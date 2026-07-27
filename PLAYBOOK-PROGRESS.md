@@ -1,6 +1,6 @@
 # AI Playbook Series Progress
 
-Last updated: 26 July 2026
+Last updated: 27 July 2026
 
 ## Working Method
 
@@ -41,9 +41,9 @@ Last updated: 26 July 2026
 - Model examples use current web sources with links, publisher, and home country. They were checked on 26 July 2026.
 - The document uses a level-1 title, level-1 numbered chapter headings, level-2 topic headings, and level-3 headings to organize multi-part topics.
 - Core Concepts progresses from Models through Tokens, Context, and Generation.
-- Knowledge and Context progresses from Prompt Engineering through Context Engineering, Retrieval-Augmented Generation, and Memory; the overlapping Adaptation comparison was removed.
-- Action and Agency progresses from Tools and Integrations through Harnesses, Permissions and Capabilities, Workflows and Agents, and Orchestration.
-- The `AI Landscape` illustration uses a hub-and-orbit composition to show that a model is one coordinated component of a complete AI product.
+- Information Pathways progresses from Prompt Engineering through Context Engineering, Retrieval-Augmented Generation, and Memory Management; the overlapping Adaptation comparison was removed.
+- Agentic Systems prioritizes Agents and Harnesses, followed by Tools and Integrations, Permissions and Capabilities, and Skills; orchestration and delegation are covered as harness responsibilities.
+- The `Introduction` illustration uses a campus map to orient readers to ten connected concepts: models, tokens, prompts, context, memory, harnesses, agents, tools, skills, and integrations.
 - The `Tokens` illustration uses a two-lane flow to show tokenisation before and after model processing, with a magnified illustrative token split.
 - The `Context Windows` illustration uses three identical tanks to show assembled input, model-generated output, unused capacity, and a fixed shared limit over time.
 - The `Compaction` illustration uses a before-and-after funnel composition to show recovered context capacity and the risk of losing detail.
@@ -52,6 +52,10 @@ Last updated: 26 July 2026
 - The `Prompt Engineering` illustration presents a useful prompt as a modular task brief anchored by its objective.
 - The Prompt Engineering comparison illustration shows how a more specific request makes categories, citations, interpretation boundaries, and review questions visible in the response.
 - The `Context Engineering` illustration uses a central blueprint to distinguish reusable information-selection and organization decisions from the context assembled for an individual task.
+- The first `Retrieval-Augmented Generation` illustration separates collection preparation from request-time search, reranking, context assembly, and referenced generation.
+- The second `Retrieval-Augmented Generation` illustration traces claims back through retrieved chunks to source sections and distinguishes citation presence from evidential support.
+- The `Memory Management` illustration separates capture and storage from later retrieval, context placement, and possible model use.
+- The `Agents` illustration depicts the agent as a robot and keeps the model visibly separate, showing repeated goal-and-state exchange, result updates, completion, and escalation without introducing the harness layer.
 - The `Model Basics` illustration is approved as the visual baseline for the series and is stored at `illustrations/02-model-basics-input-model-output.webp`.
 
 ## Illustration Style and Creation Process
@@ -92,14 +96,15 @@ Last updated: 26 July 2026
 - Prompt record: a wide 3:2 corporate editorial infographic showing document, image, audio, and code inputs flowing through a layered geometric model network to corresponding outputs; warm off-white background; restrained navy, teal, blue, coral, and muted-yellow palette; only `INPUT`, `MODEL`, and `OUTPUT` labels; no logos, robots, brains, chips, equations, or decorative clutter.
 - Approval: Option 1 selected by the content owner on 26 July 2026.
 
-### Approved AI Landscape Asset
+### Approved Introduction Concept Map Asset
 
-- Concept: an AI product encloses a central model and five coordinated modules for instructions and context, retrieval and memory, tools and permissions, harness and interface, and evaluation and monitoring; a request enters the product and a useful response leaves it.
-- Style: the approved geometric editorial style, using component names as the only embedded explanatory text.
-- Final asset: `illustrations/02-ai-landscape-ai-product-components.webp`.
-- Output: 1200 x 800 WebP, 31,782 bytes.
-- Prompt record: a wide hub-and-orbit corporate editorial infographic with a layered abstract model at the centre, five rounded supporting modules, an enclosing `AI PRODUCT` boundary, and simple request and response cards; warm off-white background; restrained navy, teal, sky-blue, coral, and muted-yellow palette; no vendor marks, robots, brains, chips, equations, binary digits, people, dense interfaces, or decorative clutter.
-- Approval: Option 1 selected by the content owner on 26 July 2026.
+- Concept: a campus map places models at the centre of a connected AI environment. Tokens, prompts, context, and memory form the information-facing area; harnesses coordinate the operational area containing agents, tools, and skills; integrations provide an outward connection.
+- Style: the approved geometric editorial style expressed as a simplified shallow-elevation campus map, using rounded pavilions, standardized signs, clean connector paths, restrained landscaping, and one concept symbol per building.
+- Final asset: `illustrations/02-ai-concepts-campus-map.webp`.
+- Output: 1200 x 800 WebP, 72,046 bytes.
+- Prompt record: a wide schematic corporate campus map with ten simplified pavilions labelled `MODELS`, `TOKENS`, `PROMPTS`, `CONTEXT`, `MEMORY`, `HARNESSES`, `AGENTS`, `TOOLS`, `SKILLS`, and `INTEGRATIONS`; clean paths and two geometric water areas express relationships without arrows or ranking; architectural and landscaping detail is deliberately reduced to align with the other playbook graphics; warm off-white background and approved palette. The final revision retains six rounded squares for tokens, a robot face for agents, a brain for memory, and an application window for harnesses.
+- Approval: the content owner selected the campus-map direction, requested four icon refinements, and then approved the simplified geometric treatment to replace the earlier Introduction illustration on 27 July 2026.
+- Interpretation note: map proximity and paths communicate conceptual relationships, not a mandatory workflow, strict system boundary, or implementation architecture.
 
 ### Approved Tokens Asset
 
@@ -180,6 +185,47 @@ Last updated: 26 July 2026
 - Prompt record: a wide corporate editorial infographic with six compact information-source cards on the left, a central blueprint labelled `SELECT`, `ORDER`, `RESOLVE`, and `FIT`, and two task-specific context tanks on the right labelled `TASK A` and `TASK B`; each tank contains a different bottom-up arrangement with unused capacity above; stale or conflicting cards remain outside the selected routes; warm off-white background and approved palette; no title, paragraphs, legend, robots, brains, chips, vendor marks, or dense interface.
 - Approval: Candidate 1 selected by the content owner for integration on 27 July 2026.
 - Interpretation note: the four blueprint concerns are design considerations rather than a mandatory ordered workflow. The two tanks illustrate that reusable engineering decisions can produce different per-request assemblies.
+
+### Approved RAG System Workflow Asset
+
+- Concept: a two-band workflow separates preparation of a searchable collection from use of that collection for an individual request. Sources are extracted, divided into chunks with metadata, and represented in search and vector indexes; a question searches both indexes, candidates are reranked, selected referenced chunks enter context, and the model generates an answer with references.
+- Style: the approved geometric editorial style, using aligned preparation and request-use bands, restrained index cards, chunk cards, the established context tank, and a compact model and answer path.
+- Final asset: `illustrations/02-rag-system-workflow.webp`.
+- Output: 1200 x 800 WebP, 45,764 bytes.
+- Prompt record: a wide folded corporate editorial workflow. The upper band contains `SOURCES`, `EXTRACT + OCR`, `CHUNKS + METADATA`, `SEARCH INDEX`, and `VECTOR INDEX`; a connecting turn leads to a lower band containing `QUESTION`, `SEARCH`, `RERANK`, selected and excluded chunks, `CONTEXT`, `MODEL`, and `ANSWER + REFERENCES`. A refresh symbol indicates that indexes require updating; warm off-white background and approved palette; no vendors, equations, robots, brains, chips, or dense interface.
+- Approval: Candidate 3 selected by the content owner for integration on 27 July 2026.
+- Interpretation note: the workflow is conceptual. Search, vector similarity, reranking, and references improve access and inspectability but do not guarantee that decisive evidence is retrieved or correctly applied.
+
+### Approved RAG Traceability Asset
+
+- Concept: three source sections retain identifiers as corresponding chunks enter context and contribute to generated claims. Two source-to-claim evidence threads remain supported, while a third claim cites a real source that does not support it.
+- Style: the approved geometric editorial style, using aligned source cards, a transparent context tank, one abstract model, claim rows, preserved reference tags, and continuous or broken evidence threads.
+- Final asset: `illustrations/02-rag-source-to-claim-traceability.webp`.
+- Output: 1200 x 675 WebP, 37,248 bytes.
+- Prompt record: a wide claim-to-source evidence ledger labelled `SOURCES`, `CONTEXT`, `MODEL`, and `CLAIMS + CITATIONS`; source documents and retrieved chunks carry matching `#12`, `#27`, and `#34` reference tags; supported evidence paths remain continuous, while the `#27` path ends in a coral `NOT SUPPORTED` warning; warm off-white background and approved palette; no substantive example claims, URLs, vendors, robots, brains, chips, or dense interface.
+- Approval: Candidate 3 selected by the content owner for integration on 27 July 2026.
+- Interpretation note: preserved reference identifiers establish traceability only. Review must still compare each generated claim with the cited source content.
+- Approved exception: use a 1200 x 675 wide-strip aspect ratio instead of the 3:2 default because the parallel source-to-claim evidence paths require additional horizontal space. The WebP format and file-size target remain unchanged.
+
+### Approved Memory Management Asset
+
+- Concept: a two-phase lifecycle separates the decision to store information and save it with scope from its possible later retrieval, placement into a request context, and use or non-use by the model. A `NOT STORED` branch and subdued ignore route make the conditional paths explicit.
+- Style: the approved geometric editorial style, using two clean horizontal bands, a scoped memory cabinet, the established transparent context-tank analogy, and an abstract model endpoint.
+- Final asset: `illustrations/02-memory-management-lifecycle.webp`.
+- Output: 1200 x 800 WebP, 54,550 bytes.
+- Prompt record: a wide two-phase corporate editorial lifecycle. The upper band contains `INFORMATION APPEARS`, `STORE?`, a `NOT STORED` branch, and `SAVE + SCOPE`; a clock turns the path into a lower band containing `RETRIEVE LATER`, `PLACE IN CONTEXT`, and `USE OR IGNORE`. One tagged card is selected from a cabinet containing several stored cards and enters a finite context tank before reaching the model; warm off-white background and approved palette; no scope names, closed loop, vendor marks, robots, brains, chips, or dense interface.
+- Approval: Candidate 3 selected by the content owner for integration on 27 July 2026.
+- Interpretation note: the path communicates a conceptual lifecycle rather than guaranteed or automatic progression. Stored information may not be retrieved, retrieved information may not be applied, and use does not imply correct application.
+
+### Approved Agents Decision Loop Asset
+
+- Concept: a robot agent carries a goal and current state into repeated interactions with a distinct model. The model returns a next step to the agent, the resulting observation updates the loop, and secondary branches allow completion or a request for help.
+- Style: the approved geometric editorial style, using a friendly robot face for the agent, the established layered network for the model, restrained directional connectors, and compact state and result cards.
+- Final asset: `illustrations/02-agents-decision-loop.webp`.
+- Output: 1200 x 800 WebP, 34,776 bytes.
+- Prompt record: refine selected Candidate 3 so `NEXT STEP` sits fully on an unmistakable model-to-agent return connector and points left toward the robot; preserve `AGENT`, `GOAL`, `CURRENT STATE`, `MODEL`, `NEXT STEP`, `RESULT`, `FINISH`, and `ASK FOR HELP`; warm off-white background and approved palette; no humans, harnesses, application windows, runtime containers, tools, permissions, code, brains, chips, vendor marks, or extra labels.
+- Approval: Candidate 3 selected by the content owner for integration on 27 July 2026; the model-to-agent direction was clarified before finalization.
+- Interpretation note: the robot is a visual metaphor for goal-directed agent behaviour, not a separate human-like actor. The diagram isolates the agent-model interaction and intentionally omits the harness and tool-execution layers.
 
 ### Approved Model Creation Asset
 

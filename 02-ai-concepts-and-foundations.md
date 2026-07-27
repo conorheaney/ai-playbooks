@@ -2,26 +2,17 @@ PLAYBOOK 02: AI CONCEPTS
 
 # 1. Purpose
 
-This playbook explains the main concepts behind modern AI systems in accessible language. It covers models, tokens, prompts, context, retrieval, memory, tools, agents, harnesses, skills, Model Context Protocol (MCP), evaluation, and related ideas. The aim is understanding rather than implementation: technical terms are included because they appear frequently in AI products and discussions, but each is explained in terms of what it means and why it matters.
+This playbook explains the main concepts behind modern AI systems in accessible language. The aim is understanding rather than implementation: technical terms are included because they appear frequently in AI products and discussions, but each is explained in terms of how it fits into the overall picture.
 
-# 2. AI Landscape
+# 2. Introduction
 
-**Artificial intelligence (AI)** is a broad term for systems that perform tasks associated with language, perception, prediction, reasoning, decision support, or action.
+**Artificial intelligence (AI)** is a broad term for systems that perform tasks associated with language, perception, prediction, reasoning, decision support, or action. The field of AI covers a broad spectrum of disciplines spanning machine learning, deep learning, generative AI and models such as foundation models, large language models (LLMs), and multimodal models.
 
-Important categories include:
+This guide will focus primarily on the concepts of agentic and generative AI. AI is now more than just a model. It covers models, tokens, prompts, context, retrieval, memory, tools, agents, harnesses, skills, integrations, evaluation, and related ideas that can be used together to assist with many creative, technical, and scientific workflows.
 
-- **Machine learning:** systems that learn patterns from examples rather than relying only on fixed rules.
-- **Deep learning:** machine learning based on large networks of connected calculations.
-- **Generative AI:** systems that create text, code, images, audio, video, or structured data.
-- **Foundation model:** a broadly trained model that can support many different tasks.
-- **Large language model (LLM):** a foundation model focused on understanding and generating language or code.
-- **Multimodal model:** a model that can work with more than one type of content, such as text, images, and audio.
+![A campus map places models at the centre, connected to tokens, prompts, context, memory, harnesses, agents, tools, skills, and integrations. Each concept is represented by a distinct building and symbol.](illustrations/02-ai-concepts-campus-map.webp)
 
-An AI product is usually much more than a model:
-
-![A model sits within a complete AI product alongside instructions and context, retrieval and memory, tools and permissions, the harness and interface, and evaluation and monitoring.](illustrations/02-ai-landscape-ai-product-components.webp)
-
-*The model is one coordinated component of the complete AI product.*
+*These concepts form a connected AI environment: the model is central to generation, while the surrounding information, coordination, capability, and connection layers shape what the complete system can do.*
 
 # 3. Core Concepts
 
@@ -183,7 +174,7 @@ A request can specify a particular format, while some systems can enforce a stru
 
 Generation can end because the model produces an end marker, reaches a maximum output or context limit, encounters a defined stop sequence, or is stopped by the product or model service. When a limit is reached, the response may end midway through a sentence, code block, or structured record. Some services return a completion status or **finish reason** that distinguishes a normal endpoint from a length limit, content restriction, or other interruption, making it easier to detect when a stopped response is not a completed answer. A product may use **streaming** to display tokens as they are generated rather than wait for the completed response.
 
-# 4. Knowledge and Context
+# 4. Information Pathways
 
 A model becomes more useful when it receives clear direction and relevant information. This chapter moves from instructions to external knowledge and then to information retained across interactions.
 
@@ -217,103 +208,90 @@ Prompt engineering improves the direction given to a model. **Context engineerin
 
 ## Retrieval-Augmented Generation
 
-**Retrieval-augmented generation (RAG)** searches an external collection and places selected information into the model's context while it prepares an answer. This can provide current, private, or specialist information without retraining the model and can make answers easier to inspect when source references are preserved.
+Retrieval-augmented generation (RAG) is an advanced topic with many design and implementation choices. This section provides only a brief conceptual outline of its purpose and basic workflow.
 
-```
-question
-  -> search
-  -> select relevant passages
-  -> place passages in the request context
-  -> generate an answer with references
-```
+RAG combines retrieval from an external collection with model context. RAG supplies current, private, or specialist information that may not be present in the model's weights. It is useful for large or changing collections and can make answers easier to inspect when source references are preserved. It does not change the underlying model or the model's weights in any way.
 
-To support RAG, a system typically parses source material, divides it into passages called chunks, records details such as source, version, section, and date, and stores searchable representations in an index. Search may use words, metadata, semantic similarity, or a combination of methods. An **embedding model** represents aspects of a passage's meaning as numbers, allowing semantic search to find related wording. Similarity is not equivalence, and chunk size matters: small chunks can lose qualifications while large chunks can bury relevant information.
+Building out a RAG implementation is a separate engineering task. An **ingestion pipeline** extracts source content, uses optical character recognition (OCR) when needed, divides it into **chunks**, and records metadata such as source, version, section, date, and access details. An **embedding model** may convert each chunk into a numerical **vector** representing aspects of its meaning. Original documents usually remain in a source system, document store, or object store; chunks and metadata are held in a search index; and vectors are held in a **vector index** provided by a **vector database** or vector-search features in another database or search engine. The indexes must be updated when sources change.
 
-RAG can fail because:
+![A two-band RAG workflow shows sources being extracted, divided into chunks with metadata, and added to search and vector indexes. A later question searches and reranks candidates; selected referenced chunks enter context before the model generates an answer with references, while other chunks remain outside.](illustrations/02-rag-system-workflow.webp)
 
-- The required source was absent, outdated, or not indexed.
-- Parsing or chunking lost a table, diagram, footnote, or qualification.
-- Search missed the relevant passage or selected a misleading one.
-- Access rules returned too much or too little.
-- The model misunderstood or ignored the retrieved passage.
-- A citation points to a real passage that does not support the claim.
+*RAG prepares searchable material separately from using it: each request retrieves and reranks candidates, and only selected chunks enter the model's context.*
 
-## Memory
+For each request, the system finds candidate chunks using keywords, metadata filters, **vector similarity search**, or **hybrid search**. Ranking or **reranking** selects the most relevant chunks, which are added to the request context with source references before the model generates an answer.
 
-**Memory** is information stored so that an AI product may select it later. It can include saved conversation summaries, user preferences, or information retained for later retrieval. Context is the information actually supplied to the model now, so a fact can exist in memory without entering the current context.
+RAG can fail when sources are absent, outdated, inaccessible, or parsed incorrectly; chunking, indexing, search, or ranking can miss decisive information; and the model can ignore or misinterpret what was retrieved. A citation to a real source may still not support the generated claim.
 
-### Memory Lifecycle
+![Three source sections retain reference identifiers as their chunks enter context and contribute to generated claims. Two evidence threads remain supported, while a third real citation is marked as not supporting its claim.](illustrations/02-rag-source-to-claim-traceability.webp)
 
-```
-information appears
-  -> decide whether to store it
-  -> save it with scope and details
-  -> retrieve it later
-  -> place it in context
-  -> model uses or ignores it
-```
+*Preserved references make a claim traceable, but reviewers must still check whether the cited source actually supports it.*
 
-Storage does not guarantee later use: the product must retrieve the information, place it in context, and the model must apply it appropriately.
+## Memory Management
 
-### Scope and Control
+**Memory management** determines what information an AI product retains for possible later use. Whilst **context** is information supplied to the model now, **memory** is stored information available for later selection. It can include conversation summaries, user preferences, or other retained facts. Stored memory is not automatically part of the current context.
 
-Memory can be scoped to a conversation, user, workspace, or organization, and retained for different periods. Wider scope and longer retention can improve continuity but increase the impact of stale, incorrect, sensitive, or over-shared information.
+The product design and user choices establish what may be remembered. The model may identify or summarize a candidate memory, but it cannot persist information by itself. The AI product applies storage rules and any required confirmation before writing accepted information to an external store. On a later request, it may retrieve relevant memory and place it into context, where the model may use, ignore, or misapply it. The AI product therefore controls storage and reuse even when the model proposes what to remember.
 
-Useful questions include:
+![A two-phase memory lifecycle shows information appearing, a decision about whether to store it, and scoped storage. Later, one selected memory is retrieved, placed into the context window, and either used or ignored by the model.](illustrations/02-memory-management-lifecycle.webp)
 
-- What is stored: original content or an AI summary?
-- How long is it retained and who can access it?
-- What source and date travel with it?
-- How can it be inspected, corrected, replaced, or deleted?
-- What prevents information crossing between users or workspaces?
+*Memory is stored for possible later retrieval; only selected memory enters the current context.*
 
-# 5. Action and Agency
+Memory can be scoped to a conversation, user, workspace, or organization and retained for different periods. Wider scope and longer retention can improve continuity but increase the impact of stale, incorrect, sensitive, or over-shared information. Memory management should preserve the source, scope, retention period, and access rules and support inspection, correction, replacement, and deletion without allowing information to cross intended boundaries.
 
-Models can do more than generate content when an AI application connects them to operations and allows work to continue over several steps. This chapter builds from individual tools to complete agent systems.
+# 5. Agentic Systems
+
+An **agentic system** allows a model to pursue a goal across one or more steps by selecting actions, using tools, and responding to results. This chapter starts with agents and the harnesses that support them, then explains the tools, permissions, and coordination involved.
+
+Terminology in this area is not standardized. In this playbook, an **agent** describes goal-directed behavior, a **harness** is the runtime and supporting software around model-based work, and a **tool** performs a specific external operation. Products and frameworks package these responsibilities differently and may call the complete system an agent. An agent may propose a tool call or delegation, while the harness typically performs the invocation and applies controls, but the exact boundary varies by implementation.
+
+## Agents
+
+An **agent** is a goal-directed decision loop that observes its current state, selects an action, inspects the result, and continues until it finishes or must stop:
+
+![A robot agent sends its goal and current state to a separate abstract model. The model returns a next step to the agent, results update the loop, and secondary branches allow the agent to finish or ask for help.](illustrations/02-agents-decision-loop.webp)
+
+*An agent repeatedly brings its goal and current state to the model, uses the proposed next step, and updates the loop from the result until it finishes or needs help.*
+
+An agent differs from a **workflow**, which follows steps and branches designed in advance. Many systems combine both by placing a bounded agent inside a fixed workflow. A bounded agent may finish after one action, while another may plan, use several systems, revise its work, and communicate a result. Workflows suit stable and predictable routes; agents are useful when the next step depends on exploration or feedback.
+
+Agents need explicit boundaries, including:
+
+- Allowed tools, information, and actions.
+- Maximum steps, time, or cost.
+- Conditions requiring confirmation.
+- Completion criteria.
+- Errors or uncertainty that require help.
+- A way to report partial work rather than hide failure.
+
+The workflow or agent design defines these boundaries, while the harness or external controls must enforce and record them. Instructions alone are not an enforcement mechanism.
+
+## Harnesses
+
+The **harness** is the runtime and supporting software that hosts model interactions, workflows, and agents. It may assemble context, maintain state, invoke models and tools, create agent instances, enforce permissions and limits, manage retries and handoffs, and record what happened.
+
+A harness does not need to be agentic: it can support a single model response, a fixed workflow, or a goal-directed agent loop. For each model call, it can construct the request, expose permitted operations, validate tool requests, and return results. Across a longer task, it can preserve state, apply budgets and stop conditions, coordinate handoffs, and expose sources, actions, errors, and traces for inspection. These responsibilities may be implemented in one application or distributed across several services.
+
+The coordination of model calls, tools, checks, and handoffs is often called **orchestration**. A harness may decompose a task into stages, use plans or checklists, preserve temporary task state, validate intermediate results, or ask the model to critique and revise a draft. Poor orchestration can repeat errors, hide missing context, or allow a task to loop.
+
+A harness may also support **delegation** by creating another agent instance for a bounded subtask. A delegated instance is often called a **subagent**, while a **multi-agent system** uses several agent instances that contribute to or coordinate around a larger goal. Separate instances can isolate information, parallelize work, or apply specialist skills, but they add coordination and cost. The harness or a coordinating agent must define the subtasks, manage their contexts, and combine the results; agents using the same model and sources are not automatically independent.
+
+The same model can appear cautious in one harness and highly autonomous in another because the available context, tools, permissions, and task loop differ.
 
 ## Tools and Integrations
 
-### Tools and Tool Calling
-
-A **tool** is an operation an AI system can request, such as search, file access, calculation, code execution, database queries, messages, or actions in external services. With **tool calling**, the model requests an available operation using a tool name and input fields; the AI application checks and runs the request, then returns the observed result to the model.
+A **tool** is an operation an AI system can request, such as search, file access, calculation, code execution, database queries, messages, or actions in external services. With **tool calling**, the model requests an available operation using a tool name and input fields; the harness checks and runs the request, then returns the observed result to the model.
 
 ```
 model requests a tool
-  -> AI application checks the request and permission
+  -> harness checks the request and permission
   -> tool performs the operation
   -> result returns to the model
   -> model responds or requests another tool
 ```
 
-The AI application, not the model, provides access and credentials. Tool use can fail through wrong selection, incorrect input, missing permission, changed system state, duplicate action, or misunderstanding of the result. Reading can still expose sensitive information, and a simple query can still have cost or access implications.
+The harness, not the model, provides access and credentials. Tool use can fail through wrong selection, incorrect input, missing permission, changed system state, duplicate action, or misunderstanding of the result. Reading can still expose sensitive information, and a simple query can still have cost or access implications.
 
-### Model Context Protocol
-
-The **Model Context Protocol (MCP)** is a standard way for AI applications to connect to external context and capabilities.
-
-```
-AI application
-  -> MCP client
-  -> MCP server
-       - tools
-       - resources
-       - prompt templates
-```
-
-Within MCP, a **resource** supplies readable context, a **tool** exposes a callable operation, and a **prompt template** supplies reusable instructions. An MCP server can connect an AI application to files, repositories, databases, document systems, or remote services. The application decides which servers to connect and what to expose to the model. MCP makes integrations more consistent, but does not make every server trustworthy: a connected server may receive credentials, reach local or remote systems, perform actions, and return untrusted content.
-
-## Harnesses
-
-The **harness** is the software that turns a model into a usable assistant or agent. It controls what the model sees, what it can do, how a multi-step task runs, and what the user can inspect.
-
-A harness may:
-
-- Assemble instructions, context, retrieved information, and task state.
-- Expose tools and integrations while enforcing access and execution controls.
-- Run model and tool loops, retries, handoffs, budgets, and stop conditions.
-- Present sources, actions, changes, errors, and trace information.
-
-The same model can appear cautious in one harness and highly autonomous in another because the available context, tools, permissions, and task loop differ.
+The **Model Context Protocol (MCP)** is one standard way for a harness to connect to external information and operations. Within MCP, a **resource** supplies readable context, a **tool** exposes a callable operation, and a **prompt template** supplies reusable instructions. An MCP server can connect to files, repositories, databases, document systems, or remote services, while the application decides which servers and features to expose. MCP makes integrations more consistent but does not make them trustworthy: a connected server may receive credentials, reach other systems, perform actions, and return untrusted content.
 
 ## Permissions and Capabilities
 
@@ -333,49 +311,11 @@ capability
 
 For example, a model may know how to write a command but have no execution tool; a tool may be available while network access is denied; and a user may hold a permission that the AI application does not receive.
 
-## Workflows and Agents
-
-A **workflow** follows steps and branches designed in advance. An **agent** chooses at least some steps based on what it observes while working toward a goal. Many systems combine both by placing a bounded agent inside a fixed workflow.
-
-An agent can inspect the current situation, choose an action, use a tool, inspect the result, and decide what to do next:
-
-```
-receive a goal
-  -> inspect the situation
-  -> choose an action
-  -> use a tool
-  -> inspect the result
-  -> continue, finish, or ask for help
-```
-
-A bounded agent may finish after one action, while another may plan, use several systems, revise its work, and communicate a result. A workflow suits a stable and predictable route; an agent is useful when the next step depends on exploration or feedback.
-
-### Boundaries and Stop Conditions
-
-Useful agent boundaries include:
-
-- Allowed tools, information, and actions.
-- Maximum steps, time, or cost.
-- Conditions requiring confirmation.
-- Completion criteria.
-- Errors or uncertainty that require help.
-- A way to report partial work rather than hide failure.
-
-The workflow or agent design defines these boundaries; the harness or external controls must enforce and record them. Instructions alone are not an enforcement mechanism.
-
-## Orchestration
-
-**Orchestration** coordinates the order of model calls, tools, checks, and handoffs. It may decompose a task into stages, use plans or checklists, preserve temporary task state, validate intermediate results, or ask the model to critique and revise a draft. These techniques can improve performance without changing model weights, while poor orchestration can repeat errors, hide missing context, or allow a task to loop.
-
-### Skills
+## Skills
 
 A **skill** is a reusable task procedure that may combine instructions, references, scripts, checks, and guidance for using tools. A prompt asset structures the direction for a model request, a skill supplies broader task know-how, and a tool exposes a callable operation.
 
 Loading a skill can change behavior without changing model permissions. Skills can conflict, become outdated, or consume too much context, so their selection and version can affect the result.
-
-### Delegation and Multiple Agents
-
-**Delegation** assigns a bounded subtask to another agent instance. A delegated instance is often called a **subagent**, while a **multi-agent system** uses several agent instances that contribute to or coordinate around a larger goal. Separate instances can isolate information, parallelize work, or apply specialist skills, but they add coordination and cost. A coordinating agent or workflow must define the subtasks and combine the results, and agents using the same model and sources are not automatically independent.
 
 # 6. Risks
 
