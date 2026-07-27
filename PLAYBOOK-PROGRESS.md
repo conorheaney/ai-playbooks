@@ -24,6 +24,14 @@ Last updated: 27 July 2026
 | 05: AI-Assisted Testing | Not created | Pending. |
 | 06: AI-Assisted Deployment and Operations | Not created | Pending. |
 
+## Current Review Position
+
+- Playbook 02 remains a draft under review and has not been approved as a whole.
+- The current review pass has completed detailed revision of the Introduction, Core Concepts, and Information Pathways chapters, including their integrated illustrations.
+- Review is currently in Chapter 5, Agentic Systems. Agents and Harnesses have been substantially revised; Tools, Integrations, Permissions, and Capabilities were most recently split and refined.
+- Skills is the next Chapter 5 topic to review, followed by Chapters 6-9: Risks, Assurance, Application, and Reference.
+- Playbook 03 remains blocked until Playbook 02 is approved.
+
 ## Playbook 02 Decisions
 
 - Write for conceptual understanding rather than as a technical implementation guide.
@@ -42,7 +50,7 @@ Last updated: 27 July 2026
 - The document uses a level-1 title, level-1 numbered chapter headings, level-2 topic headings, and level-3 headings to organize multi-part topics.
 - Core Concepts progresses from Models through Tokens, Context, and Generation.
 - Information Pathways progresses from Prompt Engineering through Context Engineering, Retrieval-Augmented Generation, and Memory Management; the overlapping Adaptation comparison was removed.
-- Agentic Systems prioritizes Agents and Harnesses, followed by Tools and Integrations, Permissions and Capabilities, and Skills; orchestration and delegation are covered as harness responsibilities.
+- Agentic Systems prioritizes Agents and Harnesses, followed by Tools, Integrations, Permissions, Capabilities, and Skills; orchestration and delegation are covered as harness responsibilities.
 - The `Introduction` illustration uses a campus map to orient readers to ten connected concepts: models, tokens, prompts, context, memory, harnesses, agents, tools, skills, and integrations.
 - The `Tokens` illustration uses a two-lane flow to show tokenisation before and after model processing, with a magnified illustrative token split.
 - The `Context Windows` illustration uses three identical tanks to show assembled input, model-generated output, unused capacity, and a fixed shared limit over time.
@@ -56,6 +64,8 @@ Last updated: 27 July 2026
 - The second `Retrieval-Augmented Generation` illustration traces claims back through retrieved chunks to source sections and distinguishes citation presence from evidential support.
 - The `Memory Management` illustration separates capture and storage from later retrieval, context placement, and possible model use.
 - The `Agents` illustration depicts the agent as a robot and keeps the model visibly separate, showing repeated goal-and-state exchange, result updates, completion, and escalation without introducing the harness layer.
+- The first `Harnesses` illustration compares a single response, fixed workflow, and agent loop while using a shaded dotted model column to keep model interactions visually separate from harness coordination.
+- The second `Harnesses` illustration presents the harness as an application coordinating a multi-agent loop around shared state, with skills and tools inside its boundary and models and integrations outside it.
 - The `Model Basics` illustration is approved as the visual baseline for the series and is stored at `illustrations/02-model-basics-input-model-output.webp`.
 
 ## Illustration Style and Creation Process
@@ -227,6 +237,26 @@ Last updated: 27 July 2026
 - Approval: Candidate 3 selected by the content owner for integration on 27 July 2026; the model-to-agent direction was clarified before finalization.
 - Interpretation note: the robot is a visual metaphor for goal-directed agent behaviour, not a separate human-like actor. The diagram isolates the agent-model interaction and intentionally omits the harness and tool-execution layers.
 
+### Approved Harness Operating Modes Asset
+
+- Concept: three horizontal lanes show one harness coordinating a single response, a fixed workflow, or an agent loop. Each lane interacts with an identically sized model card in a vertically aligned shaded column, while only the agent lane includes a robot and return loop.
+- Style: the approved geometric editorial style, using one application-shaped harness frame, compact process cards, a friendly robot agent, and subtle dotted vertical boundaries around the model column.
+- Final asset: `illustrations/02-harness-operating-modes.webp`.
+- Output: 1200 x 800 WebP, 46,748 bytes.
+- Prompt record: refine the original three-lane operating-modes composition while preserving every stage; align the three actual network-model cards vertically; place each in a pale shaded strip bounded by vertical dotted lines; contain all network nodes inside the model cards; remove horizontal dotted trails; retain `HARNESS`, `SINGLE RESPONSE`, `FIXED WORKFLOW`, `AGENT LOOP`, `CURRENT STATE`, and `NEXT STEP`; warm off-white background and approved palette.
+- Approval: the content owner supplied and approved the final refined image for integration on 27 July 2026.
+- Interpretation note: the shaded dotted column communicates conceptual separation between model calls and harness coordination. It does not prescribe whether the model is local or remote, or whether harness responsibilities are implemented in one application or distributed services.
+
+### Approved Harness Application Ecosystem Asset
+
+- Concept: an application-shaped harness coordinates three robot agents around shared current state. Skills provide reusable procedures inside the application, tools provide controlled operations, and distinct connections lead to a model above and external integrations outside the application boundary.
+- Style: the approved geometric editorial style, using a compact hub-and-orbit composition, friendly robot faces for agents, grouped connection rails, minimal labels, and a restrained application boundary.
+- Final asset: `illustrations/02-harness-application-ecosystem.webp`.
+- Output: 1200 x 800 WebP, 38,274 bytes.
+- Prompt record: create a lightweight corporate infographic showing a harness as an application rather than a physical harness; place three robot agents in a multi-agent loop around shared state; keep skills and tools within the harness; place the model and integrations outside its boundary; use grouped, restrained connectors and the established warm off-white, navy, teal, blue, coral, and muted-yellow visual language; avoid humans, dense interface detail, decorative wiring, vendor marks, brains, chips, and neon effects.
+- Approval: Candidate 2 selected by the content owner for integration on 27 July 2026.
+- Interpretation note: the application boundary communicates responsibility rather than a required deployment topology. Skills influence agent behaviour but do not grant permission, tools expose operations through the harness, and integrations connect those operations to external systems.
+
 ### Approved Model Creation Asset
 
 - Concept: six ordered stations show Design, Data, Pretraining, Post-training, Evaluation, and Release; a small iteration symbol within Evaluation indicates that evaluation can inform further work without prescribing a single return path.
@@ -239,9 +269,9 @@ Last updated: 27 July 2026
 
 ## Next Action
 
-1. Continue review of Playbook 02 with the approved `Model Basics` illustration and illustration baseline in place.
-2. If the remaining Playbook 02 content is approved, mark Playbook 02 complete and draft only Playbook 03.
-3. If revisions are requested, update only Playbook 02 and ask for review again.
+1. Continue Chapter 5 review with Skills, then complete a consistency pass across the full Agentic Systems chapter.
+2. Review Chapters 6-9 in order: Risks, Assurance, Application, and Reference.
+3. If the remaining Playbook 02 content is approved, mark Playbook 02 complete and draft only Playbook 03; otherwise update only Playbook 02 and request review again.
 
 ## Remaining Structure
 

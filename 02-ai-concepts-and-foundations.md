@@ -271,31 +271,65 @@ The **harness** is the runtime and supporting software that hosts model interact
 
 A harness does not need to be agentic: it can support a single model response, a fixed workflow, or a goal-directed agent loop. For each model call, it can construct the request, expose permitted operations, validate tool requests, and return results. Across a longer task, it can preserve state, apply budgets and stop conditions, coordinate handoffs, and expose sources, actions, errors, and traces for inspection. These responsibilities may be implemented in one application or distributed across several services.
 
+![Three horizontal lanes compare a single response, a fixed workflow, and an agent loop. Each lane calls a vertically aligned model in a shaded column bounded by dotted lines, separating the model interaction from the flow coordinated by the harness.](illustrations/02-harness-operating-modes.webp)
+
+*The same harness can coordinate a single response, a predefined workflow, or a repeating agent loop; the shaded column distinguishes model calls from the surrounding coordination flow.*
+
 The coordination of model calls, tools, checks, and handoffs is often called **orchestration**. A harness may decompose a task into stages, use plans or checklists, preserve temporary task state, validate intermediate results, or ask the model to critique and revise a draft. Poor orchestration can repeat errors, hide missing context, or allow a task to loop.
 
 A harness may also support **delegation** by creating another agent instance for a bounded subtask. A delegated instance is often called a **subagent**, while a **multi-agent system** uses several agent instances that contribute to or coordinate around a larger goal. Separate instances can isolate information, parallelize work, or apply specialist skills, but they add coordination and cost. The harness or a coordinating agent must define the subtasks, manage their contexts, and combine the results; agents using the same model and sources are not automatically independent.
 
+![An application-shaped harness coordinates three robot agents around shared state. Skills and tools are available inside the harness, while the model and external integrations remain outside its boundary.](illustrations/02-harness-application-ecosystem.webp)
+
+*The harness is the coordinating application: agents work through shared state, skills guide reusable procedures, tools expose permitted operations, and the application connects separately to models and external integrations.*
+
 The same model can appear cautious in one harness and highly autonomous in another because the available context, tools, permissions, and task loop differ.
 
-## Tools and Integrations
+## Tools
 
-A **tool** is an operation an AI system can request, such as search, file access, calculation, code execution, database queries, messages, or actions in external services. With **tool calling**, the model requests an available operation using a tool name and input fields; the harness checks and runs the request, then returns the observed result to the model.
+A **tool** is an operation an AI system can request. With **tool calling**, the model requests an available operation using a tool name and input fields; the harness checks and runs the request, then returns the observed result to the model.
+
+Frontier-model products commonly expose tool calls in the following categories, although names and implementations vary by harness:
+
+| Category | Common model-facing examples | Windows analogue | Linux analogue |
+| --- | --- | --- | --- |
+| Search and retrieval | Web search, file search, semantic retrieval, and code search. | `Select-String`, `Get-ChildItem`, and search APIs. | `rg`, `find`, and search APIs. |
+| File and repository operations | Read or write a file, apply a patch, inspect a diff, and use Git. | `Get-Content`, `Set-Content`, and `git`. | `cat`, `sed`, and `git`. |
+| Command and code execution | Run a shell command, script, test runner, code interpreter, or sandboxed program. | PowerShell, Command Prompt, and Python. | Bash, `sh`, and Python. |
+| Data query and calculation | Execute SQL, query structured data, use a calculator, or analyze a data frame. | `sqlcmd`, `sqlite3`, and PowerShell data commands. | `psql`, `sqlite3`, and Python data tools. |
+| External service actions | Call a function, REST API, MCP tool, messaging service, or issue tracker. | `Invoke-RestMethod` and service-specific clients. | `curl` and service-specific clients. |
+
+These operating-system examples are analogues rather than the model-facing tools themselves. A harness normally wraps the underlying command, API, or library in a defined tool interface and controls its inputs, credentials, permissions, and execution environment.
+
+The interface or harness normally receives the user message, maintains the agent's task state, and sends an assembled request to the model. The model returns either generated text or a structured tool request. Saying that an agent "calls a tool" is useful shorthand for this decision within the agent loop; the harness or model provider performs the actual invocation.
 
 ```
-model requests a tool
-  -> harness checks the request and permission
-  -> tool performs the operation
-  -> result returns to the model
-  -> model responds or requests another tool
+user message
+  -> harness assembles model request
+  -> model returns text or a tool request
+       -> text returns through the harness to the user
+       -> harness or provider invokes the requested tool
+            -> tool result enters context
+            -> model continues
 ```
 
-The harness, not the model, provides access and credentials. Tool use can fail through wrong selection, incorrect input, missing permission, changed system state, duplicate action, or misunderstanding of the result. Reading can still expose sensitive information, and a simple query can still have cost or access implications.
+With a **client-side tool**, the harness validates the request, checks permissions, invokes the operation, and sends the result in another model request. With a **provider-side tool**, such as some web-search services, the model provider handles this internal loop and returns the resulting response or tool events to the harness. Some harnesses include web search, while others add it through MCP or a custom integration. Web search discovers sources; web fetch retrieves content from a known address.
 
-The **Model Context Protocol (MCP)** is one standard way for a harness to connect to external information and operations. Within MCP, a **resource** supplies readable context, a **tool** exposes a callable operation, and a **prompt template** supplies reusable instructions. An MCP server can connect to files, repositories, databases, document systems, or remote services, while the application decides which servers and features to expose. MCP makes integrations more consistent but does not make them trustworthy: a connected server may receive credentials, reach other systems, perform actions, and return untrusted content.
+In either arrangement, tool availability, access, and credentials come from the runtime rather than the model's weights. Tool use can fail through wrong selection, incorrect input, missing permission, changed system state, duplicate action, or misunderstanding of the result. Reading can still expose sensitive information, and a simple query can still have cost or access implications.
 
-## Permissions and Capabilities
+## Integrations
+
+Integrations are a more advanced topic than individual tool calls, so this section provides only a brief conceptual outline. A **tool call** is one requested operation, while an **integration** is the broader connection between a harness and another system. One integration may expose several tools, readable resources, or event-driven capabilities.
+
+Integrations can use built-in connectors, application programming interfaces (APIs), software development kits (SDKs), plugins, or protocols. They manage concerns such as authentication, credentials, data translation, connectivity, and the boundary across which requests and results travel. The harness still decides which integration features to expose to the model and under what permissions.
+
+The **Model Context Protocol (MCP)** is one standard for connecting AI applications to external information and operations. An MCP server can expose **resources** for readable context, **tools** for callable operations, and **prompt templates** for reusable instructions. It may connect to files, repositories, databases, document systems, or remote services. MCP makes these connections more consistent but does not make them trustworthy: servers can receive data or credentials, reach other systems, perform actions, and return untrusted content.
+
+## Permissions
 
 A **permission** is authority to access information or perform an action. Tool availability, permission, and execution policy are separate: an operation may exist but not be exposed, an identity may lack authority to use it, or the application may require confirmation before it runs.
+
+## Capabilities
 
 A **capability** is something the complete AI system can do. It comes from several layers:
 
