@@ -10,7 +10,7 @@ This document governs tracking and content rules for the playbook series that co
 - Use the `Playbook Themes` section to keep individual playbook content on track.
 - Keep the series framework-neutral and intended for a cross-functional audience.
 - Keep the series focused on the use of AI in the SDLC.
-- Treat Playbook 02 as a standalone concepts guide without SDLC or regulated-clinical framing.
+- Treat Playbook 00 as a standalone concepts guide without SDLC or regulated-clinical framing.
 - Stick to the language style and tone in `Editorial Standards` when drafting playbooks.
 - Follow the `Illustration Workflow` when the user asks to generate illustrations.
 - Track live playbook progress in `Playbook Status`.
@@ -21,10 +21,10 @@ This document governs tracking and content rules for the playbook series that co
 
 | Playbook | File | Status |
 | --- | --- | --- |
-| 00: AI in the SDLC | `00-ai-enabled-sdlc-overview.md` | Approved. |
-| 01: Getting Started with AI Tools | `01-getting-started-with-ai-tools.md` | Approved. |
-| 02: AI Concepts | `02-ai-concepts.md` | Draft; under review. |
-| 03: AI-Assisted Planning | Not created | Blocked pending Playbook 02 approval. |
+| 00: AI Concepts | `00-ai-concepts.md` | Draft; under review. |
+| 01: AI in the SDLC | `01-ai-enabled-sdlc-overview.md` | Approved. |
+| 02: Getting Started with AI Tools | `02-getting-started-with-ai-tools.md` | Approved. |
+| 03: AI-Assisted Planning | Not created | Blocked pending Playbook 00 approval. |
 | 04: AI-Assisted Development | Not created | Pending. |
 | 05: AI-Assisted Testing | Not created | Pending. |
 | 06: AI-Assisted Deployment and Operations | Not created | Pending. |
@@ -33,26 +33,26 @@ This document governs tracking and content rules for the playbook series that co
 
 Playbooks 03-06 include example prompts, tool or agent patterns, worked examples, verification techniques, and practical exercises.
 
-### Playbook 00: AI in the SDLC
+### Playbook 00: AI Concepts
+
+- Explain the core building blocks of modern AI systems in plain language.
+- Cover models, tokens, prompts, context, retrieval, memory, tools, agents, harnesses, skills, and integrations.
+- Focus on how the concepts fit together rather than implementation details.
+- Support later playbooks with shared vocabulary and mental models.
+
+### Playbook 01: AI in the SDLC
 
 - Series scope, audience, and what the playbooks do and do not cover.
 - Where AI can help across planning, development, testing, and deployment.
 - Common ways to work with AI: chat, embedded assistants, retrieval, agents, and automated workflows.
 - Safety, judgment, and human review as the baseline.
 
-### Playbook 01: Getting Started with AI Tools
+### Playbook 02: Getting Started with AI Tools
 
 - Start with the task, not the tool.
 - Choose the least capable interaction mode that can do the job.
 - Understand tool boundaries, context limits, and permission risks.
 - Prepare, prompt, and verify bounded work clearly.
-
-### Playbook 02: AI Concepts
-
-- Explain the core building blocks of modern AI systems in plain language.
-- Cover models, tokens, prompts, context, retrieval, memory, tools, agents, harnesses, skills, and integrations.
-- Focus on how the concepts fit together rather than implementation details.
-- Support later playbooks with shared vocabulary and mental models.
 
 ### Playbook 03: AI-Assisted Planning
 
@@ -81,7 +81,7 @@ After Playbook 06 is approved:
 
 - Reconcile names and cross-references across all playbooks.
 - Check terminology, scope boundaries, examples, and safeguards for consistency.
-- Check Markdown links, including current external model references in Playbook 02.
+- Check Markdown links, including current external model references in Playbook 00.
 - Confirm that no playbook introduces an unsupported regulatory framework or jurisdiction.
 - Perform manual verification only; this repository has no automated documentation toolchain.
 

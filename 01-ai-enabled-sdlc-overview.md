@@ -1,4 +1,4 @@
-# Playbook 00: AI in the SDLC
+# Playbook 01: AI in the SDLC
 
 ## 1. What This Series Is For
 
@@ -125,9 +125,9 @@ Avoid starting with autonomous repository-wide changes, unsupervised production 
 
 | Number | Playbook | Focus |
 | --- | --- | --- |
-| 00 | AI in the SDLC | Where AI fits and how an AI-assisted workflow operates. |
-| 01 | Getting Started with AI Tools | Selecting interaction modes, tools, context, permissions, and practical safeguards. |
-| 02 | AI Concepts and Foundations | Models, tokens, prompting, RAG, agents, harnesses, tools, capabilities, evaluation, and limitations. |
+| 00 | AI Concepts | Models, tokens, prompting, RAG, agents, harnesses, tools, capabilities, evaluation, and limitations. |
+| 01 | AI in the SDLC | Where AI fits and how an AI-assisted workflow operates. |
+| 02 | Getting Started with AI Tools | Selecting interaction modes, tools, context, permissions, and practical safeguards. |
 | 03 | AI-Assisted Planning | Demonstrations for discovery, analysis, requirements, risk, and planning. |
 | 04 | AI-Assisted Development | Demonstrations for codebase exploration, design, coding, review, and documentation. |
 | 05 | AI-Assisted Testing | Demonstrations for test design, automation, coverage, failure analysis, and evidence. |

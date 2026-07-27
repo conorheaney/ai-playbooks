@@ -1,4 +1,4 @@
-PLAYBOOK 02: AI CONCEPTS
+PLAYBOOK 00: AI CONCEPTS
 
 # 1. Purpose
 
@@ -10,7 +10,7 @@ This playbook walks through the main ideas behind modern AI systems in plain lan
 
 This guide focuses mainly on agentic and generative AI. AI today is more than just a model. It can include models, tokens, prompts, context, retrieval, memory, tools, agents, harnesses, skills, integrations, evaluation, and related ideas that work together to support creative, technical, and scientific workflows.
 
-![A campus map places models at the centre, connected to tokens, prompts, context, memory, harnesses, agents, tools, skills, and integrations. Each concept is represented by a distinct building and symbol.](illustrations/02-ai-concepts-campus-map.webp)
+![A campus map places models at the centre, connected to tokens, prompts, context, memory, harnesses, agents, tools, skills, and integrations. Each concept is represented by a distinct building and symbol.](illustrations/00-ai-concepts-campus-map.webp)
 
 *These concepts form a connected AI environment: the model sits at the center of generation, while the surrounding information, coordination, capability, and connection layers shape what the full system can do.*
 
@@ -22,9 +22,9 @@ This chapter starts with the model itself, then looks at how frontier organizati
 
 ### Model Basics
 
-A **model** is a learned mathematical system that turns input into output. Language models produce text or code, image models interpret or create images, speech models process audio, and embedding models turn content into numbers for similarity search. A model has an **architecture**, meaning the overall design of its calculations, and **parameters**, or weights, meaning the values learned during training. No single parameter holds one complete fact or rule; the behavior comes from the combined values. Unlike conventional software, a model is not built line by line from written instructions, but learns patterns from examples.
+A **model** is a learned mathematical system that turns input into output. Language models produce text or code, image models interpret or create images, speech models process audio, and embedding models turn content into numbers for similarity search. A model has an **architecture**, meaning the overall design of its calculations. A model also has **parameters**, or weights, meaning the values learned during training. No single parameter holds one complete fact or rule; the behavior comes from the combined values. Unlike conventional software, a model is not built line by line from written instructions, but learns patterns from examples.
 
-![Text, image, audio, and code inputs flow through an abstract model network and emerge as corresponding outputs.](illustrations/02-model-basics-input-model-output.webp)
+![Text, image, audio, and code inputs flow through an abstract model network and emerge as corresponding outputs.](illustrations/00-model-basics-input-model-output.webp)
 
 *A model learns patterns that let it transform inputs into outputs; it does not store one separate rule or fact for every response.*
 
@@ -36,7 +36,7 @@ Foundation models are usually built by specialist organizations with large resea
 
 Creating a frontier model is a large, iterative process. Broad pretraining builds a base model from prepared data; post-training shapes how it responds; evaluation helps decide whether it should be improved, restricted, or released. The exact methods vary and are not always public.
 
-![Design, data preparation, pretraining, post-training, evaluation, and release form an ordered model-creation lifecycle, with evaluation marked as iterative.](illustrations/02-model-creation-lifecycle.webp)
+![Design, data preparation, pretraining, post-training, evaluation, and release form an ordered model-creation lifecycle, with evaluation marked as iterative.](illustrations/00-model-creation-lifecycle.webp)
 
 *Model creation moves through six broad stages; evaluation can lead to another round of work or to a release decision.*
 
@@ -64,7 +64,7 @@ People usually describe models by capability level, access to the weights, and o
 | Open-weight | Trained weights can be downloaded and run under a licence. | [Mistral Medium 3.5](https://docs.mistral.ai/models/model-cards/mistral-medium-3-5-26-04), Mistral AI, France; [Llama 4](https://github.com/meta-llama/llama-models), Meta, United States; [Qwen3-235B-A22B-Thinking-2507](https://huggingface.co/Qwen/Qwen3-235B-A22B-Thinking-2507), Alibaba Cloud, China. |
 | Open-source | Under the [Open Source AI Definition](https://opensource.org/ai/open-source-ai-definition), this requires freedoms to use, study, modify, and share, supported by weights, code, and sufficient training-data information. | [Apertus](https://www.swiss-ai.org/apertus), Swiss AI Initiative, Switzerland; [Pythia](https://github.com/EleutherAI/pythia), EleutherAI, United States. Both publish broad model, code, data, and training artifacts. |
 
-Examples were checked on 26 July 2026. Publisher and home country identify the organization responsible for the referenced release, not every legal entity, hosting region, or data-processing location. Model families contain different releases, licences can differ, and frontier status changes as capabilities move forward; verify the specific release and licence before applying a label.
+*Examples were checked on 26 July 2026. Publisher and home country identify the organization responsible for the referenced release, not every legal entity, hosting region, or data-processing location. Model families contain different releases, licences can differ, and frontier status changes as capabilities move forward; verify the specific release and licence before applying a label.*
 
 ## Tokens
 
@@ -78,7 +78,7 @@ A token can be a whole word, part of a word, punctuation, spacing, a number, or 
 
 The tokenizer assigns a numerical identifier, called a **token ID**, to each token. The model converts these identifiers into internal numerical representations that it can process. The generated token IDs are then converted back into readable content by the tokenizer.
 
-![Readable input passes through a tokenizer and becomes tokens for the model; generated tokens pass through the tokenizer again to become a readable response. A magnified inset shows differently sized word fragments and punctuation.](illustrations/02-tokens-tokenisation-process.webp)
+![Readable input passes through a tokenizer and becomes tokens for the model; generated tokens pass through the tokenizer again to become a readable response. A magnified inset shows differently sized word fragments and punctuation.](illustrations/00-tokens-tokenisation-process.webp)
 
 This is a high-level conceptual view of tokenization. The token boundaries shown are only examples and vary by tokenizer; the diagram leaves out token IDs, the model's internal representations, and service implementation details. At a high level, the workflow is:
 
@@ -112,7 +112,7 @@ Many AI services bill usage by the number of input and output tokens processed. 
 
 The **context window** is the maximum token space available to the model at one time. It is measured in tokens rather than file size, pages, or words. At a basic level, think of it like a tank with finite capacity: the assembled input fills part of the tank, while the generated response uses the remaining space. Depending on the model and product, hidden reasoning tokens may also use this capacity even though they are not shown in the response. Generated tool calls use output capacity, while tool results use input capacity when they are sent to the model in a later request.
 
-![Three identical context-window tanks show the AI product and user assembling input, the model generating output above that input, and a completed response that leaves some capacity unused.](illustrations/02-context-window-fill-over-time.webp)
+![Three identical context-window tanks show the AI product and user assembling input, the model generating output above that input, and a completed response that leaves some capacity unused.](illustrations/00-context-window-fill-over-time.webp)
 
 *The AI product assembles the input first. The model then generates output tokens into the remaining context space, and unused capacity may remain when the response is complete.*
 
@@ -128,7 +128,7 @@ Each model request gets its own assembled context. Starting a new conversation, 
 
 Long conversations and multi-step tasks can get close to the context-window limit. The AI product may remove older material, summarize it, keep selected facts, or create a handoff note to make room. This process is called **compaction**. Compaction keeps work moving, but the summary is a reduced version of the earlier context. Qualifications, open questions, rejected options, decisions, and source references can be lost or changed.
 
-![A nearly full context tank passes detailed earlier material through a compaction funnel. A smaller summary enters a second tank, recovering capacity while some detail is lost.](illustrations/02-context-compaction.webp)
+![A nearly full context tank passes detailed earlier material through a compaction funnel. A smaller summary enters a second tank, recovering capacity while some detail is lost.](illustrations/00-context-compaction.webp)
 
 *Compaction replaces detailed earlier context with a smaller summary, recovering capacity while possibly losing useful nuance and references.*
 
@@ -146,7 +146,7 @@ Putting information into context makes it temporarily available to the model for
 
 **Generation** is the process a model uses to produce output from the context it receives. An LLM builds a response one token at a time instead of retrieving a complete sentence or answer as a fixed block. Each generated token becomes part of the context used to generate the next one, until the model reaches a natural endpoint or is stopped.
 
-![Context enters a model, which presents possible next tokens with relative likelihood bars. One token is added to the generated-so-far sequence before the process repeats or stops.](illustrations/02-generation-one-token-at-a-time.webp)
+![Context enters a model, which presents possible next tokens with relative likelihood bars. One token is added to the generated-so-far sequence before the process repeats or stops.](illustrations/00-generation-one-token-at-a-time.webp)
 
 *The model selects and adds one token at a time. The expanded response then influences the next selection until generation stops.*
 
@@ -166,7 +166,7 @@ Some models spend more processing time analyzing a problem or comparing possible
 
 A request can ask for a specific format, and some systems can enforce a structure such as defined JSON fields and value types. Enforced structured output makes a response easier for software to read and validate, but it controls shape, not truth. Check both that the required fields and value types are present and that their values are correct, supported, and internally consistent.
 
-![A structured response passes an outer check for required fields and value types, while a separate inner check examines its values against sources, calculations, and internal consistency.](illustrations/02-structured-output-validation-layers.webp)
+![A structured response passes an outer check for required fields and value types, while a separate inner check examines its values against sources, calculations, and internal consistency.](illustrations/00-structured-output-validation-layers.webp)
 
 *A response can have a valid structure while its values still need verification against sources and logic.*
 
@@ -182,13 +182,13 @@ A model becomes more useful when it gets clear direction and relevant informatio
 
 A **prompt** is direction given to a model, such as an objective, instructions, constraints, examples, and a requested output. **Prompt engineering** improves that direction. Some products use "prompt" to mean all input sent to the model, but this playbook keeps the prompt separate from the broader context assembled around it. A useful prompt often includes the desired result, relevant background and sources, boundaries, steps, output format, and the evidence expected.
 
-![A prompt is presented as a modular task brief with an objective supported by context, sources, constraints, tasks, output requirements, and checks.](illustrations/02-prompt-engineering-prompt-anatomy.webp)
+![A prompt is presented as a modular task brief with an objective supported by context, sources, constraints, tasks, output requirements, and checks.](illustrations/00-prompt-engineering-prompt-anatomy.webp)
 
 *A useful prompt can combine these pieces to make the requested work and the review criteria clearer; not every task needs every piece.*
 
 Compare the two prompts in the illustration below. The second prompt defines the work and makes the answer easier to review. Two document icons feed the same supplied material into two prompts. The vague request produces a general summary with unanswered review questions, while the specific request produces a categorized comparison with citations and separated interpretations.
 
-![Two document icons feed the same supplied material into two prompts. The vague request produces a general summary with unresolved review questions, while the specific request produces a categorized comparison with citations and separated interpretations.](illustrations/02-prompt-engineering-document-comparison.webp)
+![Two document icons feed the same supplied material into two prompts. The vague request produces a general summary with unresolved review questions, while the specific request produces a categorized comparison with citations and separated interpretations.](illustrations/00-prompt-engineering-document-comparison.webp)
 
 *The more specific prompt makes the expected comparison, evidence, and review criteria visible; it structures the response without guaranteeing that the content is correct.*
 
@@ -200,7 +200,7 @@ A prompt used repeatedly can become a versioned asset with task instructions, ex
 
 Prompt engineering improves the direction given to a model. **Context engineering** looks at the broader information environment by deciding what the model should receive, where that information comes from, and how it should be organized. The aim is to provide relevant instructions and evidence without burying them in unnecessary, conflicting, or outdated material.
 
-![Available instructions, history, sources, state, and tool information pass through a context blueprint that selects, orders, resolves, and fits material into different context tanks for two tasks. Some outdated or conflicting material remains outside.](illustrations/02-context-engineering-blueprint.webp)
+![Available instructions, history, sources, state, and tool information pass through a context blueprint that selects, orders, resolves, and fits material into different context tanks for two tasks. Some outdated or conflicting material remains outside.](illustrations/00-context-engineering-blueprint.webp)
 
 *Context engineering sets reusable selection and organization decisions. Each task can then assemble a different context from the available information.*
 
@@ -214,7 +214,7 @@ RAG combines retrieval from an external collection with model context. It brings
 
 Building a RAG system is a separate engineering task. An **ingestion pipeline** extracts source content, uses optical character recognition (OCR) when needed, divides it into **chunks**, and records metadata such as source, version, section, date, and access details. An **embedding model** may convert each chunk into a numerical **vector** that represents aspects of its meaning. Original documents usually stay in a source system, document store, or object store; chunks and metadata live in a search index; and vectors live in a **vector index** provided by a **vector database** or vector-search features in another database or search engine. The indexes must be updated when sources change.
 
-![A two-band RAG workflow shows sources being extracted, divided into chunks with metadata, and added to search and vector indexes. A later question searches and reranks candidates; selected referenced chunks enter context before the model generates an answer with references, while other chunks remain outside.](illustrations/02-rag-system-workflow.webp)
+![A two-band RAG workflow shows sources being extracted, divided into chunks with metadata, and added to search and vector indexes. A later question searches and reranks candidates; selected referenced chunks enter context before the model generates an answer with references, while other chunks remain outside.](illustrations/00-rag-system-workflow.webp)
 
 *RAG prepares searchable material separately from using it: each request retrieves and reranks candidates, and only selected chunks enter the model's context.*
 
@@ -222,7 +222,7 @@ For each request, the system finds candidate chunks using keywords, metadata fil
 
 RAG can fail when sources are missing, outdated, inaccessible, or parsed incorrectly; chunking, indexing, search, or ranking can miss decisive information; and the model can ignore or misread what was retrieved. A citation to a real source may still not support the generated claim.
 
-![Three source sections retain reference identifiers as their chunks enter context and contribute to generated claims. Two evidence threads remain supported, while a third real citation is marked as not supporting its claim.](illustrations/02-rag-source-to-claim-traceability.webp)
+![Three source sections retain reference identifiers as their chunks enter context and contribute to generated claims. Two evidence threads remain supported, while a third real citation is marked as not supporting its claim.](illustrations/00-rag-source-to-claim-traceability.webp)
 
 *Preserved references make a claim traceable, but reviewers still need to check whether the cited source actually supports it.*
 
@@ -232,7 +232,7 @@ RAG can fail when sources are missing, outdated, inaccessible, or parsed incorre
 
 The product design and user choices determine what may be remembered. The model may identify or summarize a candidate memory, but it cannot persist information on its own. The AI product applies storage rules and any required confirmation before writing accepted information to an external store. On a later request, it may retrieve relevant memory and place it into context, where the model may use it, ignore it, or misapply it. The AI product therefore controls storage and reuse even when the model proposes what to remember.
 
-![A two-phase memory lifecycle shows information appearing, a decision about whether to store it, and scoped storage. Later, one selected memory is retrieved, placed into the context window, and either used or ignored by the model.](illustrations/02-memory-management-lifecycle.webp)
+![A two-phase memory lifecycle shows information appearing, a decision about whether to store it, and scoped storage. Later, one selected memory is retrieved, placed into the context window, and either used or ignored by the model.](illustrations/00-memory-management-lifecycle.webp)
 
 *Memory is stored for possible later retrieval; only selected memory enters the current context.*
 
@@ -248,7 +248,7 @@ Terminology in this area is not standardized. In this playbook, an **agent** mea
 
 An **agent** is a goal-directed decision loop that looks at its current state, chooses an action, checks the result, and continues until it finishes or has to stop:
 
-![A robot agent sends its goal and current state to a separate abstract model. The model returns a next step to the agent, results update the loop, and secondary branches allow the agent to finish or ask for help.](illustrations/02-agents-decision-loop.webp)
+![A robot agent sends its goal and current state to a separate abstract model. The model returns a next step to the agent, results update the loop, and secondary branches allow the agent to finish or ask for help.](illustrations/00-agents-decision-loop.webp)
 
 *An agent repeatedly brings its goal and current state to the model, uses the proposed next step, and updates the loop from the result until it finishes or needs help.*
 
@@ -271,7 +271,7 @@ The **harness** is the runtime and supporting software that hosts model interact
 
 A harness does not have to be agentic: it can support a single model response, a fixed workflow, or a goal-directed agent loop. For each model call, it can build the request, expose permitted operations, validate tool requests, and return results. Across a longer task, it can preserve state, apply budgets and stop conditions, coordinate handoffs, and expose sources, actions, errors, and traces for inspection. These responsibilities may live in one application or be spread across several services.
 
-![Three horizontal lanes compare a single response, a fixed workflow, and an agent loop. Each lane calls a vertically aligned model in a shaded column bounded by dotted lines, separating the model interaction from the flow coordinated by the harness.](illustrations/02-harness-operating-modes.webp)
+![Three horizontal lanes compare a single response, a fixed workflow, and an agent loop. Each lane calls a vertically aligned model in a shaded column bounded by dotted lines, separating the model interaction from the flow coordinated by the harness.](illustrations/00-harness-operating-modes.webp)
 
 *The same harness can coordinate a single response, a predefined workflow, or a repeating agent loop; the shaded column separates model calls from the surrounding coordination flow.*
 
@@ -279,7 +279,7 @@ The coordination of model calls, tools, checks, and handoffs is often called **o
 
 A harness may also support **delegation** by creating another agent instance for a bounded subtask. A delegated instance is often called a **subagent**, while a **multi-agent system** uses several agent instances that contribute to or coordinate around a larger goal. Separate instances can isolate information, parallelize work, or apply specialist skills, but they add coordination and cost. The harness or a coordinating agent must define the subtasks, manage their contexts, and combine the results; agents using the same model and sources are not automatically independent.
 
-![An application-shaped harness coordinates three robot agents around shared state. Skills and tools are available inside the harness, while the model and external integrations remain outside its boundary.](illustrations/02-harness-application-ecosystem.webp)
+![An application-shaped harness coordinates three robot agents around shared state. Skills and tools are available inside the harness, while the model and external integrations remain outside its boundary.](illustrations/00-harness-application-ecosystem.webp)
 
 *The harness is the coordinating application: agents work through shared state, skills guide reusable procedures, tools expose permitted operations, and the application connects separately to models and external integrations.*
 
@@ -303,7 +303,7 @@ The operating-system examples are analogues, not necessarily the model-facing to
 
 The harness receives the user message, keeps task state, and sends an assembled request to the model. The model returns generated text, a structured tool request, or both. The harness takes that request, checks whether the relevant tool is available, and sends the request to the tool. The harness waits for the tool call to finish, rebuilds the context with the result, and sends that back to the model. The model may then finish the task or request more tool calls.
 
-![A six-stage tool-request workflow starts with a user message, shows the harness assembling context, the model returning a tool request with metadata, the harness checking and running the tool, the result returning to the harness, and the model either responding or requesting another tool.](illustrations/02-tool-request-workflow.webp)
+![A six-stage tool-request workflow starts with a user message, shows the harness assembling context, the model returning a tool request with metadata, the harness checking and running the tool, the result returning to the harness, and the model either responding or requesting another tool.](illustrations/00-tool-request-workflow.webp)
 
 *The harness assembles each model request, checks and invokes an available tool, adds the observed result to context, and continues until the model returns a response or requests another tool.*
 
@@ -315,7 +315,7 @@ In either setup, the runtime provides tool availability, access, and credentials
 
 Integrations are a more advanced topic than individual tool calls, so this section gives only a brief conceptual overview. A **tool call** is one requested operation, while an **integration** is the broader connection between a harness and another system. One integration may expose several tools, readable resources, or event-driven capabilities.
 
-![A harness exposes three operations through one integration that manages authentication, data translation, and connectivity before reaching cloud, database, and business-application systems. Request arrows travel outward and result arrows return to the harness.](illustrations/02-integrations-managed-gateway.webp)
+![A harness exposes three operations through one integration that manages authentication, data translation, and connectivity before reaching cloud, database, and business-application systems. Request arrows travel outward and result arrows return to the harness.](illustrations/00-integrations-managed-gateway.webp)
 
 *An integration manages the connection between a harness and external systems; individual tool operations travel through that broader connection and return observed results.*
 
@@ -327,7 +327,7 @@ The **Model Context Protocol (MCP)** is one standard for connecting AI applicati
 
 A **skill** is a reusable task package that gives a model task-specific procedures or knowledge without changing its weights. OpenAI and Anthropic support the open [Agent Skills format](https://agentskills.io/specification), where a `SKILL.md` file contains the skill's name, description, and instructions, with optional supporting files for references, scripts, templates, examples, or checks. Products may add their own metadata and behavior.
 
-![An open skill kit contains reusable instructions, references, scripts, checks, and tool guidance. A task enters from the left, optional sources and a tool remain outside the kit, and a checked result exits on the right.](illustrations/02-skills-open-kit.webp)
+![An open skill kit contains reusable instructions, references, scripts, checks, and tool guidance. A task enters from the left, optional sources and a tool remain outside the kit, and a checked result exits on the right.](illustrations/00-skills-open-kit.webp)
 
 *A skill packages reusable task guidance and supporting material; it can guide how sources and tools are used without providing access, permission, or execution by itself.*
 
@@ -366,9 +366,7 @@ For example, a model may know how to write a command but have no execution tool;
 
 # 6. Risks
 
-AI systems can cause damage to property, people, or reputation. The register below groups common risks by their main harm.
-
-Sources used for this register include NIST AI RMF, UNESCO's ethics recommendation, OECD AI Principles, and OWASP GenAI Security guidance.
+AI systems can cause damage to property, people, or reputation. The register below groups common risks by their main harm. Sources used for this register include NIST AI RMF, UNESCO's ethics recommendation, OECD AI Principles, and OWASP GenAI Security guidance.
 
 ## Property
 

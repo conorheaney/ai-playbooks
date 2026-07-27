@@ -1,4 +1,4 @@
-# Playbook 01: Getting Started with AI Tools
+# Playbook 02: Getting Started with AI Tools
 
 ## 1. Purpose
 
@@ -241,9 +241,9 @@ Then run a capability review:
 | Hidden incompleteness | The tool reports findings without its search boundary. | Ask for inspected sources, searches, inaccessible areas, and open questions. |
 | Accidental disclosure | Logs, screenshots, records, or source files contain restricted data. | Minimize and sanitize context before it enters the tool path. |
 
-## 11. Ready for the Next Playbook
+## 11. Readiness Checklist
 
-Before moving to more advanced techniques, a team should be able to:
+A team ready to apply these practices should be able to:
 
 - Match a bounded task to an interaction mode.
 - Explain what context the tool receives and what actions it can take.
@@ -251,4 +251,4 @@ Before moving to more advanced techniques, a team should be able to:
 - Start with minimal permissions and recognize when more capability is justified.
 - Verify generated content through source evidence, executable checks, or independent review.
 
-Playbook 02 explains models, tokens, context, prompting, retrieval, agents, harnesses, tools, capabilities, evaluation, and common limitations.
+Refer to Playbook 00 for explanations of models, tokens, context, prompting, retrieval, agents, harnesses, tools, capabilities, evaluation, and common limitations.
