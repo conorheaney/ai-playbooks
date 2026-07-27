@@ -287,43 +287,62 @@ The same model can appear cautious in one harness and highly autonomous in anoth
 
 ## Tools
 
-A **tool** is an operation an AI system can request. With **tool calling**, the model requests an available operation using a tool name and input fields; the harness checks and runs the request, then returns the observed result to the model.
+A **tool** is an operation that an AI system makes available to a model. With **tool calling**, the model returns a structured request containing a tool name and input fields. The runtime checks and invokes the tool, then makes the observed result available to the model.
 
-Frontier-model products commonly expose tool calls in the following categories, although names and implementations vary by harness:
+AI products built around frontier models commonly expose these categories of tools, although names and implementations vary by harness:
 
 | Category | Common model-facing examples | Windows analogue | Linux analogue |
 | --- | --- | --- | --- |
-| Search and retrieval | Web search, file search, semantic retrieval, and code search. | `Select-String`, `Get-ChildItem`, and search APIs. | `rg`, `find`, and search APIs. |
-| File and repository operations | Read or write a file, apply a patch, inspect a diff, and use Git. | `Get-Content`, `Set-Content`, and `git`. | `cat`, `sed`, and `git`. |
-| Command and code execution | Run a shell command, script, test runner, code interpreter, or sandboxed program. | PowerShell, Command Prompt, and Python. | Bash, `sh`, and Python. |
-| Data query and calculation | Execute SQL, query structured data, use a calculator, or analyze a data frame. | `sqlcmd`, `sqlite3`, and PowerShell data commands. | `psql`, `sqlite3`, and Python data tools. |
-| External service actions | Call a function, REST API, MCP tool, messaging service, or issue tracker. | `Invoke-RestMethod` and service-specific clients. | `curl` and service-specific clients. |
+| Search and retrieval | Web, file, semantic, and code search. | `Select-String`, `Get-ChildItem`, and search APIs. | `rg`, `find`, and search APIs. |
+| File and repository operations | Read or write files, apply patches, inspect diffs, and use Git. | `Get-Content`, `Set-Content`, and `git`. | `cat`, `sed`, and `git`. |
+| Command and code execution | Run shell commands, scripts, test runners, code interpreters, or sandboxed programs. | PowerShell, Command Prompt, and Python. | Bash, `sh`, and Python. |
+| Data query and calculation | Execute SQL, query structured data, calculate, or analyze data frames. | `sqlcmd`, `sqlite3`, and PowerShell data commands. | `psql`, `sqlite3`, and Python data tools. |
+| External service actions | Call functions, REST APIs, MCP tools, messaging services, or issue trackers. | `Invoke-RestMethod` and service-specific clients. | `curl` and service-specific clients. |
 
-These operating-system examples are analogues rather than the model-facing tools themselves. A harness normally wraps the underlying command, API, or library in a defined tool interface and controls its inputs, credentials, permissions, and execution environment.
+The operating-system examples are analogues, not necessarily the model-facing tools themselves. A harness normally wraps a command, API, or library in a defined interface and controls its inputs, credentials, permissions, and execution environment.
 
-The interface or harness normally receives the user message, maintains the agent's task state, and sends an assembled request to the model. The model returns either generated text or a structured tool request. Saying that an agent "calls a tool" is useful shorthand for this decision within the agent loop; the harness or model provider performs the actual invocation.
+The harness receives the user message, maintains task state, and sends an assembled request to the model. The model returns generated text, a structured tool request, or both. The harness takes this request, determines if the relevant tool is available and sends the request to the tool. The harness waits for the tool call to complete, re-assembles the context with the result and sends this back to the model. The model may then complete the task or request more tool calls.
 
-```
-user message
-  -> harness assembles model request
-  -> model returns text or a tool request
-       -> text returns through the harness to the user
-       -> harness or provider invokes the requested tool
-            -> tool result enters context
-            -> model continues
-```
+![A six-stage tool-request workflow starts with a user message, shows the harness assembling context, the model returning a tool request with metadata, the harness checking and running the tool, the result returning to the harness, and the model either responding or requesting another tool.](illustrations/02-tool-request-workflow.webp)
 
-With a **client-side tool**, the harness validates the request, checks permissions, invokes the operation, and sends the result in another model request. With a **provider-side tool**, such as some web-search services, the model provider handles this internal loop and returns the resulting response or tool events to the harness. Some harnesses include web search, while others add it through MCP or a custom integration. Web search discovers sources; web fetch retrieves content from a known address.
+*The harness assembles each model request, checks and invokes an available tool, adds the observed result to context, and continues until the model returns a response or requests another tool.*
 
-In either arrangement, tool availability, access, and credentials come from the runtime rather than the model's weights. Tool use can fail through wrong selection, incorrect input, missing permission, changed system state, duplicate action, or misunderstanding of the result. Reading can still expose sensitive information, and a simple query can still have cost or access implications.
+For a **client-side tool**, the harness validates the request, checks permissions, invokes the operation, and includes the result in another model request. For a **provider-side tool**, such as some web-search services, the model provider handles this loop and returns the response or tool events to the harness. A harness may include web search or add it through MCP or a custom integration. Web search discovers sources; web fetch retrieves content from a known address.
+
+In either arrangement, the runtime provides tool availability, access, and credentials; they do not come from the model's weights. Tool use can fail because of incorrect selection or input, missing permission, changed system state, duplicate action, or a misunderstood result. Read operations can expose sensitive information, and even a simple query can have cost or access implications.
 
 ## Integrations
 
 Integrations are a more advanced topic than individual tool calls, so this section provides only a brief conceptual outline. A **tool call** is one requested operation, while an **integration** is the broader connection between a harness and another system. One integration may expose several tools, readable resources, or event-driven capabilities.
 
+![A harness exposes three operations through one integration that manages authentication, data translation, and connectivity before reaching cloud, database, and business-application systems. Request arrows travel outward and result arrows return to the harness.](illustrations/02-integrations-managed-gateway.webp)
+
+*An integration manages the connection between a harness and external systems; individual tool operations travel through that broader connection and return observed results.*
+
 Integrations can use built-in connectors, application programming interfaces (APIs), software development kits (SDKs), plugins, or protocols. They manage concerns such as authentication, credentials, data translation, connectivity, and the boundary across which requests and results travel. The harness still decides which integration features to expose to the model and under what permissions.
 
 The **Model Context Protocol (MCP)** is one standard for connecting AI applications to external information and operations. An MCP server can expose **resources** for readable context, **tools** for callable operations, and **prompt templates** for reusable instructions. It may connect to files, repositories, databases, document systems, or remote services. MCP makes these connections more consistent but does not make them trustworthy: servers can receive data or credentials, reach other systems, perform actions, and return untrusted content.
+
+## Skills
+
+A **skill** is a reusable task package that gives a model task-specific procedures or knowledge without changing its weights. OpenAI and Anthropic support the open [Agent Skills format](https://agentskills.io/specification), in which a `SKILL.md` file contains the skill's name, description, and instructions, with optional supporting files for references, scripts, templates, examples, or checks. Products may add their own metadata and behavior.
+
+![An open skill kit contains reusable instructions, references, scripts, checks, and tool guidance. A task enters from the left, optional sources and a tool remain outside the kit, and a checked result exits on the right.](illustrations/02-skills-open-kit.webp)
+
+*A skill packages reusable task guidance and supporting material; it can direct how sources and tools are used without supplying access, permission, or execution by itself.*
+
+Skills commonly use **progressive disclosure** so unused instructions stay out of the context window. Depending on the product, the user, model, or harness may select a skill from its metadata, then load the full instructions only when needed.
+
+In an agentic system, a skill guides how an agent plans, uses tools, checks results, and reports its work. The harness manages state and execution, tools perform operations, integrations connect systems, and permissions control access. A skill may explain how to use a tool or include a script, but it does not create an integration, provide credentials, grant permission, or enforce a control. It is not an independent agent and can guide a single response, workflow, agent, or subagent.
+
+Basic examples include:
+
+| Example | What the skill contributes |
+| --- | --- |
+| /grill-me | Instructions guide the model to agressively question the user in an interview format to surface anomolies in a planned software requirement |
+| /summarize-it | Instructions guide the model to summarise supplied documents to a consistent structured format |
+
+It is important to review a skill's instructions, scripts, dependencies, access, and tool use before adoption. Skills can conflict, become outdated, contain unsafe instructions, or consume too much context, so consequential skills should be tested, versioned, and kept within normal permission and confirmation controls.
 
 ## Permissions
 
@@ -345,61 +364,60 @@ capability
 
 For example, a model may know how to write a command but have no execution tool; a tool may be available while network access is denied; and a user may hold a permission that the AI application does not receive.
 
-## Skills
-
-A **skill** is a reusable task procedure that may combine instructions, references, scripts, checks, and guidance for using tools. A prompt asset structures the direction for a model request, a skill supplies broader task know-how, and a tool exposes a callable operation.
-
-Loading a skill can change behavior without changing model permissions. Skills can conflict, become outdated, or consume too much context, so their selection and version can affect the result.
-
 # 6. Risks
 
-The capabilities described in the previous chapters also create limitations and risks. These come from generated content, changing system components, untrusted information, and access to external actions.
+AI systems can cause damage to property, people, or reputation. The register below groups common risks by their primary harm.
 
-## Hallucination
+Sources used for this register include NIST AI RMF, UNESCO's ethics recommendation, OECD AI Principles, and OWASP GenAI Security guidance.
 
-**Hallucination** is generated content that is unsupported, fabricated, or inconsistent with the relevant source or reality. Examples include invented citations, nonexistent features, false quotations, and claims about actions that never occurred. Grounding and tools can reduce some hallucinations but cannot eliminate them.
+## Property
 
-## Uncertainty
+| Harm | Risk | Example failure mode | Typical control |
+| --- | --- | --- | --- |
+| High | Prompt injection | Untrusted content redirects the model into unauthorized actions. | Treat external content as data, not authority. |
+| High | Sensitive data disclosure | Prompts, outputs, logs, or tool results expose confidential data. | Limit data in context and logs. |
+| High | Insecure output handling | Downstream code or systems trust unvalidated model output. | Validate and sanitize before use. |
+| High | Excessive agency | The model takes actions beyond its intended authority. | Bound tools, actions, and approvals. |
+| High | Training data poisoning | Corrupted data implants bad behavior or hidden triggers. | Control data sources and review training inputs. |
+| High | Supply chain compromise | A model, skill, plugin, dependency, or dataset is compromised. | Vet components and pin trusted versions. |
+| Medium | Denial of service or runaway cost | Loops, long context, or heavy tool use exhaust compute or budget. | Set step, time, and cost limits. |
 
-Confident wording is not a dependable measure of correctness. Better evidence comes from source support, repeatable checks, tool results, and measured performance on representative examples.
+## Person
 
-## Bias
+| Harm | Risk | Example failure mode | Typical control |
+| --- | --- | --- | --- |
+| High | Bias and discrimination | The system treats groups differently or unfairly. | Test with representative cases and review outcomes. |
+| High | Privacy invasion | The system infers or exposes personal information. | Minimize personal data and restrict access. |
+| High | Unsafe advice | Wrong guidance harms health, legal, financial, or physical safety. | Keep humans in the loop for high-stakes decisions. |
+| High | Human-rights harm or exclusion | The system denies access or deepens inequality. | Check impacts on affected groups before release. |
+| Medium | Overreliance / automation bias | People trust the output too much and stop checking it. | Require independent review for consequential use. |
+| High | Deceptive or manipulative output | The system persuades, pressures, or misleads users. | Set content and behavior boundaries. |
+| High | Lack of human oversight | No accountable person reviews a consequential action. | Define approval points and escalation paths. |
 
-Bias can enter through training data, examples, retrieval sources, labels, prompts, evaluation material, or user interpretation. It may appear as missing perspectives, stereotypes, uneven performance, or preference for common cases over rare ones.
+## Reputation
 
-## Drift
+| Harm | Risk | Example failure mode | Typical control |
+| --- | --- | --- | --- |
+| Medium | Hallucinated claims | The model states false facts as if they were true. | Ground answers in sources and checks. |
+| High | Invented citations or evidence | The model fabricates references or support. | Verify citations against source material. |
+| Medium | Offensive or toxic content | The system produces harmful or inappropriate language. | Apply safety filters and review prompts. |
+| Medium | Misleading confidence | Wrong output is presented in a polished, authoritative tone. | Separate confidence from evidence. |
+| Medium | Poor transparency | Stakeholders cannot see how the result was produced. | Record sources, tools, and decisions. |
+| High | Regulatory or policy non-compliance | AI use conflicts with legal or internal rules. | Review requirements before deployment. |
 
-Behavior can change when any of these change:
+## Examples
 
-- Model or provider version.
-- Prompt or system instructions.
-- Retrieved sources or search index.
-- Tools and permissions.
-- Memory and conversation state.
-- Harness or user interface.
+All examples below are referenced from: https://www.osohq.com/developers/ai-agents-gone-rogue
 
-Evaluating only a model name misses much of the system that produces the result.
-
-## Prompt Injection
-
-**Prompt injection** occurs when untrusted content contains instructions intended to redirect the model or its tool use.
-
-- **Direct prompt injection:** a user asks the system to ignore its intended task or reveal protected information.
-- **Indirect prompt injection:** a document, web page, message, file, or tool result contains instructions aimed at the AI.
-
-## AI Security
-
-Other risks include:
-
-- Disclosure of information through output, tool input, links, or messages.
-- Misuse of credentials available to the AI application.
-- Poisoned retrieved content or memory.
-- Unsafe execution of generated code or commands.
-- Secrets appearing in context, logs, or errors.
-- Excessive permissions or autonomy.
-- Runaway loops, cost, or resource use.
-
-Useful protections include limiting information, tools, permissions, destinations, steps, and cost; treating external content as data rather than authority; checking tool input outside the model; requiring confirmation for consequential actions; and isolating reversible work. No prompt creates a complete security boundary, so enforcement also belongs in identity, applications, tools, networks, and target systems.
+| Harm | Incident | Brief summary | Citation |
+| --- | --- | --- | --- |
+| Property | Codex escalates to root via Docker group to bypass missing sudo | The agent found a path to root-equivalent access, mounted the host filesystem, and overwrote a critical host config file without the user's explicit approval. | Oso Rogue Agents Registry, "Codex escalates to root via Docker group to bypass missing sudo". |
+| Property | Cursor Agent Deletes Production Database and Backups via Railway API | After a credential mismatch, the agent deleted a Railway volume, permanently deleting the production database and its backups. | Oso Rogue Agents Registry, "Cursor Agent Deletes Production Database and Backups via Railway API". |
+| Property | Replit's AI Assistant Ignored Instructions Causing Major Data Loss | The assistant ignored repeated instructions not to modify code, fabricated test data, and deleted a live production database. | Oso Rogue Agents Registry, "Replit's AI Assistant Ignored Instructions Causing Major Data Loss". |
+| Person | OpenClaw Floods User and Random Contacts With 500+ iMessages | The agent spammed the user, the user's spouse, and random contacts with hundreds of messages after being given iMessage access. | Oso Rogue Agents Registry, "OpenClaw Floods User and Random Contacts With 500+ iMessages". |
+| Person | Meta AI support agent allows Instagram account takeover via unauthenticated email swap | The support agent was able to change account details without identity verification, enabling account takeover. | Oso Rogue Agents Registry, "Meta AI support agent allows Instagram account takeover via unauthenticated email swap". |
+| Reputation | Meta AI Agent Posts to Forum and Triggers Data Breach | The agent posted directly to an internal forum without approval, and the resulting chain of events exposed sensitive data for roughly two hours. | Oso Rogue Agents Registry, "Meta AI Agent Posts to Forum and Triggers Data Breach". |
+| Reputation | Agent Shipped Unverified Third-Party Code Without Approval | The agent invented a public repo ID and deployed unverified third-party code without source verification. | Oso Rogue Agents Registry, "Agent Shipped Unverified Third-Party Code Without Approval". |
 
 # 7. Assurance
 
@@ -484,11 +502,9 @@ More logging is not always better because prompts and tool results can contain s
 
 **Provenance** records where material came from and how it changed, distinguishing supplied sources, retrieved information, tool evidence, generated proposals, human edits, and final decisions.
 
-# 8. Application
+# 8. Approaches
 
-The concepts can now be combined into practical choices. This chapter compares common approaches, follows one example through increasing levels of capability, and provides exercises for exploring the differences.
-
-## Choosing Approaches
+The concepts can now be combined into practical choices. The table below compares common approaches.
 
 | Need | Start with | Add if needed |
 | --- | --- | --- |
@@ -501,52 +517,6 @@ The concepts can now be combined into practical choices. This chapter compares c
 | Enforce an access or safety rule | A non-model system control. | Model detection as an additional signal. |
 
 Use the simplest approach that provides enough information, capability, and reviewability for the task.
-
-## Worked Example
-
-Suppose an organization wants to compare several versions of policy documents and identify differences.
-
-**Prompt-Only**
-
-A person selects and supplies the relevant passages, then asks the model for a cited comparison. **Useful when:** the source set is small and a knowledgeable person can select it. **Weakness:** the person may omit the decisive passage or version.
-
-**RAG**
-
-The documents are indexed with titles, versions, dates, sections, and status. The system retrieves passages and asks the model to prepare a referenced comparison. **Useful when:** the collection is too large to select manually or changes regularly. **Weakness:** search may miss a term, choose an outdated document, or separate a statement from its qualification.
-
-**Agent**
-
-A read-only agent searches the collection, follows references, compares versions, and returns the sources inspected, its findings, and unresolved questions. **Useful when:** the route requires several searches and depends on what is found. **Weakness:** the agent may stop too early, search poorly, or assume that a failed search proves something is absent.
-
-These are different patterns, not maturity levels. The simplest sufficient pattern is often the best choice.
-
-## Practical Exercises
-
-**Exercise 1: Context**
-
-Ask the same question three ways:
-
-1. With a long unstructured document.
-2. With selected relevant passages.
-3. With passages selected by retrieval.
-
-Compare omissions, irrelevant content, references, and review effort.
-
-**Exercise 2: Prompt Versus Tool**
-
-Ask a model to calculate the difference between two lists. Then use a deterministic comparison tool and ask the model to explain the result. Compare correctness and traceability.
-
-**Exercise 3: Capability Map**
-
-For an AI product, draw the path from user to model, harness, tools, credentials, external systems, and logs. Mark what data crosses each boundary and what can be read or changed.
-
-**Exercise 4: Indirect Prompt Injection**
-
-In an isolated synthetic environment, place an unrelated instruction in a document the AI will read. Observe whether the AI treats it as data or follows it. Repeat with fewer permissions and stronger confirmation.
-
-**Exercise 5: Small Eval**
-
-Create ten examples for one task, including normal, ambiguous, conflicting, missing-information, and abstention cases. Define expected behavior before testing two prompts, models, or configurations.
 
 # 9. Reference
 
@@ -583,7 +553,7 @@ Create ten examples for one task, including normal, ambiguous, conflicting, miss
 | Prompt caching | Reuse of earlier prompt processing to reduce time or cost. |
 | Prompt injection | Untrusted content intended to redirect model behavior or tool use. |
 | RAG | Retrieval of external information for use while generating an answer. |
-| Skill | A reusable task procedure combining instructions, references, scripts, checks, or tool guidance. |
+| Skill | A reusable task package combining instructions, references, scripts, checks, or tool guidance. |
 | Structured output | Model output required to follow a defined format. |
 | Token | A small unit of content processed or generated by a model. |
 | Tokenizer | The component that converts content to and from tokens. |

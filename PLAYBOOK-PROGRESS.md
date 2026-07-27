@@ -66,6 +66,9 @@ Last updated: 27 July 2026
 - The `Agents` illustration depicts the agent as a robot and keeps the model visibly separate, showing repeated goal-and-state exchange, result updates, completion, and escalation without introducing the harness layer.
 - The first `Harnesses` illustration compares a single response, fixed workflow, and agent loop while using a shaded dotted model column to keep model interactions visually separate from harness coordination.
 - The second `Harnesses` illustration presents the harness as an application coordinating a multi-agent loop around shared state, with skills and tools inside its boundary and models and integrations outside it.
+- The `Tools` illustration separates a tool call into six connected stages: starting the conversation, building context, requesting a tool, checking and running it, returning the result, and responding or repeating.
+- The `Integrations` illustration presents one managed connection between a harness and several external systems, distinguishing the integration from the individual operations that travel through it.
+- The `Skills` illustration presents a skill as a reusable task kit containing instructions, references, scripts, checks, and tool guidance, while keeping the task, sources, tool, and result outside the package.
 - The `Model Basics` illustration is approved as the visual baseline for the series and is stored at `illustrations/02-model-basics-input-model-output.webp`.
 
 ## Illustration Style and Creation Process
@@ -266,6 +269,36 @@ Last updated: 27 July 2026
 - Prompt record: a wide corporate editorial lifecycle showing six rounded geometric stations connected left to right; concept-specific symbols for each stage; warm off-white background; restrained navy, teal, sky-blue, coral, and muted-yellow palette; no vendor marks, robots, brains, chips, equations, or decorative text. The initial lower feedback arrows were replaced by one small iteration symbol within Evaluation after review.
 - Approval: the content owner requested removal of the confusing lower arrows and approved significant vertical cropping before integration on 26 July 2026.
 - Approved exception: use a 1200 x 461 wide-strip aspect ratio instead of the 3:2 default because the six-stage linear lifecycle benefits from reduced vertical whitespace. The WebP format and file-size target remain unchanged.
+
+### Approved Tool Request Workflow Asset
+
+- Concept: six connected stages show a user starting a conversation, the harness building context, the model returning a tool request with metadata, the harness checking availability and invoking the tool, the tool result returning to the harness, and the enriched context returning to the model for a response or another tool request.
+- Style: the approved geometric editorial style, using six rounded stage panels, restrained directional connectors, the established application-window harness and layered-network model symbols, compact context bundles, and minimal embedded text.
+- Final asset: `illustrations/02-tool-request-workflow.webp`.
+- Output: 1200 x 800 WebP, 73,686 bytes.
+- Prompt record: restyle the approved six-stage serpentine workflow to match the repository baseline; retain `START`, `BUILD CONTEXT`, `MODEL REQUESTS TOOL`, `CHECK + RUN`, `RETURN RESULT`, and `RESPOND OR REPEAT`; use a warm off-white background, restrained navy, teal, sky-blue, coral, and muted-yellow palette, fine connectors, modular cards, soft shadows, and consistent line weight; preserve the tool-result direction into the harness and the final response-or-repeat branch.
+- Approval: the content owner supplied the selected image and requested its integration on 27 July 2026.
+- Interpretation note: the diagram shows a conceptual client-side tool loop. A provider-side tool may perform some stages internally, and the availability check does not by itself imply that permission or confirmation requirements have been satisfied.
+
+### Approved Integrations Managed Gateway Asset
+
+- Concept: three operations exposed by a harness pass through one integration to cloud, database, and business-application systems. The integration contains symbols for authentication, data translation, and connectivity, while paired directional connectors distinguish outward requests from returning results.
+- Style: the approved geometric editorial style, using three calm zones, rounded operation and system cards, fine bidirectional connectors, minimal labels, and a restrained central gateway.
+- Final asset: `illustrations/02-integrations-managed-gateway.webp`.
+- Output: 1200 x 800 WebP, 45,322 bytes.
+- Prompt record: depict an integration as a managed bridge between a harness and multiple external systems; show search, data, and action operations on the harness side; place authentication, translation, and connectivity symbols inside one central integration gateway; connect to cloud, database, and business-application systems; use paired request-and-result paths, the approved warm off-white background, restrained palette, fine line weight, subtle texture, and minimal embedded text.
+- Approval: Candidate 1 selected by the content owner for integration on 27 July 2026.
+- Interpretation note: the three aligned rows are illustrative examples, not a claim that each operation uses only one integration concern. Authentication does not itself grant permission, and a connected capability is not necessarily exposed to the model.
+
+### Approved Skills Open Kit Asset
+
+- Concept: one open skill kit contains five reusable components: instructions, references, scripts, checks, and tool guidance. A task enters from the left, a result exits on the right, and optional sources and a tool remain outside the skill boundary.
+- Style: the approved geometric editorial style, using one dominant open case, five balanced component cards, subdued external dependencies, minimal connectors, and the restrained repository palette.
+- Final asset: `illustrations/02-skills-open-kit.webp`.
+- Output: 1200 x 800 WebP, 41,874 bytes.
+- Prompt record: depict a skill as a reusable task kit whose contents combine procedural guidance and supporting material; place `INSTRUCTIONS`, `REFERENCES`, `SCRIPTS`, `CHECKS`, and `TOOL GUIDANCE` inside one central `SKILL` case; keep `TASK`, `SOURCES`, `TOOL`, and `RESULT` small and outside; use the approved warm off-white background, rounded geometric forms, restrained palette, fine line weight, subtle texture, soft shadows, and generous whitespace.
+- Approval: Candidate 1 selected by the content owner for integration on 27 July 2026.
+- Interpretation note: the component cards describe material a skill may package rather than mandatory contents or an ordered workflow. A skill can guide tool use but does not provide credentials, grant permission, create an integration, or execute work independently.
 
 ## Next Action
 
