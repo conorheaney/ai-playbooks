@@ -1,162 +1,111 @@
-# Playbook 01: Using AI in the SDLC
+PLAYBOOK 01: AI IN THE SDLC
 
-## 1. What AI Can Help With
+## 1. Purpose
 
-AI can help a software team understand a problem, explore source material, draft changes, find gaps, and prepare work for review. Like any collaborator, it can also miss important details or get things wrong.
+This playbook helps teams to begin to apply AI concepts across the software development life cycle (SDLC). The aim is to help them start small, choose a sensible way to work, and build checking into the task from the beginning.
 
-It tends to work best on bounded tasks where the sources, available actions, expected result, and method of checking are clear. The team still owns the work and decides what to keep.
+## 2. Introduction
 
-This playbook is for product, clinical, quality, regulatory, engineering, testing, security, and operations teams working in heavily regulated clinical environments. It stays focused on AI as part of software delivery rather than AI built into a clinical product, used for diagnosis or treatment, or used as a clinical algorithm.
+AI can help teams understand problems, explore sources, draft changes, find gaps, and prepare work for review. It works best on bounded tasks with clear sources, actions, outputs, and checks, but it can also miss details or be wrong. Teams remain responsible for the data they provide, permissions they grant, AI actions they authorise, and outputs and decisions they accept. The table below gives examples for each SDLC stage.
 
-Playbook 00 explains models, context, prompting, retrieval-augmented generation (RAG), agents, tools, permissions, evaluation, and other AI concepts. This playbook shows how to apply those ideas during the software development life cycle (SDLC).
-
-| SDLC stage | AI can help you |
+| SDLC stage | AI can help teams |
 | --- | --- |
-| Planning | Compare sources, summarise research, expose assumptions, draft questions, and propose requirements or risks. |
-| Development | Explore a codebase, explain code, propose designs, draft changes, review a diff, and update documentation. |
-| Testing | Derive scenarios, suggest test data or automation, find boundary cases, map coverage, and analyse failures. |
+| Planning | Compare sources, summarise research, expose assumptions, and draft questions, requirements, or risks. |
+| Development | Explore and explain code, propose designs, draft or review changes, and update documentation. |
+| Testing | Derive scenarios, suggest data or automation, find boundaries, map coverage, and analyse failures. |
 | Deployment and operations | Summarise changes, draft runbooks, compare configuration, inspect sanitised logs, and suggest monitoring or rollback checks. |
 
-Think of these as starting points rather than decisions. People still confirm the sources, choose the design, approve requirements, establish expected test results, accept risk, and control releases.
+## 3. Approach
 
-## 2. Choose How You Work
-
-A useful place to start is the task, not the tool. It helps to jot down:
-
-- The result you are after.
-- The sources that may help.
-- Anything that should stay out of the AI tool.
-- How much access would actually be useful.
-- What a helpful result would contain.
-- How you could check it.
-
-"Help with requirements" does not give the AI much direction. A bounded request is easier to work with:
+One approach is to start with the task rather than the tool by describing the outcome, useful sources, excluded information, necessary access, expected output, and how it could be checked. The simplest mode with the least access is often enough. For example, **"Help with requirements"** could become:
 
 > Compare these three approved source documents. List conflicting medication-display rules with exact references and draft clarification questions. Do not create final requirements.
 
-A useful rule of thumb is to choose the simplest option with the least access needed for the task.
+Ask, Search, and Act are playbook labels for thinking about increasing capability and access, not industry-standard or mutually exclusive product categories. Ask works with supplied context, Search adds approved read-only sources, and Act adds changes or repeated actions. A product or task may combine these modes. Choose the simplest combination that can complete the task while keeping it understandable and reviewable.
 
-### Ask
+![Three bounded work zones labelled Ask, Search, and Act show a task moving from supplied context to approved read-only sources and stopping with a check at Search. The unused Act zone adds an isolated workspace, preview, confirmation, and recovery controls.](illustrations/01-choose-how-you-work-capability-steps.webp)
 
-Chat and embedded assistants work well for explaining, comparing, critiquing, or drafting from context you provide. They are often a good starting point for one-off work. It is worth checking what the product adds to the conversation, such as the current file, workspace content, history, or hidden instructions.
+*Ask, Search, and Act add progressively more capability and access.*
 
-### Search
+| Mode | Useful for | Worth checking |
+| --- | --- | --- |
+| Ask | One-off explanation, comparison, critique, and drafting with chat or embedded assistants. | Whether the product also includes the current file, workspace, history, or hidden instructions. |
+| Search | Work across several approved sources with retrieval or read-only agents. | What was searched, found, missed, or inaccessible, and whether each citation supports its claim. |
+| Act | Changes or repeated actions with editing agents or automated workflows. | Whether an isolated branch or sandbox, previews, confirmation, and recovery are available. |
 
-Retrieval and read-only agents are useful when a task draws on several approved sources. You can ask what they searched, what they found, and what they could not access. Search results can be incomplete, and a real citation may not support the claim beside it.
+The product around the model determines the context, credentials, permissions, tools, and evidence available. Before using a product, confirm where data is processed and retained, which data classifications are approved, whether supplied information may be used for training or service improvement, and whether actions and evidence are visible, attributable, confirmable, and reversible as the task requires.
 
-### Act
+It is important to be aware that Search and Act modes can expose an AI system to instructions embedded in documents, websites, repositories, tickets, or logs. Treat retrieved content as potentially untrusted data rather than authority to change the task, disclose information, or use additional tools. Product controls should keep source content from overriding approved instructions, permissions, and confirmation requirements.
 
-Editing agents and automated workflows become useful when a task genuinely needs changes or repeated actions. An isolated branch or sandbox gives you room to inspect the result first. When an action affects a shared system or another person, previews, confirmation, and a way back are especially helpful.
+## 4. Loop
 
-An AI tool is more than its model. The surrounding product decides what context is included, which credentials and permissions apply, which tools are available, and what evidence you can inspect. A few questions are worth asking:
+A loop is a repeatable way of working in which people prepare an AI task, check the result, and either accept it or use what they learned to try again. In this loop, the team defines the work, provides context, sets access, requests evidence, and reviews the output before deciding what happens next. The details may change across the SDLC, but the cycle remains useful whenever an AI result benefits from review and refinement.
 
-- Where prompts, files, outputs, retrieved content, and logs are processed and retained.
-- Which data classifications are approved for that path.
-- Whether supplied information may be used for training or service improvement.
-- Whether actions are visible, confirmable, attributable, and reversible.
-- Whether the tool shows sources, searches, commands, diffs, results, and errors.
+![A human-led boundary contains Define, Context, and Access and hands a prepared task to a matching agent boundary, where a robot-marked workspace produces an inspectable output. The output passes to a human check and normal acceptance gate, while a failed check returns to human preparation.](illustrations/01-simple-loop-human-agent-boundaries.webp)
 
-For most early uses, asking, searching, or proposing is enough. Editing shared systems or acting in production is rarely needed.
+*People set the boundaries, inspect the output, and accept it through the normal process or revise and repeat.*
 
-## 3. Try a Simple Loop
-
-Here is a simple loop that works across the SDLC.
+A loop can be any repeatable process that feeds results or review into the next attempt; it does not need one fixed design. The guideline suggested here uses six stages: Define, Provide Context, Set Access, Request Evidence, Check, and Accept or Revise. Teams can adapt, combine, or repeat these stages to suit the task and their existing process.
 
 ### 1. Define
 
-Start with one outcome you can see and check. Note the sources, boundaries, useful output, finishing point, and how you expect to check the result.
+One observable outcome can anchor the task, together with its sources, boundaries, expected output, stopping point, and method of checking. This focus helps the AI prioritise relevant work and makes a useful result easier to recognise. It also reduces the chance of a broad request producing a polished but incomplete answer.
 
 ### 2. Provide Context
 
-Bring in the smallest useful set of approved information. Explain the relevant users, workflow, terminology, constraints, and previous decisions. More context is not always better; irrelevant or conflicting material can make the result worse.
+A small set of approved information may be enough. Useful context can include relevant users, workflow, terminology, constraints, and decisions. This gives the AI details it could not otherwise know and helps it produce work that fits the situation, while irrelevant or conflicting material can hide what matters.
 
 ### 3. Set Access
 
-Read-only access is often enough at first. Editing, execution, network, or external-system access can be added when the task really needs it. A prompt on its own cannot reliably prevent an action that the surrounding system allows.
+Read-only access is often a suitable starting point, with editing, execution, network, or external-system access added when needed. Matching access to the task allows the AI to do useful work without introducing unnecessary actions or complexity. A prompt cannot reliably prevent actions the system permits. For example, asking an agent not to edit files does not enforce read-only access if its tools still allow changes.
 
-### 4. Ask for Inspectable Output
+### 4. Request Evidence
 
-It helps to ask for sources, facts, assumptions, searches, gaps, and open questions. Failed checks are useful information too. Visible evidence is more useful than hidden chain-of-thought.
+Inspectable output can make review easier by identifying sources, assumptions, searches, gaps, open questions, and failed checks. An AI's account cannot be trusted as evidence on its own: a cited source may not support the claim, and a reported action may not have succeeded. The account can still guide the review, while opened sources and independently run checks provide stronger support. Keeping these details visible helps teams find problems, make corrections, and improve the next attempt without relying on hidden chain-of-thought.
 
-### 5. Check the Result
+### 5. Check
 
-This is where you open cited sources, inspect affected artifacts, run repository-native checks, compare calculations, and observe the real system state. Clinical, quality, security, or other specialist review can add the context the task needs. AI reviewing AI is not independent verification.
+Checking might involve opening cited sources, inspecting affected artifacts, comparing calculations, running repository-native checks, or observing the real system. Agreement from a person or another AI does not verify an answer; confidence comes from checking it against an authoritative source, calculation, test result, or observed behaviour.
 
-### 6. Accept Through the Normal Process
+### 6. Accept or Revise
 
-The output can stay as a proposal until your usual checks and approvals are complete. Your normal process will determine how much to record about the sources, AI contribution, human changes, checks, and final decision.
+AI output can remain a proposal until the usual checks and approvals are complete. Useful work can move forward, while weak tasks, context, or boundaries can be revised and tried again before adding access. Records of sources, contributions, checks, decisions, task briefs, source versions, and available product details can make the work easier to explain or revisit, although another run may differ.
 
-If the result exposes missing context or a poor task boundary, you can adjust the task and repeat the loop. Better context or a clearer request will often help more than extra access.
+Together, these stages help a team get useful AI output without treating the first response as finished work. A brief look back at effort, coverage, corrections, and review can help the team decide whether the approach is worth using again. The next section shows how the loop might support one change through planning, development, testing, and deployment.
 
-## 4. See One Change Through the SDLC
+## 5. Example
 
-Consider a proposed change to the medication-list display in a clinician-facing application. The team has approved, de-identified research notes, existing requirements, a terminology guide, and the relevant repository.
+A team is preparing a change to how medication lists appear in a clinician-facing application. The change may affect requirements, display logic, tests, documentation, and release activities. The team has approved, de-identified research notes, current requirements, a terminology guide, and the relevant repository. At each SDLC stage, the loop is applied with a suitable AI approach while people review the output and make the decisions.
+
+![Four aligned columns follow one change through Planning, Development, Testing, and Operations. In each stage, an AI assistant prepares a provisional output above a linked change record, while a person reviews the work and attaches source-based or observed evidence below.](illustrations/01-one-change-through-sdlc-evidence-ledger.webp)
+
+*At each stage, AI proposals remain separate from human review and observed evidence linked to the change.*
 
 ### Planning
 
-The team asks a retrieval assistant to compare the approved sources, group statements about medication naming and status, identify conflicts, and draft workshop questions. The request asks for an exact source reference beside each observed statement, keeps source facts separate from interpretations, and leaves final requirements to the team.
-
-Product and clinical reviewers open the cited sections, check the terminology, look for missing or contradictory material, and decide which questions enter the workshop. They own the resulting requirements and acceptance criteria.
+The team is considering a candidate requirement: `MED-DISPLAY-014`: *"The medication list shall show each medication's status and place active medications before inactive medications."* A read-only agent is asked to compare the wording with the approved research notes, current requirements, and terminology guide and to draft questions rather than final requirements. It links relevant statements to their sources and highlights conflicts, inaccessible material, and gaps such as unknown or stale status. Product and clinical reviewers open the sources, assess the findings, and either decide the final requirement and acceptance criteria or refine the task and repeat the loop.
 
 ### Development
 
-A read-only repository agent traces the display data from its source contract to the user interface. It lists relevant files, symbols, tests, interfaces, searches performed, and areas it could not inspect. An engineer checks the paths before asking an editing agent to prepare a small change in an isolated branch.
-
-Engineers review the design and diff, inspect security and error handling, run the repository's checks, and confirm requirement coverage. The agent's summary is not evidence that the code built or the tests passed.
+With `MED-DISPLAY-014` approved, a read-only agent is asked to identify the code, interfaces, tests, and documentation that may be affected. It traces medication status from the source contract to the display, lists the files and symbols it inspected, and records gaps or inaccessible areas. After an engineer checks this impact map, an editing agent prepares a candidate change in an isolated branch. Engineers review the design and diff, inspect security and error handling, run repository checks, and confirm that the implementation covers the requirement.
 
 ### Testing
 
-The team asks AI to suggest normal, missing-data, stale-data, boundary, localisation, and accessibility scenarios from the approved requirements. It can also draft automation, while the expected results stay tied to an independent source rather than being copied from the implementation.
-
-Testers review the scenarios, inspect generated test code, run the tests, and keep the actual execution evidence. AI can group failures or suggest investigation paths, while the team decides whether the product is acceptable.
+Using `MED-DISPLAY-014`, its acceptance criteria, and the candidate implementation, an agent is asked to propose normal, missing-data, stale-data, boundary, localisation, and accessibility scenarios. It links each scenario to the relevant criterion and may prepare test automation in an isolated branch. Testers establish expected results from the approved requirement, review any generated code, run the tests, and retain the execution evidence. The agent may then help group failures or suggest investigation paths, while testers decide whether the result is acceptable.
 
 ### Deployment and Operations
 
-AI can draft release notes, runbook updates, smoke checks, monitoring questions, and rollback steps from accepted change records. It can also compare approved configuration snapshots or analyse sanitised logs without receiving production credentials.
+Using the accepted change record, test evidence, and existing runbooks, a read-only agent is asked to draft release notes, runbook updates, smoke checks, monitoring questions, and rollback steps. It may also compare approved configuration snapshots or analyse sanitised logs, without production access. Release staff review the drafts, confirm the approvals and evidence, and verify the real environment, commands, monitoring, and rollback state before acting.
 
-The people responsible for the release confirm readiness. Operators verify the real environment, commands, monitoring, and rollback state before acting. Production access is not required for AI to provide useful deployment support.
+The tool may change with the task, while a human-led loop can provide continuity.
 
-This example uses different tools at different stages because the tasks and boundaries change. The loop stays the same: define, provide context, set access, ask for inspectable output, check, and accept.
+## 6. Summary
 
-## 5. Find a Safe Place to Start
-
-A good first setup usually looks something like this:
-
-- The tool and sources are approved for the task and contain no unnecessary sensitive data.
-- The task is narrow, has a clear stopping point, and is easy for someone to check.
-- The AI has only the access it needs, and important actions are previewed and confirmed.
-- Changes are isolated and reversible where possible.
-- Accepted work is saved where the team normally keeps it.
-
-A few warning signs are worth watching for:
-
-| Warning sign | A useful response |
-| --- | --- |
-| The request is vague | Make the outcome, sources, exclusions, output, and check more specific. |
-| The tool receives everything | Trim irrelevant files, records, logs, and history. |
-| The answer sounds certain but shows no evidence | Ask for sources and check them directly. |
-| The tool has more access than the task needs | Step back to fewer tools, lower permissions, or a simpler mode. |
-| The AI says its own work is correct | Bring in a person, executable checks, or observed evidence. |
-| The search boundary is hidden | Ask what was searched, missed, inaccessible, or assumed. |
-| One error could spread widely | Try representative cases first and keep a way to stop or reverse the workflow. |
-
-Prompts can guide behaviour, but they are not security controls. The tool and its integrations are the better place to enforce permissions, isolation, confirmations, limits, logging, and recovery.
-
-If sensitive information is exposed or an agent goes beyond its intended access, pause the work. The same applies if evidence appears fabricated, an action cannot be explained, or an AI-assisted error may have reached a released product or controlled record. The relevant incident or escalation process can then guide the next steps.
-
-When choosing a first use case, look for something narrow, repeatable, low consequence, and easy to verify. Good options include summarising a public specification, explaining an unfamiliar module, drafting test ideas from approved requirements, finding candidate inconsistencies across documents, or preparing release-note candidates from accepted changes.
-
-Speed is only part of the picture. It is also useful to note errors, omissions, unsupported assumptions, corrections, review effort, and whether the result genuinely helped.
-
-## 6. Continue Through the Series
+Across the SDLC, the task, tool, and level of access may change, while the same human-led loop connects the work: teams prepare bounded tasks, AI produces inspectable proposals, and people check, accept, or revise them. The medication-display example shows this approach carrying evidence and decisions from planning through development, testing, and operations. The following playbooks explore how it can be applied within each stage.
 
 | Playbook | Focus |
 | --- | --- |
-| **00: AI Concepts** | Models, context, prompting, retrieval, agents, tools, risks, evaluation, and other shared concepts. |
-| **01: Using AI in the SDLC** | A practical way to choose tasks, tools, boundaries, checks, and first use cases. |
 | **02: AI-Assisted Planning** | Discovery, source analysis, requirements, assumptions, acceptance criteria, risk, and traceability. |
 | **03: AI-Assisted Development** | Codebase exploration, design, coding, refactoring, review, documentation, and provenance. |
-| **04: AI-Assisted Testing** | Test design, automation, data, coverage, boundary cases, failure analysis, and execution evidence. |
+| **04: AI-Assisted Testing** | Test design, automation, data, coverage, boundaries, failure analysis, and execution evidence. |
 | **05: AI-Assisted Deployment and Operations** | Release preparation, runbooks, configuration, monitoring, incidents, rollback, and production boundaries. |
-
-Playbooks 02-05 build on the loop introduced here with stage-specific prompts, tool and agent patterns, worked examples, verification techniques, and practical exercises.

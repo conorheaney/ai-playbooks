@@ -199,3 +199,34 @@
 - Prompt record: depict a skill as a reusable task kit whose contents combine procedural guidance and supporting material; place `INSTRUCTIONS`, `REFERENCES`, `SCRIPTS`, `CHECKS`, and `TOOL GUIDANCE` inside one central `SKILL` case; keep `TASK`, `SOURCES`, `TOOL`, and `RESULT` small and outside; use the approved warm off-white background, rounded geometric forms, restrained palette, fine line weight, subtle texture, soft shadows, and generous whitespace.
 - Approval: Candidate 1 selected by the content owner for integration on 27 July 2026.
 - Interpretation note: the component cards describe material a skill may package rather than mandatory contents or an ordered workflow. A skill can guide tool use but does not provide credentials, grant permission, create an integration, or execute work independently.
+
+## Approved Choose How You Work Asset
+
+- Concept: three bounded work zones show `ASK`, `SEARCH`, and `ACT` as progressively broader capability modes. One task moves from supplied context into approved read-only sources and stops at Search, while the unused Act zone displays isolation, preview, confirmation, and recovery controls.
+- Style: the approved geometric editorial style, using three rounded work zones, restrained task and control symbols, generous whitespace, and `ASK`, `SEARCH`, and `ACT` as the only embedded labels.
+- Final asset: `illustrations/01-choose-how-you-work-capability-steps.webp`.
+- Output: 1200 x 800 WebP, 40,274 bytes.
+- Prompt record: a wide three-zone corporate editorial infographic showing `ASK`, `SEARCH`, and `ACT`; a single task passes through supplied context and stops with a check at approved read-only sources; the unused action zone contains an isolated workspace and symbols for preview, confirmation, and recovery; boundaries become more explicit as capability and access expand; warm off-white background, restrained navy, teal, sky-blue, coral, and muted-yellow palette, fine line weight, subtle texture, and minimal text; no vendor marks, robots, brains, chips, equations, people, or dense interface detail.
+- Approval: Candidate 1 selected by the content owner and approved for integration on 28 July 2026.
+- Interpretation note: the three modes are starting points rather than a mandatory sequence or quality ranking. The task stops at Search to show that broader access is unnecessary when a simpler mode is sufficient. Spatial enclosures represent system and workflow boundaries; prompting alone does not enforce them.
+
+## Approved Simple Loop Asset
+
+- Concept: two matching bounded areas separate human-led preparation from agent production. A person oversees `DEFINE`, `CONTEXT`, and `ACCESS` inside the first boundary; one arrow hands the prepared task to a robot-marked agent boundary containing `OUTPUT`. The output then moves to an external human `CHECK` and normal `ACCEPT` gate, while a conditional feedback path returns incomplete work to human preparation.
+- Style: the approved geometric editorial style, using equal rounded dashed boundaries, mirrored human and robot markers, compact stage blocks, restrained connectors, generous whitespace, and minimal embedded text.
+- Final asset: `illustrations/01-simple-loop-human-agent-boundaries.webp`.
+- Output: 1200 x 600 WebP, 44,240 bytes.
+- Prompt record: refine the selected bounded-workbench concept into a balanced wide editorial workflow with two equal primary boundaries; place one human partially behind the preparation boundary containing `DEFINE`, `CONTEXT`, and `ACCESS`; place one friendly robot face partially behind the agent boundary containing `OUTPUT`; connect the boundaries with one handoff arrow; keep `CHECK` and `ACCEPT` outside the agent boundary; preserve a coral conditional feedback path from checking to human preparation; use the approved warm off-white background, restrained navy, teal, sky-blue, coral, and muted-yellow palette, rounded forms, fine line weight, subtle texture, and minimal text.
+- Approval: the content owner selected the bounded-workbench direction, requested clearer human and agent participation, then approved the rebalanced candidate for integration on 28 July 2026.
+- Interpretation note: the boundaries communicate responsibility and access, not a required system architecture. Human preparation does not guarantee a good result, the agent's inspectable output is still a proposal, and checking and acceptance remain separate human-controlled activities. The feedback path indicates conditional revision rather than automatic repetition.
+- Approved exception: use a 1200 x 600 wide-strip aspect ratio instead of the 1200 x 800 default to preserve the selected source image's exact 2:1 composition without stretching or cropping. The content owner requested the correction on 28 July 2026.
+
+## Approved One Change Through the SDLC Asset
+
+- Concept: a proposal-and-evidence ledger follows one change through `PLANNING`, `DEVELOPMENT`, `TESTING`, and `OPERATIONS`. Each aligned stage places bounded AI assistance and a provisional output above the continuing change record, with a human reviewer and source-based or observed evidence below.
+- Style: the approved soft geometric editorial style, using four equal vertical columns, friendly robot markers, simple human reviewers, rounded evidence panels, a continuous central spine, restrained connectors, and generous whitespace.
+- Final asset: `illustrations/01-one-change-through-sdlc-evidence-ledger.webp`.
+- Output: 1200 x 800 WebP, 69,682 bytes.
+- Prompt record: refine the selected proposal-and-evidence ledger into a balanced four-column grid for `PLANNING`, `DEVELOPMENT`, `TESTING`, and `OPERATIONS`; remove the external input card; align stage labels, robot markers, provisional outputs, linked change records, human reviewers, and verified evidence panels on shared horizontal baselines; distribute the phases evenly; preserve a continuous evidence spine beginning at Planning; use the approved warm off-white background, restrained navy, teal, sky-blue, coral, and muted-yellow palette, rounded pale panels, gentle outlines, subtle texture, soft shadows, and minimal embedded text.
+- Approval: the content owner selected Option 3, requested a softer playbook style, removal of the external input, and equal horizontal and vertical alignment, then approved the refined candidate for integration on 28 July 2026.
+- Interpretation note: the columns summarize stage-specific assistance and review rather than prescribing a mandatory workflow or organizational structure. AI outputs remain provisional, the linked panels represent accumulated traceability rather than proof of correctness, and the Operations column does not imply that AI receives production credentials or release authority.
