@@ -10,6 +10,7 @@ This document governs tracking and content rules for the playbook series that co
 - Use the `Playbook Themes` section to keep individual playbook content on track.
 - Keep the series framework-neutral and intended for a cross-functional audience.
 - Keep the series focused on the use of AI in the SDLC.
+- Frame AI as an assistive technology within human-led SDLC work, not as a replacement for professional judgement or decision authority.
 - Treat Playbook 00 as a standalone concepts guide without SDLC or regulated-clinical framing.
 - Stick to the language style and tone in `Editorial Standards` when drafting playbooks.
 - Follow the `Illustration Workflow` when the user asks to generate illustrations.
@@ -22,7 +23,7 @@ This document governs tracking and content rules for the playbook series that co
 | Playbook | File | Status |
 | --- | --- | --- |
 | 00: AI Concepts | `00-ai-concepts.md` | Draft; under review. |
-| 01: Using AI in the SDLC | `01-using-ai-in-the-sdlc.md` | Draft; under review. |
+| 01: Using AI in the SDLC | `01-using-ai-in-the-sdlc.md` | Complete. |
 | 02: AI-Assisted Planning | Not created | Blocked pending Playbooks 00 and 01 approval. |
 | 03: AI-Assisted Development | Not created | Pending. |
 | 04: AI-Assisted Testing | Not created | Pending. |
