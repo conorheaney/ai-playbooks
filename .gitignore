@@ -1,1 +1,18 @@
+# Local archives
 .archive/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local editor settings
+.idea/
+.vscode/
+*.code-workspace
+
+# Temporary and backup files
+*.swp
+*.swo
+*~
+~$*
