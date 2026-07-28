@@ -254,3 +254,14 @@
 - Interpretation note: the repeated positive gates summarize material that has progressed in this worked example; they do not imply automatic acceptance or guarantee correctness. AI contributions remain proposals, people control acceptance, and access may differ by stage.
 - Replacement note: this asset supersedes `illustrations/01-one-change-through-sdlc-evidence-ledger.webp` in Playbook 01. The previous file remains in the repository as a historical approved asset but is no longer referenced by the playbook.
 - Approved exception: use a 1200 x 600 wide-strip aspect ratio instead of the 1200 x 800 default to reduce unused vertical space while preserving the full five-stage width. The content owner requested this adjustment on 28 July 2026.
+
+## Approved AI Risk Operational Hazard Map Asset
+
+- Concept: three bounded operational districts group example AI risks by their primary harm to property, people, or reputation. Coral hexagons indicate high severity, while muted-yellow circles indicate medium severity; broken boundaries and incident paths make the possible consequences visible.
+- Style: the approved lightweight editorial style, using a warm off-white background, restrained navy, teal, sky-blue, coral, and muted-yellow palette, geometric forms, fine linework, subtle texture, and generous whitespace.
+- Final asset: `illustrations/00-risks-operational-hazard-map.webp`.
+- Output: 1200 x 800 WebP, 94,884 bytes.
+- Prompt record: depict a controlled operational hazard map with separate `PROPERTY`, `PERSON`, and `REPUTATION` districts; show prompt injection, data disclosure, runaway cost, bias and exclusion, privacy invasion, overreliance, invented citations, hallucinated claims, and poor transparency as specific failure consequences; distinguish high and medium severity through coral hexagonal and muted-yellow circular nodes; use the approved repository palette and editorial illustration style; avoid decorative scenery, vendor marks, robots, brains, chips, weapons, flames, skulls, and unsupported numerical claims.
+- Approval: the content owner supplied the selected image and requested its integration on 28 July 2026.
+- Interpretation note: the image presents examples rather than a complete risk register. A risk may affect more than one category, and the displayed severity is illustrative because actual severity depends on the system, use, exposure, and controls.
+- Replacement note: this image replaces the separate Property, Person, and Reputation risk tables in Playbook 00. The real-world incident examples table remains in the playbook.

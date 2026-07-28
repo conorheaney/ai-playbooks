@@ -366,42 +366,11 @@ For example, a model may know how to write a command but have no execution tool;
 
 # 6. Risks
 
-AI systems can cause damage to property, people, or reputation. The register below groups common risks by their main harm. Sources used for this register include NIST AI RMF, UNESCO's ethics recommendation, OECD AI Principles, and OWASP GenAI Security guidance.
+AI systems can cause damage to property, people, or reputation. Property risks affect information, systems, services, resources, and other assets through failures such as prompt injection, data disclosure, or uncontrolled consumption. Person risks affect privacy, fairness, safety, autonomy, access, and the quality of human oversight. Reputation risks affect trust, credibility, transparency, and confidence in an organization's claims and evidence. The risks shown below are examples rather than a complete register: one risk may affect several categories, and its severity depends on the system, its use, and the surrounding controls. Sources used to develop these examples include NIST AI RMF, UNESCO's ethics recommendation, OECD AI Principles, and OWASP GenAI Security guidance.
 
-## Property
+![Operational hazard map grouping example AI risks by property, person, and reputation. High risks shown include prompt injection, data disclosure, bias and exclusion, privacy invasion, and invented citations; medium risks shown include runaway cost, overreliance, hallucinated claims, and poor transparency.](illustrations/00-risks-operational-hazard-map.webp)
 
-| Harm | Risk | Example failure mode | Typical control |
-| --- | --- | --- | --- |
-| High | Prompt injection | Untrusted content redirects the model into unauthorized actions. | Treat external content as data, not authority. |
-| High | Sensitive data disclosure | Prompts, outputs, logs, or tool results expose confidential data. | Limit data in context and logs. |
-| High | Insecure output handling | Downstream code or systems trust unvalidated model output. | Validate and sanitize before use. |
-| High | Excessive agency | The model takes actions beyond its intended authority. | Bound tools, actions, and approvals. |
-| High | Training data poisoning | Corrupted data implants bad behavior or hidden triggers. | Control data sources and review training inputs. |
-| High | Supply chain compromise | A model, skill, plugin, dependency, or dataset is compromised. | Vet components and pin trusted versions. |
-| Medium | Denial of service or runaway cost | Loops, long context, or heavy tool use exhaust compute or budget. | Set step, time, and cost limits. |
-
-## Person
-
-| Harm | Risk | Example failure mode | Typical control |
-| --- | --- | --- | --- |
-| High | Bias and discrimination | The system treats groups differently or unfairly. | Test with representative cases and review outcomes. |
-| High | Privacy invasion | The system infers or exposes personal information. | Minimize personal data and restrict access. |
-| High | Unsafe advice | Wrong guidance harms health, legal, financial, or physical safety. | Keep humans in the loop for high-stakes decisions. |
-| High | Human-rights harm or exclusion | The system denies access or deepens inequality. | Check impacts on affected groups before release. |
-| Medium | Overreliance / automation bias | People trust the output too much and stop checking it. | Require independent review for consequential use. |
-| High | Deceptive or manipulative output | The system persuades, pressures, or misleads users. | Set content and behavior boundaries. |
-| High | Lack of human oversight | No accountable person reviews a consequential action. | Define approval points and escalation paths. |
-
-## Reputation
-
-| Harm | Risk | Example failure mode | Typical control |
-| --- | --- | --- | --- |
-| Medium | Hallucinated claims | The model states false facts as if they were true. | Ground answers in sources and checks. |
-| High | Invented citations or evidence | The model fabricates references or support. | Verify citations against source material. |
-| Medium | Offensive or toxic content | The system produces harmful or inappropriate language. | Apply safety filters and review prompts. |
-| Medium | Misleading confidence | Wrong output is presented in a polished, authoritative tone. | Separate confidence from evidence. |
-| Medium | Poor transparency | Stakeholders cannot see how the result was produced. | Record sources, tools, and decisions. |
-| High | Regulatory or policy non-compliance | AI use conflicts with legal or internal rules. | Review requirements before deployment. |
+*Example AI risks grouped by their primary harm. Severity and categorization depend on the system and its context.*
 
 ## Examples
 
