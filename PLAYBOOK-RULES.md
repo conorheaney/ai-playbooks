@@ -1,6 +1,6 @@
 # AI Playbook Rules
 
-Last updated: 27 July 2026
+Last updated: 28 July 2026
 
 This document governs tracking and content rules for the playbook series that covers the use of AI in the software development life cycle and the shared conventions that keep the series aligned as it grows.
 
@@ -22,16 +22,15 @@ This document governs tracking and content rules for the playbook series that co
 | Playbook | File | Status |
 | --- | --- | --- |
 | 00: AI Concepts | `00-ai-concepts.md` | Draft; under review. |
-| 01: AI in the SDLC | `01-ai-enabled-sdlc-overview.md` | Approved. |
-| 02: Getting Started with AI Tools | `02-getting-started-with-ai-tools.md` | Approved. |
-| 03: AI-Assisted Planning | Not created | Blocked pending Playbook 00 approval. |
-| 04: AI-Assisted Development | Not created | Pending. |
-| 05: AI-Assisted Testing | Not created | Pending. |
-| 06: AI-Assisted Deployment and Operations | Not created | Pending. |
+| 01: Using AI in the SDLC | `01-using-ai-in-the-sdlc.md` | Draft; under review. |
+| 02: AI-Assisted Planning | Not created | Blocked pending Playbooks 00 and 01 approval. |
+| 03: AI-Assisted Development | Not created | Pending. |
+| 04: AI-Assisted Testing | Not created | Pending. |
+| 05: AI-Assisted Deployment and Operations | Not created | Pending. |
 
 ## Playbook Themes
 
-Playbooks 03-06 include example prompts, tool or agent patterns, worked examples, verification techniques, and practical exercises.
+Playbooks 02-05 include example prompts, tool or agent patterns, worked examples, verification techniques, and practical exercises.
 
 ### Playbook 00: AI Concepts
 
@@ -40,44 +39,39 @@ Playbooks 03-06 include example prompts, tool or agent patterns, worked examples
 - Focus on how the concepts fit together rather than implementation details.
 - Support later playbooks with shared vocabulary and mental models.
 
-### Playbook 01: AI in the SDLC
+### Playbook 01: Using AI in the SDLC
 
 - Series scope, audience, and what the playbooks do and do not cover.
 - Where AI can help across planning, development, testing, and deployment.
-- Common ways to work with AI: chat, embedded assistants, retrieval, agents, and automated workflows.
+- Start with the task and choose the least capable interaction mode that can complete it.
+- Understand tool boundaries, context limits, permissions, and evidence.
+- Prepare, prompt, and verify bounded work clearly.
 - Safety, judgment, and human review as the baseline.
 
-### Playbook 02: Getting Started with AI Tools
-
-- Start with the task, not the tool.
-- Choose the least capable interaction mode that can do the job.
-- Understand tool boundaries, context limits, and permission risks.
-- Prepare, prompt, and verify bounded work clearly.
-
-### Playbook 03: AI-Assisted Planning
+### Playbook 02: AI-Assisted Planning
 
 - Discovery, source analysis, and stakeholder preparation.
 - Requirements, assumptions, acceptance criteria, and traceability.
 - Risk, privacy, security, safety, and regulatory planning support.
 
-### Playbook 04: AI-Assisted Development
+### Playbook 03: AI-Assisted Development
 
 - Codebase exploration, design, coding, refactoring, review, and documentation.
 - Context preparation, tool permissions, generated-code review, provenance, and reproducibility.
 
-### Playbook 05: AI-Assisted Testing
+### Playbook 04: AI-Assisted Testing
 
 - Test design, automation, test data, coverage, boundary cases, and failure analysis.
 - Independent expected results, probabilistic AI evaluation, adversarial testing, and execution evidence.
 
-### Playbook 06: AI-Assisted Deployment and Operations
+### Playbook 05: AI-Assisted Deployment and Operations
 
 - Release preparation, runbooks, configuration comparison, deployment support, monitoring, incident analysis, and rollback.
 - Human release authority, environment verification, production access boundaries, and observed evidence.
 
 ## Final Reconciliation
 
-After Playbook 06 is approved:
+After Playbook 05 is approved:
 
 - Reconcile names and cross-references across all playbooks.
 - Check terminology, scope boundaries, examples, and safeguards for consistency.
