@@ -16,10 +16,11 @@ Within the SDLC, AI can help teams understand problems, explore sources, draft c
 
 | SDLC stage | AI can help teams |
 | --- | --- |
-| Planning | Compare sources, summarise research, expose assumptions, and draft questions, requirements, or risks. |
-| Development | Explore and explain code, propose designs, draft or review changes, and update documentation. |
+| Planning | Explore the concept, build its context, expose assumptions, gaps, or risks, and draft a high-level URS. |
+| Design | Translate the approved URS into software requirements and acceptance criteria, explore solution options, and define architecture and interfaces. |
+| Development | Explore and explain code, draft or review changes, and update documentation. |
 | Testing | Derive scenarios, suggest data or automation, find boundaries, map coverage, and analyse failures. |
-| Deployment and operations | Summarise changes, draft runbooks, compare configuration, inspect sanitised logs, and suggest monitoring or rollback checks. |
+| Deployment | Summarise changes, draft runbooks, compare configuration, and suggest release, smoke, or rollback checks. |
 
 # 3. Approach
 
@@ -77,41 +78,46 @@ Checking might involve opening cited sources, inspecting affected artifacts, com
 
 AI output can remain a proposal until the usual checks and approvals are complete. Useful work can move forward, while weak tasks, context, or boundaries can be revised and tried again before adding access. Records of sources, contributions, checks, decisions, task briefs, source versions, and available product details can make the work easier to explain or revisit, although another run may differ.
 
-Together, these stages help a team get useful AI output without treating the first response as finished work. A brief look back at effort, coverage, corrections, and review can help the team decide whether the approach is worth using again. The next section shows how the loop might support one change through planning, development, testing, and deployment.
+Together, these stages help a team get useful AI output without treating the first response as finished work. A brief look back at effort, coverage, corrections, and review can help the team decide whether the approach is worth using again. The next section shows how the loop might support one change from planning through deployment.
 
 # 5. Example
 
-A team is preparing a change to how medication lists appear in a clinician-facing application. The change may affect requirements, display logic, tests, documentation, and release activities. The team has approved, de-identified research notes, current requirements, a terminology guide, and the relevant repository. At each SDLC stage, the loop is applied with a suitable AI approach while people review the output and make the decisions.
+A team is preparing a change to how medication lists appear in a clinician-facing application. The change may affect requirements, architecture, interfaces, display logic, tests, documentation, and release activities. The team has approved, de-identified research notes, current requirements, a terminology guide, and the relevant repository. At each SDLC stage, the loop is applied with a suitable AI approach while people review the output and make the decisions.
 
-![Four aligned columns follow one change through Planning, Development, Testing, and Operations. In each stage, an AI assistant prepares a provisional output above a linked change record, while a person reviews the work and attaches source-based or observed evidence below.](illustrations/01-one-change-through-sdlc-evidence-ledger.webp)
+![Five columns show Planning, Design, Development, Testing, and Deployment. In each stage, an AI assistant prepares a proposal above a growing change bundle, while a person controls the gate that allows reviewed material to move forward.](illustrations/01-one-change-through-sdlc-growing-bundle.webp)
 
-*At each stage, AI proposals remain separate from human review and observed evidence linked to the change.*
+*The change bundle grows across the SDLC as AI prepares proposals and people decide what moves forward.*
 
 ## Planning
 
-The team is considering a candidate requirement: `MED-DISPLAY-014`: *"The medication list shall show each medication's status and place active medications before inactive medications."* A read-only agent is asked to compare the wording with the approved research notes, current requirements, and terminology guide and to draft questions rather than final requirements. It links relevant statements to their sources and highlights conflicts, inaccessible material, and gaps such as unknown or stale status. Product and clinical reviewers open the sources, assess the findings, and either decide the final requirement and acceptance criteria or refine the task and repeat the loop.
+The team is considering a concept for helping clinicians identify current medication and understand its status. A read-only agent compares the idea with approved research notes, current requirements, and terminology guidance and highlights supporting evidence, assumptions, gaps, risks, and questions. Product and clinical reviewers resolve enough uncertainty to approve the concept context and a high-level requirement: `URS-MED-014`: *"The medication list shall enable clinicians to identify current medications and understand the status of each medication."*
+
+## Design
+
+With `URS-MED-014` approved, an agent helps translate the need into a candidate software requirement: `SRS-MED-DISPLAY-014`: *"The medication list shall show each medication's status and place active medications before inactive medications."* It also compares options for status interpretation, sorting, and display and identifies affected components, data flows, interfaces, and trade-offs. Reviewers agree the SRS, acceptance criteria, architecture and API decisions, or return unclear needs to Planning.
 
 ## Development
 
-With `MED-DISPLAY-014` approved, a read-only agent is asked to identify the code, interfaces, tests, and documentation that may be affected. It traces medication status from the source contract to the display, lists the files and symbols it inspected, and records gaps or inaccessible areas. After an engineer checks this impact map, an editing agent prepares a candidate change in an isolated branch. Engineers review the design and diff, inspect security and error handling, run repository checks, and confirm that the implementation covers the requirement.
+Using the approved software requirement and design, a read-only agent identifies the code, tests, and documentation that may be affected. It lists the files and symbols it inspected and records gaps or inaccessible areas. After an engineer checks the impact map, an editing agent prepares a candidate change in an isolated branch. Engineers review the diff, inspect security and error handling, run repository checks, and confirm that the implementation follows the requirement and design.
 
 ## Testing
 
-Using `MED-DISPLAY-014`, its acceptance criteria, and the candidate implementation, an agent is asked to propose normal, missing-data, stale-data, boundary, localisation, and accessibility scenarios. It links each scenario to the relevant criterion and may prepare test automation in an isolated branch. Testers establish expected results from the approved requirement, review any generated code, run the tests, and retain the execution evidence. The agent may then help group failures or suggest investigation paths, while testers decide whether the result is acceptable.
+Using `SRS-MED-DISPLAY-014`, its acceptance criteria, and the candidate implementation, an agent is asked to propose normal, missing-data, stale-data, boundary, localisation, and accessibility scenarios. It links each scenario to the relevant criterion and may prepare test automation in an isolated branch. Testers establish expected results from the approved requirement, review any generated code, run the tests, and retain the execution evidence. The agent may then help group failures or suggest investigation paths, while testers decide whether the result is acceptable.
 
-## Deployment and Operations
+## Deployment
 
-Using the accepted change record, test evidence, and existing runbooks, a read-only agent is asked to draft release notes, runbook updates, smoke checks, monitoring questions, and rollback steps. It may also compare approved configuration snapshots or analyse sanitised logs, without production access. Release staff review the drafts, confirm the approvals and evidence, and verify the real environment, commands, monitoring, and rollback state before acting.
+Using the accepted change record, test evidence, and existing runbooks, a read-only agent drafts release notes, runbook updates, smoke checks, and rollback steps. It may also compare approved configuration snapshots without production access. Release staff review the drafts, confirm the approvals and evidence, and verify the real environment, commands, monitoring, and rollback state before acting.
 
-Planning uses Search, development moves from Search to Act, testing begins with supplied context and may move to Act, and deployment uses Search without production access. At each stage, checks either support acceptance or shape another pass, so the mode changes while the human-led loop provides continuity.
+Planning and design often use Ask or Search, while development and testing may move into Act. Deployment can benefit from read-only support around controlled actions and observed evidence. The mode changes with the task, while the human-led loop provides continuity.
 
 # 6. Summary
 
-Across the SDLC, the task, tool, and level of access may change, while the same human-led loop connects the work: teams prepare bounded tasks, AI produces inspectable proposals, and people check, accept, or revise them. The medication-display example shows this approach carrying evidence and decisions from planning through development, testing, and operations. The following playbooks explore how it can be applied within each stage.
+Across the SDLC, the task, tool, and level of access may change, while the same human-led loop connects the work: teams prepare bounded tasks, AI produces inspectable proposals, and people check, accept, or revise them. The medication-display example shows this approach carrying evidence and decisions from planning through design, development, testing, and deployment. The following playbooks explore how it can be applied within each stage.
 
 | Playbook | Focus |
 | --- | --- |
-| **02: AI-Assisted Planning** | Discovery, source analysis, requirements, assumptions, acceptance criteria, risk, and traceability. |
-| **03: AI-Assisted Development** | Codebase exploration, design, coding, refactoring, review, documentation, and provenance. |
-| **04: AI-Assisted Testing** | Test design, automation, data, coverage, boundaries, failure analysis, and execution evidence. |
-| **05: AI-Assisted Deployment and Operations** | Release preparation, runbooks, configuration, monitoring, incidents, rollback, and production boundaries. |
+| **02: AI-Assisted Planning** | Concept exploration, context, stakeholder needs, high-level URS, assumptions, gaps, risks, and traceability. |
+| **03: AI-Assisted Design** | SRS, acceptance criteria, solution options, architecture, interfaces, data flows, trade-offs, and design decisions. |
+| **04: AI-Assisted Development** | Codebase exploration, coding, refactoring, review, documentation, and provenance. |
+| **05: AI-Assisted Testing** | Test design, automation, data, coverage, boundaries, failure analysis, and execution evidence. |
+| **06: AI-Assisted Deployment** | Release preparation, runbooks, configuration, smoke checks, rollback, and production boundaries. |

@@ -24,14 +24,15 @@ This document governs tracking and content rules for the playbook series that co
 | --- | --- | --- |
 | 00: AI Concepts | `00-ai-concepts.md` | Draft; under review. |
 | 01: Using AI in the SDLC | `01-using-ai-in-the-sdlc.md` | Complete. |
-| 02: AI-Assisted Planning | Not created | Blocked pending Playbooks 00 and 01 approval. |
-| 03: AI-Assisted Development | Not created | Pending. |
-| 04: AI-Assisted Testing | Not created | Pending. |
-| 05: AI-Assisted Deployment and Operations | Not created | Pending. |
+| 02: AI-Assisted Planning | `02-ai-assisted-planning.md` | Draft; under review. |
+| 03: AI-Assisted Design | Not created | Blocked pending Playbook 02 approval. |
+| 04: AI-Assisted Development | Not created | Pending. |
+| 05: AI-Assisted Testing | Not created | Pending. |
+| 06: AI-Assisted Deployment | Not created | Pending. |
 
 ## Playbook Themes
 
-Playbooks 02-05 include example prompts, tool or agent patterns, worked examples, verification techniques, and practical exercises.
+Playbooks 02-06 include example prompts, tool or agent patterns, worked examples, verification techniques, and practical exercises.
 
 ### Playbook 00: AI Concepts
 
@@ -43,7 +44,7 @@ Playbooks 02-05 include example prompts, tool or agent patterns, worked examples
 ### Playbook 01: Using AI in the SDLC
 
 - Series scope, audience, and what the playbooks do and do not cover.
-- Where AI can help across planning, development, testing, and deployment.
+- Where AI can help across planning, design, development, testing, and deployment.
 - Start with the task and choose the least capable interaction mode that can complete it.
 - Understand tool boundaries, context limits, permissions, and evidence.
 - Prepare, prompt, and verify bounded work clearly.
@@ -52,27 +53,33 @@ Playbooks 02-05 include example prompts, tool or agent patterns, worked examples
 ### Playbook 02: AI-Assisted Planning
 
 - Discovery, source analysis, and stakeholder preparation.
-- Requirements, assumptions, acceptance criteria, and traceability.
+- Concept definition, context, stakeholder needs, high-level URS, assumptions, gaps, and traceability.
 - Risk, privacy, security, safety, and regulatory planning support.
 
-### Playbook 03: AI-Assisted Development
+### Playbook 03: AI-Assisted Design
 
-- Codebase exploration, design, coding, refactoring, review, and documentation.
+- Translation of the approved URS into SRS requirements and acceptance criteria.
+- Solution exploration, architecture, APIs, interfaces, data flows, trade-offs, constraints, and design decisions.
+- Design evidence, review, traceability, and handoff into development.
+
+### Playbook 04: AI-Assisted Development
+
+- Codebase exploration, coding, refactoring, review, and documentation.
 - Context preparation, tool permissions, generated-code review, provenance, and reproducibility.
 
-### Playbook 04: AI-Assisted Testing
+### Playbook 05: AI-Assisted Testing
 
 - Test design, automation, test data, coverage, boundary cases, and failure analysis.
 - Independent expected results, probabilistic AI evaluation, adversarial testing, and execution evidence.
 
-### Playbook 05: AI-Assisted Deployment and Operations
+### Playbook 06: AI-Assisted Deployment
 
-- Release preparation, runbooks, configuration comparison, deployment support, monitoring, incident analysis, and rollback.
+- Release preparation, runbooks, configuration comparison, deployment support, smoke checks, and rollback.
 - Human release authority, environment verification, production access boundaries, and observed evidence.
 
 ## Final Reconciliation
 
-After Playbook 05 is approved:
+After Playbook 06 is approved:
 
 - Reconcile names and cross-references across all playbooks.
 - Check terminology, scope boundaries, examples, and safeguards for consistency.
