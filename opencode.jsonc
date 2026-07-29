@@ -1,0 +1,281 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // Process and identity
+  // "shell": "powershell",
+  // "logLevel": "INFO", // DEBUG | INFO | WARN | ERROR
+  // "username": "conor",
+
+  // Server used by `opencode serve` and `opencode web`
+  // "server": {
+  //   "port": 4096,
+  //   "hostname": "127.0.0.1",
+  //   "mdns": false,
+  //   "mdnsDomain": "opencode.local",
+  //   "cors": ["https://example.com"]
+  // },
+
+  // Models and agents
+  // "model": "provider/model-id",
+  // "small_model": "provider/model-id",
+  // "default_agent": "build",
+  // "subagent_depth": 1,
+  // "agent": {
+  //   "reviewer": {
+  //     "model": "provider/model-id",
+  //     "variant": "high",
+  //     "temperature": 0.2,
+  //     "top_p": 0.9,
+  //     "prompt": "Review the requested change.",
+  //     "disable": false,
+  //     "description": "Reviews changes for defects and regressions.",
+  //     "mode": "subagent", // subagent | primary | all
+  //     "hidden": false,
+  //     "options": {},
+  //     "color": "#4FC3F7", // Hex, or primary | secondary | accent | success | warning | error | info
+  //     "steps": 20,
+  //     "permission": {
+  //       "edit": "deny",
+  //       "bash": "ask"
+  //     }
+  //   }
+  // },
+
+  // Custom commands
+  // "command": {
+  //   "review": {
+  //     "template": "Review $ARGUMENTS",
+  //     "description": "Reviews the requested files.",
+  //     "agent": "reviewer",
+  //     "model": "provider/model-id",
+  //     "variant": "high",
+  //     "subtask": true
+  //   }
+  // },
+
+  // Additional skills and supporting repositories/directories
+  // "skills": {
+  //   "paths": [".opencode/skills", "C:/shared/opencode-skills"],
+  //   "urls": ["https://example.com/.well-known/skills/"]
+  // },
+  // "references": {
+  //   "docs": {
+  //     "path": "../docs",
+  //     "description": "Product documentation and conventions.",
+  //     "hidden": false
+  //   },
+  //   "sdk": {
+  //     "repository": "owner/repository",
+  //     "branch": "main",
+  //     "description": "SDK implementation reference.",
+  //     "hidden": false
+  //   },
+  //   "shorthand": "../other-local-directory"
+  // },
+
+  // Providers. Configure only providers or model overrides this project needs.
+  // "provider": {
+  //   "custom": {
+  //     "api": "https://api.example.com/v1",
+  //     "name": "Custom provider",
+  //     "env": ["CUSTOM_API_KEY"],
+  //     "id": "custom",
+  //     "npm": "@ai-sdk/openai-compatible",
+  //     "whitelist": ["model-id"],
+  //     "blacklist": ["legacy-model-id"],
+  //     "options": {
+  //       "apiKey": "{env:CUSTOM_API_KEY}",
+  //       "baseURL": "https://api.example.com/v1",
+  //       "enterpriseUrl": "https://github.example.com",
+  //       "setCacheKey": false,
+  //       "timeout": 300000,
+  //       "headerTimeout": 30000,
+  //       "chunkTimeout": 30000
+  //     },
+  //     "models": {
+  //       "model-id": {
+  //         "id": "model-id",
+  //         "name": "Model name",
+  //         "family": "model-family",
+  //         "release_date": "2026-01-01",
+  //         "attachment": true,
+  //         "reasoning": true,
+  //         "temperature": true,
+  //         "tool_call": true,
+  //         "interleaved": { "field": "reasoning_details" },
+  //         "cost": {
+  //           "input": 1,
+  //           "output": 2,
+  //           "cache_read": 0.1,
+  //           "cache_write": 0.2,
+  //           "context_over_200k": {
+  //             "input": 2,
+  //             "output": 4,
+  //             "cache_read": 0.2,
+  //             "cache_write": 0.4
+  //           }
+  //         },
+  //         "limit": {
+  //           "context": 200000,
+  //           "input": 180000,
+  //           "output": 20000
+  //         },
+  //         "modalities": {
+  //           "input": ["text", "audio", "image", "video", "pdf"],
+  //           "output": ["text", "audio", "image", "video", "pdf"]
+  //         },
+  //         "experimental": false,
+  //         "status": "active", // alpha | beta | deprecated | active
+  //         "provider": {
+  //           "npm": "@ai-sdk/openai-compatible",
+  //           "api": "https://api.example.com/v1"
+  //         },
+  //         "options": {},
+  //         "headers": { "X-Custom-Header": "value" },
+  //         "variants": {
+  //           "high": { "disabled": false }
+  //         }
+  //       }
+  //     }
+  //   }
+  // },
+  // "disabled_providers": ["provider-id"],
+  // "enabled_providers": ["provider-id"],
+
+  // MCP servers
+  // "mcp": {
+  //   "local-server": {
+  //     "type": "local",
+  //     "command": ["npx", "-y", "@example/mcp-server"],
+  //     "cwd": ".",
+  //     "environment": { "API_KEY": "{env:API_KEY}" },
+  //     "enabled": true,
+  //     "timeout": 5000
+  //   },
+  //   "remote-server": {
+  //     "type": "remote",
+  //     "url": "https://example.com/mcp",
+  //     "enabled": true,
+  //     "headers": { "Authorization": "Bearer {env:MCP_TOKEN}" },
+  //     "oauth": {
+  //       "clientId": "client-id",
+  //       "clientSecret": "{env:MCP_CLIENT_SECRET}",
+  //       "scope": "read write",
+  //       "callbackPort": 19876,
+  //       "redirectUri": "http://127.0.0.1:19876/mcp/oauth/callback"
+  //     },
+  //     "timeout": 5000
+  //   },
+  //   "inherited-server": { "enabled": false }
+  // },
+
+  // Plugins: package specs, local paths, or [spec, options] tuples
+  // "plugin": [
+  //   "opencode-plugin-name@1.0.0",
+  //   "./local-plugin.ts",
+  //   ["opencode-plugin-with-options", { "option": "value" }]
+  // ],
+
+  // Permission actions are allow | ask | deny. For pattern maps, the last matching rule wins.
+  // "permission": {
+  //   "read": "allow",
+  //   "edit": "ask",
+  //   "glob": "allow",
+  //   "grep": "allow",
+  //   "list": "allow",
+  //   "bash": { "*": "ask", "git status*": "allow" },
+  //   "task": "allow",
+  //   "external_directory": { "*": "ask", "../docs/**": "allow" },
+  //   "todowrite": "allow",
+  //   "question": "allow",
+  //   "webfetch": "allow",
+  //   "websearch": "allow",
+  //   "lsp": "allow",
+  //   "doom_loop": "ask",
+  //   "skill": "allow"
+  // },
+
+  // Formatting and language servers
+  "formatter": false,
+  // "formatter": {
+  //   "prettier": {
+  //     "disabled": false,
+  //     "command": ["npx", "prettier", "--write", "$FILE"],
+  //     "environment": { "NODE_ENV": "development" },
+  //     "extensions": [".md", ".json"]
+  //   }
+  // },
+  "lsp": false,
+  // "lsp": {
+  //   "example": {
+  //     "command": ["example-language-server", "--stdio"],
+  //     "extensions": [".example"],
+  //     "disabled": false,
+  //     "env": { "LOG_LEVEL": "info" },
+  //     "initialization": {}
+  //   },
+  //   "disabled-server": { "disabled": true }
+  // },
+
+  // Project context and filesystem behavior
+  "instructions": ["AGENTS.md", "PLAYBOOK-RULES.md"],
+  // "watcher": {
+  //   "ignore": ["node_modules/**", "dist/**"]
+  // },
+  // "snapshot": true,
+  // "attachment": {
+  //   "image": {
+  //     "auto_resize": true,
+  //     "max_width": 2000,
+  //     "max_height": 2000,
+  //     "max_base64_bytes": 5242880
+  //   }
+  // },
+
+  // Sharing and updates
+  // "share": "manual", // manual | auto | disabled
+  // "autoupdate": "notify", // true | false | notify
+
+  // Output and context compaction
+  // "tool_output": {
+  //   "max_lines": 2000,
+  //   "max_bytes": 51200
+  // },
+  // "compaction": {
+  //   "auto": true,
+  //   "prune": false,
+  //   "tail_turns": 2,
+  //   "preserve_recent_tokens": 20000,
+  //   "reserved": 10000
+  // },
+
+  // Enterprise installation
+  // "enterprise": {
+  //   "url": "https://opencode.example.com"
+  // },
+
+  // Experimental options may change without notice.
+  // "experimental": {
+  //   "disable_paste_summary": false,
+  //   "batch_tool": false,
+  //   "openTelemetry": false,
+  //   "primary_tools": ["edit"],
+  //   "continue_loop_on_deny": false,
+  //   "mcp_timeout": 30000,
+  //   "policies": [
+  //     {
+  //       "action": "provider.use",
+  //       "effect": "allow",
+  //       "resource": "provider/model-id"
+  //     }
+  //   ]
+  // },
+
+  // Deprecated but still valid in 1.18.9. Prefer the replacements above.
+  // "reference": {}, // Use references.
+  // "autoshare": false, // Use share.
+  // "mode": {}, // Use agent.
+  // "layout": "stretch", // Layout is always stretch.
+  // "tools": { "bash": true }, // Use permission.
+  // Agent-only deprecated fields: "maxSteps" (use "steps") and "tools" (use "permission").
+}
