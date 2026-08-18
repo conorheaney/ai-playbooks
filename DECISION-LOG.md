@@ -271,7 +271,7 @@
 
 - Concept: a proposal-and-evidence ledger follows one change through `PLANNING`, `DEVELOPMENT`, `TESTING`, and `OPERATIONS`. Each aligned stage places bounded AI assistance and a provisional output above the continuing change record, with a human reviewer and source-based or observed evidence below.
 - Style: the approved soft geometric editorial style, using four equal vertical columns, friendly robot markers, simple human reviewers, rounded evidence panels, a continuous central spine, restrained connectors, and generous whitespace.
-- Final asset: `assets/illustration-candidates/01-one-change-through-sdlc-evidence-ledger.webp`.
+- Final asset: `.assets/illustration-candidates/01-one-change-through-sdlc-evidence-ledger.webp`.
 - Output: 1200 x 800 WebP, 69,682 bytes.
 - Prompt record: refine the selected proposal-and-evidence ledger into a balanced four-column grid for `PLANNING`, `DEVELOPMENT`, `TESTING`, and `OPERATIONS`; remove the external input card; align stage labels, robot markers, provisional outputs, linked change records, human reviewers, and verified evidence panels on shared horizontal baselines; distribute the phases evenly; preserve a continuous evidence spine beginning at Planning; use the approved warm off-white background, restrained navy, teal, sky-blue, coral, and muted-yellow palette, rounded pale panels, gentle outlines, subtle texture, soft shadows, and minimal embedded text.
 - Approval: the content owner selected Option 3, requested a softer playbook style, removal of the external input, and equal horizontal and vertical alignment, then approved the refined candidate for integration on 28 July 2026.
@@ -298,7 +298,7 @@
 - Final refinement: make all five stage borders solid and continuous through their bottom edges, retain the full horizontal composition, and crop excess warm off-white space above and below the content.
 - Approval: the content owner selected the five-column candidate, requested stricter use of the light repository palette, approved it for integration, and then requested the solid-border and reduced-height refinement on 28 July 2026.
 - Interpretation note: the repeated positive gates summarize material that has progressed in this worked example; they do not imply automatic acceptance or guarantee correctness. AI contributions remain proposals, people control acceptance, and access may differ by stage.
-- Replacement note: this asset supersedes `assets/illustration-candidates/01-one-change-through-sdlc-evidence-ledger.webp` in Playbook 01. The previous file remains in the repository as a historical approved asset but is no longer referenced by the playbook.
+- Replacement note: this asset supersedes `.assets/illustration-candidates/01-one-change-through-sdlc-evidence-ledger.webp` in Playbook 01. The previous file remains in the repository as a historical approved asset but is no longer referenced by the playbook.
 - Approved exception: use a 1200 x 600 wide-strip aspect ratio instead of the 1200 x 800 default to reduce unused vertical space while preserving the full five-stage width. The content owner requested this adjustment on 28 July 2026.
 
 ## Approved AI Risk Operational Hazard Map Asset

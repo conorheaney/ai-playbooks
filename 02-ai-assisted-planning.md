@@ -2,13 +2,13 @@ PLAYBOOK 02: AI-ASSISTED PLANNING
 
 # 1. Purpose
 
-This playbook builds on Playbook 01 and follows the [example URS](example-urs-medication-recording.md), which was built from the [URS template](urs-template.md). A team is extending a diagnostic application used for clinical tests. For a trial, the sponsor wants authorised clinicians to record medication given to a participant between pre-treatment and post-treatment assessments. The application records the medication and timing; it does not administer medication or analyse efficacy.
+This playbook builds on Playbook 01 and follows the [example URS](artifacts/urs-example.md), which was built from the [URS template](artifacts/urs-template.md). A team is extending a diagnostic application used for clinical tests. For a trial, the sponsor wants authorised clinicians to record medication given to a participant between pre-treatment and post-treatment assessments. The application records the medication and timing; it does not administer medication or analyse efficacy.
 
 It shows how four activities build one working URS: Explore, Build, Challenge, and Finalise. Ask, Search, and Act describe how the work is done, not how Planning is structured.
 
 # 2. Planning Activities
 
-The proposed change adds medication recording between selected assessments. Planning starts one **working URS** from the [URS template](urs-template.md). Each phase updates different sections of that document; the final review confirms it is ready for Design. Design uses the URS to define detailed requirements, options, interfaces, and acceptance criteria.
+The proposed change adds medication recording between selected assessments. Planning starts one **working URS** from the [URS template](artifacts/urs-template.md). Each phase updates different sections of that document; the final review confirms it is ready for Design. Design uses the URS to define detailed requirements, options, interfaces, and acceptance criteria.
 
 | Planning activity | Primary AI concepts | Planning output |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ Choose the least capable approved setup. An online conversational model suits su
 
 # 3. Explore
 
-Start the working URS from the [URS template](urs-template.md). Explore the medication-recording need before proposing a solution. Use a conversational model manually with only the sponsor's change idea and a short approved research excerpt. This is an Ask interaction, not an agentic interview or document-editing task. Discuss the output with stakeholders before updating the working URS.
+Start the working URS from the [URS template](artifacts/urs-template.md). Explore the medication-recording need before proposing a solution. Use a conversational model manually with only the sponsor's change idea and a short approved research excerpt. This is an Ask interaction, not an agentic interview or document-editing task. Discuss the output with stakeholders before updating the working URS.
 
 This phase builds the URS's **Purpose and Scope** and **Users and Outcome** sections. Reviewers check that the options are distinct, grounded, and interface-neutral. Accepted material goes into those sections; detailed requirements and unresolved issues come later.
 
@@ -63,9 +63,9 @@ Reviewers confirm coverage and evidence, apply any agreed severity method, assig
 
 # 6. Finalise
 
-Finalise adds no new content. Use document or repository tools to compare the working URS with the [User Requirements Specification Template](urs-template.md), check required sections, headings, identifiers, links, owners, statuses, and open items, and report any differences. A person reviews proposed corrections and prepares the **Handoff to Design**.
+Finalise adds no new content. Use document or repository tools to compare the working URS with the [User Requirements Specification Template](artifacts/urs-template.md), check required sections, headings, identifiers, links, owners, statuses, and open items, and report any differences. A person reviews proposed corrections and prepares the **Handoff to Design**.
 
-> Use an available document or repository tool to check the working medication-recording URS against the [User Requirements Specification Template](urs-template.md). Report missing sections, broken links, duplicate identifiers, inconsistent statuses, and unresolved items. Propose only concise, non-technical corrections and show a change log. Do not add requirements, publish the document, approve its contents, accept risks, or make design decisions.
+> Use an available document or repository tool to check the working medication-recording URS against the [User Requirements Specification Template](artifacts/urs-template.md). Report missing sections, broken links, duplicate identifiers, inconsistent statuses, and unresolved items. Propose only concise, non-technical corrections and show a change log. Do not add requirements, publish the document, approve its contents, accept risks, or make design decisions.
 
 ![The URS template and working URS enter a bounded review workspace where AI Assist prepares structure, link, identifier, status, diff, and unresolved-item checks before a person controls the handoff to Design.](illustrations/02-finalise-urs-handoff.webp)
 
@@ -73,7 +73,7 @@ Finalise adds no new content. Use document or repository tools to compare the wo
 
 # 7. Summary
 
-The four activities update one working URS built from the [URS template](urs-template.md). This is not a prescriptive process: teams can revisit activities and update different sections as evidence, decisions, and questions change. The [example URS](example-urs-medication-recording.md) shows the completed Design handoff. AI can propose updates, but people verify evidence, decide, and approve.
+The four activities update one working URS built from the [URS template](artifacts/urs-template.md). This is not a prescriptive process: teams can revisit activities and update different sections as evidence, decisions, and questions change. The [example URS](artifacts/urs-example.md) shows the completed Design handoff. AI can propose updates, but people verify evidence, decide, and approve.
 
 Ask, Search, and Act can support any activity. The human-led Loop keeps outcomes, evidence, access, checks, and decisions connected through the handoff to Design.
 

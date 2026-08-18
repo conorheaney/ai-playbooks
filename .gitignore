@@ -13,3 +13,6 @@ Desktop.ini
 *.swo
 *~
 ~$*
+
+# Local supporting assets
+.assets/
