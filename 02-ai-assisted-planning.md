@@ -2,123 +2,86 @@ PLAYBOOK 02: AI-ASSISTED PLANNING
 
 # 1. Purpose
 
-This playbook follows the medication-display change introduced in Playbook 01 and looks more closely at three opportunities for AI during planning. Each opportunity uses one of the Ask, Search, and Act modes with the same human-led Loop: Define, Provide Context, Set Access, Request Evidence, Check, and Accept or Revise.
+This playbook builds on Playbook 01 and follows the [example URS](example-urs-medication-recording.md), which was built from the [URS template](urs-template.md). A team is extending a diagnostic application used for clinical tests. For a trial, the sponsor wants authorised clinicians to record medication given to a participant between pre-treatment and post-treatment assessments. The application records the medication and timing; it does not administer medication or analyse efficacy.
 
-The examples show AI helping a team clarify the overall concept, build the context around it, and prepare a high-level User Requirements Specification (URS) statement. People still supply stakeholder knowledge, resolve uncertainty, assess risk, and approve the concept that moves into Design.
+It shows how four activities build one working URS: Explore, Build, Challenge, and Finalise. Ask, Search, and Act describe how the work is done, not how Planning is structured.
 
-# 2. Three Planning Opportunities
+# 2. Planning Activities
 
-The starting idea is to improve the medication list so clinicians can identify current medication and understand its status. Research supports the need, but the intended outcome, scope, terminology, and treatment of unknown or stale status are not yet clear. Planning aims to turn that idea into a supported concept definition and high-level URS statement, without deciding the detailed software behaviour or design.
+The proposed change adds medication recording between selected assessments. Planning starts one **working URS** from the [URS template](urs-template.md). Each phase updates different sections of that document; the final review confirms it is ready for Design. Design uses the URS to define detailed requirements, options, interfaces, and acceptance criteria.
 
-| Opportunity | Mode | Planning outcome | Playbook 00 connection |
-| --- | --- | --- | --- |
-| Explore the concept | Ask | Possible concept framings, assumptions, and stakeholder questions. | Prompt engineering |
-| Build the context | Search | Source-linked needs, constraints, gaps, and risks. | Retrieval-augmented generation |
-| Prepare the concept and URS brief | Act | A reviewable concept definition and high-level URS statement. | Permissions |
+| Planning activity | Primary AI concepts | Planning output |
+| --- | --- | --- |
+| Explore | Prompt Engineering; Generation | Update purpose, users, outcome, and scope. |
+| Build | Context Engineering; Provenance | Define broad requirements from the context and update sources, constraints, boundaries, and terminology. |
+| Challenge | Evaluation; Risks | Add assumptions, risks, decisions, and open questions. |
+| Finalise | Structured Output; Permissions | Review the URS and prepare the Design handoff. |
 
-The mode changes as the work becomes broader and more actionable. The Loop remains the same, giving people a familiar way to set up, inspect, and decide what happens to each result.
+![One working URS is refined through Explore, Build, Challenge, and Finalise with a small AI Assist marker connected to each activity, while a human review point controls the handoff to Design.](illustrations/02-planning-four-activities.webp)
 
-# 3. Ask: Explore the Idea
+*AI can assist across all four activities; the working URS still moves forward through human-verified evidence and decisions.*
 
-The first opportunity is to explore what the change is trying to achieve before searching a large collection or drafting a requirement. Ask suits a small set of material supplied directly in the conversation. It can help a team consider several ways to frame the user need, expose assumptions, and prepare questions for a workshop without presenting one answer as the concept.
+Modes can combine: Explore uses Ask, Build uses Search, Challenge may use both, and Finalise may use a bounded Act task. All follow the Loop from Playbook 01. Agentic changes remain proposals until a person verifies them.
 
-## Concept Connection: Prompt Engineering
+Choose the least capable approved setup. An online conversational model suits supplied-context work; a local model suits restricted or offline work; an agentic interview skill can propose live URS updates from stakeholder answers or sources. The skill may use an online or local model, but people verify evidence, confirm decisions, and approve the URS for Design.
 
-Playbook 00 describes a prompt as direction that may include an objective, background, sources, constraints, tasks, output, and checks. This is useful during exploration because a vague request such as *“What should we do with medication status?”* may jump to a solution before the need and intended outcome are understood.
+# 3. Explore
 
-A more useful Ask prompt could be:
+Start the working URS from the [URS template](urs-template.md). Explore the medication-recording need before proposing a solution. Use a conversational model manually with only the sponsor's change idea and a short approved research excerpt. This is an Ask interaction, not an agentic interview or document-editing task. Discuss the output with stakeholders before updating the working URS.
 
-> Using the change idea, research excerpt, and terminology definitions supplied below, suggest three ways to frame the user need and intended outcome. For each, identify affected users, scope, assumptions, possible benefits, risks, and stakeholder questions. Keep the framing independent of a particular display or ordering solution. Do not recommend an option or draft detailed software behaviour.
+This phase builds the URS's **Purpose and Scope** and **Users and Outcome** sections. Reviewers check that the options are distinct, grounded, and interface-neutral. Accepted material goes into those sections; detailed requirements and unresolved issues come later.
 
-The prompt encourages breadth while keeping the stopping point clear. It also makes assumptions and questions part of the expected output rather than allowing the model to fill gaps silently.
+> The sponsor wants authorised clinicians to record medication given to a trial participant between the pre-treatment and post-treatment efficacy assessments. Using this change idea and the short research excerpt, suggest three concise ways to describe the need and intended outcome. Keep each option brief and non-technical. Do not write requirements or propose a solution.
 
-## Ask With the Loop
+![A medication-recording gap between pre-treatment and post-treatment assessments is separated into user, need, and outcome; a small AI Assist marker proposes candidate framing while detailed fields, screens, validation, and workflow remain in a Design Later area.](illustrations/02-explore-medication-capture.webp)
 
-| Loop stage | How it appears in this use case |
-| --- | --- |
-| Define | Explore possible ways to express the medication-list need and prepare workshop questions. |
-| Provide Context | Supply the change idea, selected research excerpt, terminology definitions, and known constraints. |
-| Set Access | Use Ask with only the supplied material; no repository or external access is needed. |
-| Request Evidence | Keep quoted or paraphrased source statements separate from interpretations and assumptions. |
-| Check | Product and clinical reviewers compare the output with the supplied excerpts and their knowledge of the workflow. |
-| Accept or Revise | Useful questions move into the workshop; weak interpretations can be corrected or explored again. |
+*AI can propose candidate framing; people clarify the user, need, and outcome before deciding how medication recording will work.*
 
-The result is not a requirement. It is a clearer conversation starter: possible problem statements, users, outcomes, scope boundaries, and questions such as what “current” means and whether stale or unknown status changes the user need.
+# 4. Build
 
-# 4. Search: Build the Context
+Build the context needed for the URS from approved planning sources and existing evidence: the current workflow, protocol timing, terminology, data standards, risk files, policies, and support records. Use manual Search to verify sources, or give an interview skill read-only access to suggest citations and gaps. If permitted, it can add proposed source links to the working URS during the session; a reviewer must approve each source.
 
-The second opportunity begins when the small supplied bundle is no longer enough. Relevant material may sit across research notes, existing requirements, terminology guidance, support records, risk files, policies, and approved standards. Search can help build the context needed to define the concept and show where the proposed need is supported, constrained, or unclear.
+This phase updates the template's **Context and Sources**, **Constraints and Boundaries**, terminology, and **User Requirements** sections. It turns the accepted need and context into broad, non-technical requirements. Reviewers verify cited passages and check that each requirement expresses a supported user or business need; unsupported claims are removed or investigated again.
 
-## Concept Connection: Retrieval-Augmented Generation
+> Search the approved Planning sources for information relevant to this change. List concise, non-technical supported needs, constraints, conflicts, and gaps with source references. Separate source statements from interpretation and note inaccessible sources. Add proposed entries to the working URS template's **Context and Sources**, **Constraints and Boundaries**, and **User Requirements** sections. Write broad requirements from the supported needs; do not define detailed software behaviour, identify risks, or make decisions.
 
-Playbook 00 explains that retrieval-augmented generation brings selected material from an external collection into model context. Preserved references can make findings easier to inspect, but retrieval may miss decisive material and a real citation may not support the claim beside it. For planning, the search boundary is therefore part of the result.
+![Approved, versioned sources pass through AI Assist and a human evidence check into Context, Constraints, and Requirements sections of the URS; inaccessible sources and gaps remain separate.](illustrations/02-search-evidence-map.webp)
 
-A Search prompt could be:
+*AI can help extract candidate findings; people verify cited passages, choose the context, and keep findings traceable.*
 
-> Search the approved planning collection for evidence about clinicians identifying current medication and understanding medication status. Include related workflow, terminology, accessibility, privacy, security, safety, and regulatory considerations. Group findings as supported need, constraint, conflict, gap, risk question, or possibly outdated material. Include the source, version, and section for each finding. Report sources that were not searched or could not be accessed. Draft clarification questions separately; do not define detailed software behaviour.
+# 5. Challenge
 
-This gives the team a source-linked view rather than a general summary. It also invites the search to look for missing and conflicting material, not just content that supports the candidate wording.
+This phase evaluates the context and updates the template's **Decisions and Assumptions** and **Open Questions and Risks** sections. It considers the implications of unclear responsibility, wrong participant or assessment links, timing errors, incomplete records, inappropriate access, duplicates, and accidental efficacy conclusions without changing the requirements.
 
-## Search With the Loop
+Reviewers confirm coverage and evidence, apply any agreed severity method, assign questions, and record decisions for Design. AI does not accept residual risk.
 
-| Loop stage | How it appears in this use case |
-| --- | --- |
-| Define | Find the evidence, constraints, gaps, and risks needed to define the medication-list concept. |
-| Provide Context | Identify the change idea, relevant terms, date range, approved collections, and source priorities. |
-| Set Access | Give a read-only agent access to the approved planning sources, with sensitive or irrelevant collections excluded. |
-| Request Evidence | Ask for source versions, sections, searches, inaccessible areas, interpretations, and unresolved questions. |
-| Check | Reviewers open the cited passages, test whether they support each claim, and look for important omitted sources. |
-| Accept or Revise | Supported findings inform the concept and URS discussion; unsupported claims are removed and search gaps may lead to another pass. |
+> Review the draft medication-recording URS and its sources. Identify concise, non-technical assumptions, risks, missing information, and stakeholder questions. Cover participant and assessment association, timing, corrections, duplicate records, authorised access, and the boundary excluding medication administration and efficacy analysis. Add proposed entries to the working URS template's **Decisions and Assumptions** and **Open Questions and Risks** sections, with sources and a change log. Do not change the requirements, accept risks, or make policy or design decisions.
 
-The output may support a need for clinicians to recognise current medication and understand status, while leaving display, ordering, and stale-data behaviour for later definition. It may also surface scope limits, terminology, accessibility, data, safety, or regulatory questions. People decide which findings become part of the concept, its context, assumptions, risks, or open questions.
+![A single Challenge lens examines the draft URS, AI Assist proposes findings into supported, uncertain, and unresolved trays, and human review turns them into Decisions and Assumptions plus Open Questions and Risks.](illustrations/02-challenge-assumptions-risks.webp)
 
-# 5. Act: Prepare the Concept and URS Brief
+*AI can surface and classify candidate findings; people review what they mean without rewriting requirements or accepting residual risk.*
 
-The third opportunity comes after the team has resolved enough of the main questions to describe the concept clearly. Act can help place accepted content into a controlled planning template, preserve source links, and prepare a coherent review draft. It is most useful when the artifact structure and editing boundary are already understood.
+# 6. Finalise
 
-The concept and URS brief could include:
+Finalise adds no new content. Use document or repository tools to compare the working URS with the [User Requirements Specification Template](urs-template.md), check required sections, headings, identifiers, links, owners, statuses, and open items, and report any differences. A person reviews proposed corrections and prepares the **Handoff to Design**.
 
-- A concise problem and opportunity statement.
-- Intended users, workflow, outcome, scope, and exclusions.
-- Agreed terminology, assumptions, constraints, gaps, and risks.
-- A high-level URS statement linked to its supporting sources.
-- Open questions, owners, decisions, and the context needed by Design.
+> Use an available document or repository tool to check the working medication-recording URS against the [User Requirements Specification Template](urs-template.md). Report missing sections, broken links, duplicate identifiers, inconsistent statuses, and unresolved items. Propose only concise, non-technical corrections and show a change log. Do not add requirements, publish the document, approve its contents, accept risks, or make design decisions.
 
-For this example, a candidate statement might be `URS-MED-014`: *"The medication list shall enable clinicians to identify current medications and understand the status of each medication."* Design can use that approved need and its context to develop the SRS, acceptance criteria, architecture, and API contracts.
+![The URS template and working URS enter a bounded review workspace where AI Assist prepares structure, link, identifier, status, diff, and unresolved-item checks before a person controls the handoff to Design.](illustrations/02-finalise-urs-handoff.webp)
 
-## Concept Connection: Permissions
-
-Playbook 00 separates tool availability from permission. An editing operation may exist, but that does not mean an AI system has authority to overwrite an approved document or publish a new baseline. A prompt can describe the intended boundary; permissions and workflow controls enforce it.
-
-An Act task brief could be:
-
-> Using only the accepted planning findings and the supplied template, prepare a draft concept and URS brief in the review workspace. Include the problem, users, intended outcome, scope, exclusions, terminology, assumptions, constraints, gaps, risks, high-level URS statement, source links, and open decisions. Mark unresolved information rather than inventing it. Show the files changed and provide a diff. Do not edit approved baselines, publish the brief, or approve the URS.
-
-## Act With the Loop
-
-| Loop stage | How it appears in this use case |
-| --- | --- |
-| Define | Prepare one reviewable concept and URS brief from accepted findings, with no approval or publication. |
-| Provide Context | Supply accepted findings, source links, the template, naming rules, and the current draft. |
-| Set Access | Allow editing only in an isolated review workspace; keep approved baselines and publishing actions unavailable. |
-| Request Evidence | Ask for changed files, diffs, preserved identifiers, validation results, unresolved fields, and failed checks. |
-| Check | Document owners inspect the wording, links, classifications, and differences against the accepted decisions and sources. |
-| Accept or Revise | Reviewed changes may enter the normal approval process; gaps return to the draft or an earlier planning conversation. |
-
-Stable checks can complement the agent by finding duplicate identifiers, missing required fields, or broken source links. Human reviewers decide whether the concept is clear, the high-level URS expresses the accepted need, the supporting context is sufficient, and the open questions and risks are visible enough for Design.
-
-# 6. What the Three Examples Teach
-
-The three opportunities show a gradual change in capability and access:
-
-- Ask helps widen and clarify the conversation using supplied context.
-- Search adds approved source collections and traceable retrieval.
-- Act adds bounded editing once people have accepted the underlying planning decisions.
-
-Moving to a more capable mode is not the measure of progress. Ask may reveal that the change is not understood, Search may show that a source is missing, and Act may expose an unresolved field that belongs back in the workshop. In each case, the Loop allows the team to use what it learned and revise the task.
-
-A short practice run could use another change idea with an unclear user need. The team could try an Ask prompt to explore possible concept framings, a Search task to build source-backed context, and an Act task that prepares a disposable concept and URS brief. Comparing what each mode adds, what it cannot establish, and what people still need to decide makes the boundaries visible.
+*AI can prepare checks and a diff; people review corrections, approve the URS, and hand it to Design.*
 
 # 7. Summary
 
-AI can support planning at three useful points: exploring the concept, building its context, and preparing a high-level URS brief for review. Prompt engineering helps shape the Ask, retrieval supports source-linked Search, and permissions keep Act within its intended boundary. The mode changes, but the human-led Loop keeps context, evidence, checking, and decisions connected as the concept moves towards Design.
+The four activities update one working URS built from the [URS template](urs-template.md). This is not a prescriptive process: teams can revisit activities and update different sections as evidence, decisions, and questions change. The [example URS](example-urs-medication-recording.md) shows the completed Design handoff. AI can propose updates, but people verify evidence, decide, and approve.
+
+Ask, Search, and Act can support any activity. The human-led Loop keeps outcomes, evidence, access, checks, and decisions connected through the handoff to Design.
+
+# 8. Appendix A
+
+| Playbook section | Relevant URS sections | Output |
+| --- | --- | --- |
+| 3. Explore | Purpose and Scope; Users and Outcome | Update the template with the need, outcome, users, and scope. |
+| 4. Build | Context and Sources; Constraints and Boundaries; User Requirements | Update the template with evidence, boundaries, and broad requirements. |
+| 5. Challenge | Decisions and Assumptions; Open Questions and Risks | Record uncertainty, risks, decisions, and owners. |
+| 6. Finalise | All sections; Handoff to Design | Review the working URS and prepare the handoff. |

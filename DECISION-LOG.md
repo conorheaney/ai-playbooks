@@ -1,5 +1,51 @@
 # AI Playbook Decision Log
 
+## Approved AI-Assisted Planning Illustration Set
+
+- Concept: replace the previous five Playbook 02 illustrations with a coherent set that uses the working URS as the visual anchor. The set shows one URS refined through Explore, Build, Challenge, and Finalise; separates need from later solution design; traces approved sources through human verification into URS sections; classifies Challenge findings as supported, uncertain, or unresolved; and ends Finalise at a human-controlled handoff to Design.
+- Style: lightweight editorial illustration with warm off-white background, rounded geometric forms, restrained navy, teal, sky-blue, coral, and muted-yellow accents, subtle texture, generous whitespace, consistent line weight, and minimal embedded labels.
+- Final assets: `illustrations/02-planning-four-activities.webp`, `illustrations/02-explore-medication-capture.webp`, `illustrations/02-search-evidence-map.webp`, `illustrations/02-challenge-assumptions-risks.webp`, and `illustrations/02-finalise-urs-handoff.webp`.
+- Output: each asset is 1200 x 800 WebP and below 100 KB.
+- Prompt record: five `infographic-diagram` prompts covering the single working URS, need-before-solution exploration, evidence-to-URS traceability, multi-lens Challenge review, and controlled Finalise comparison and handoff. Prompts required minimal labels, human review, and explicit boundaries against medication administration, efficacy analysis, AI approval, and requirement rewriting.
+- Approval: the content owner approved the five replacement concepts and requested the complete set on 18 August 2026.
+- Interpretation note: the diagrams explain the Playbook 02 example and relationships between planning artefacts; they do not prescribe a rigid sequence, guarantee evidence quality, or imply that AI can approve content or accept residual risk.
+
+## AI-Assisted Planning Illustration Revision
+
+- Revision: add one consistent abstract `AI ASSIST` marker to each Playbook 02 illustration, with dotted proposal/checking connectors. Preserve the existing URS, human review, uncertainty, permission, and Design-handoff relationships.
+- Final assets: the five assets listed above, revised in place on 18 August 2026.
+- Prompt record: precise-object edits added AI assistance to the overview, candidate framing in Explore, evidence extraction before human verification in Build, candidate classification in Challenge, and checklist/diff preparation inside the bounded Finalise workspace.
+- Approval: the content owner requested this revision after reviewing the first generated set and approved the revised direction on 18 August 2026.
+- Interpretation note: the AI marker represents provisional assistance only. Dotted connectors indicate suggestions or prepared checks; human icons and solid handoff paths retain verification, decision, approval, and authority.
+
+## Challenge Illustration Simplification
+
+- Revision: simplify the Challenge image to match the Explore and Build compositions. Retain the coloured `SUPPORTED`, `UNCERTAIN`, and `UNRESOLVED` trays, but remove the six lenses, numbered callouts, large meeting scene, owner panel, destination cards, and footer legend.
+- Final asset: `illustrations/02-challenge-assumptions-risks.webp`.
+- Prompt record: a precise-object edit reduced the image to one `DRAFT URS`, one `AI ASSIST` proposal marker, three coloured trays, and one compact `HUMAN REVIEW` gate.
+- Approval: the content owner requested this simplification and approved the revised asset on 18 August 2026.
+
+## Challenge Lens and Outputs Revision
+
+- Revision: clarify the Challenge input and outputs by replacing the simplified flow with one magnifying review lens over the `DRAFT URS`. The lens contains a magnified check, question, and risk view; classified findings still use the three coloured trays; human review now leads to the two explicit outputs.
+- Final asset: `illustrations/02-challenge-assumptions-risks.webp`.
+- Prompt record: a precise-object edit added the `CHALLENGE` heading, single review lens, `HUMAN REVIEW` gate, and output cards labelled `DECISIONS + ASSUMPTIONS` and `OPEN QUESTIONS + RISKS`, while retaining the `AI ASSIST` marker and coloured trays.
+- Approval: the content owner requested this revision and approved the clearer Challenge-to-outputs composition on 18 August 2026.
+
+## Challenge Output Layout Revision
+
+- Revision: move the two Challenge outputs into a prominent vertically centred stack on the right side of the image. The DRAFT URS, single review lens, AI Assist marker, coloured trays, and Human Review remain on the left and centre as the analysis flow.
+- Final asset: `illustrations/02-challenge-assumptions-risks.webp`.
+- Prompt record: a layout-focused edit made `DECISIONS + ASSUMPTIONS` and `OPEN QUESTIONS + RISKS` the right-side destinations with direct arrows from Human Review, while preserving the single-lens composition and restrained playbook style.
+- Approval: the content owner requested the right-side vertically centred outcomes and approved the revised layout on 18 August 2026.
+
+## Challenge Tearaway Boundary Revision
+
+- Revision: add a vertical torn-paper boundary between the Challenge working area and the right-side output stack, matching the visual tearaway treatment used in Finalise.
+- Final asset: `illustrations/02-challenge-assumptions-risks.webp`.
+- Prompt record: a precise-object edit added only the wavy tear boundary and a subtle separated panel treatment; the single lens, trays, Human Review gate, centred outcomes, and arrows remain unchanged.
+- Approval: the content owner requested and approved the matching tearaway treatment on 18 August 2026.
+
 ## Approved Baseline Asset
 
 - Concept: text, image, audio, and code inputs pass through an abstract model network and emerge as corresponding outputs.
@@ -225,7 +271,7 @@
 
 - Concept: a proposal-and-evidence ledger follows one change through `PLANNING`, `DEVELOPMENT`, `TESTING`, and `OPERATIONS`. Each aligned stage places bounded AI assistance and a provisional output above the continuing change record, with a human reviewer and source-based or observed evidence below.
 - Style: the approved soft geometric editorial style, using four equal vertical columns, friendly robot markers, simple human reviewers, rounded evidence panels, a continuous central spine, restrained connectors, and generous whitespace.
-- Final asset: `illustrations/01-one-change-through-sdlc-evidence-ledger.webp`.
+- Final asset: `assets/illustration-candidates/01-one-change-through-sdlc-evidence-ledger.webp`.
 - Output: 1200 x 800 WebP, 69,682 bytes.
 - Prompt record: refine the selected proposal-and-evidence ledger into a balanced four-column grid for `PLANNING`, `DEVELOPMENT`, `TESTING`, and `OPERATIONS`; remove the external input card; align stage labels, robot markers, provisional outputs, linked change records, human reviewers, and verified evidence panels on shared horizontal baselines; distribute the phases evenly; preserve a continuous evidence spine beginning at Planning; use the approved warm off-white background, restrained navy, teal, sky-blue, coral, and muted-yellow palette, rounded pale panels, gentle outlines, subtle texture, soft shadows, and minimal embedded text.
 - Approval: the content owner selected Option 3, requested a softer playbook style, removal of the external input, and equal horizontal and vertical alignment, then approved the refined candidate for integration on 28 July 2026.
@@ -252,7 +298,7 @@
 - Final refinement: make all five stage borders solid and continuous through their bottom edges, retain the full horizontal composition, and crop excess warm off-white space above and below the content.
 - Approval: the content owner selected the five-column candidate, requested stricter use of the light repository palette, approved it for integration, and then requested the solid-border and reduced-height refinement on 28 July 2026.
 - Interpretation note: the repeated positive gates summarize material that has progressed in this worked example; they do not imply automatic acceptance or guarantee correctness. AI contributions remain proposals, people control acceptance, and access may differ by stage.
-- Replacement note: this asset supersedes `illustrations/01-one-change-through-sdlc-evidence-ledger.webp` in Playbook 01. The previous file remains in the repository as a historical approved asset but is no longer referenced by the playbook.
+- Replacement note: this asset supersedes `assets/illustration-candidates/01-one-change-through-sdlc-evidence-ledger.webp` in Playbook 01. The previous file remains in the repository as a historical approved asset but is no longer referenced by the playbook.
 - Approved exception: use a 1200 x 600 wide-strip aspect ratio instead of the 1200 x 800 default to reduce unused vertical space while preserving the full five-stage width. The content owner requested this adjustment on 28 July 2026.
 
 ## Approved AI Risk Operational Hazard Map Asset

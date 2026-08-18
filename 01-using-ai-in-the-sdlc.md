@@ -16,7 +16,7 @@ Within the SDLC, AI can help teams understand problems, explore sources, draft c
 
 | SDLC stage | AI can help teams |
 | --- | --- |
-| Planning | Explore the concept, build its context, expose assumptions, gaps, or risks, and draft a high-level URS. |
+| Planning | Explore the concept, build its context, challenge assumptions and risks, and prepare a high-level URS. |
 | Design | Translate the approved URS into software requirements and acceptance criteria, explore solution options, and define architecture and interfaces. |
 | Development | Explore and explain code, draft or review changes, and update documentation. |
 | Testing | Derive scenarios, suggest data or automation, find boundaries, map coverage, and analyse failures. |
@@ -26,7 +26,7 @@ Within the SDLC, AI can help teams understand problems, explore sources, draft c
 
 One approach is to start with the task rather than the tool by describing the outcome, useful sources, excluded information, necessary access, expected output, and how it could be checked. The simplest mode with the least access is often enough. For example, **"Help with requirements"** could become:
 
-> Compare these three approved source documents. List conflicting medication-display rules with exact references and draft clarification questions. Do not create final requirements.
+> Compare these three approved source documents. Identify requirements, timing constraints, conflicts, and gaps relevant to a sponsor's request to record medication administered to a trial participant between pre-treatment and post-treatment efficacy assessments. Treat medication administration and efficacy analysis as outside the application. Give exact references and draft clarification questions. Do not create final requirements.
 
 Ask, Search, and Act are playbook labels for thinking about increasing capability and access, not industry-standard or mutually exclusive product categories. Ask works with supplied context, Search adds approved read-only sources, and Act adds changes or repeated actions. A product or task may combine these modes. Choose the simplest combination that can complete the task while keeping it understandable and reviewable.
 
@@ -82,7 +82,9 @@ Together, these stages help a team get useful AI output without treating the fir
 
 # 5. Example
 
-A team is preparing a change to how medication lists appear in a clinician-facing application. The change may affect requirements, architecture, interfaces, display logic, tests, documentation, and release activities. The team has approved, de-identified research notes, current requirements, a terminology guide, and the relevant repository. At each SDLC stage, the loop is applied with a suitable AI approach while people review the output and make the decisions.
+A team is extending a diagnostic application that performs different types of clinical tests. For use in a clinical trial, the sponsor wants authorised clinicians to record details of medication administered to a trial participant between pre-treatment and post-treatment assessments so that drug efficacy can be analysed later outside the application. The application records the medication details and timing; it neither administers medication nor analyses efficacy.
+
+The change may affect requirements, clinical workflow, data models, interfaces, tests, documentation, and release activities. The team has approved, de-identified research notes, current requirements, a terminology guide, and the relevant repository. At each SDLC stage, it applies the loop with a suitable AI approach while people review the output and make the decisions.
 
 ![Five columns show Planning, Design, Development, Testing, and Deployment. In each stage, an AI assistant prepares a proposal above a growing change bundle, while a person controls the gate that allows reviewed material to move forward.](illustrations/01-one-change-through-sdlc-growing-bundle.webp)
 
@@ -90,11 +92,11 @@ A team is preparing a change to how medication lists appear in a clinician-facin
 
 ## Planning
 
-The team is considering a concept for helping clinicians identify current medication and understand its status. A read-only agent compares the idea with approved research notes, current requirements, and terminology guidance and highlights supporting evidence, assumptions, gaps, risks, and questions. Product and clinical reviewers resolve enough uncertainty to approve the concept context and a high-level requirement: `URS-MED-014`: *"The medication list shall enable clinicians to identify current medications and understand the status of each medication."*
+The team explores the sponsor's need, what clinicians must record about the administered medication, and which protocol-defined timing rules apply. AI helps frame the concept, assemble source-linked context, and challenge assumptions about authorised users, trial participants, timing, data integrity, privacy, safety, and the relationship between the medication record and assessment results. The scope explicitly excludes administering medication and determining efficacy. Product and clinical reviewers resolve enough uncertainty to approve the context and a high-level requirement: `URS-MED-014`: *"The application shall enable authorised clinicians to record medication administered to a trial participant between the pre-treatment and post-treatment efficacy assessments."*
 
 ## Design
 
-With `URS-MED-014` approved, an agent helps translate the need into a candidate software requirement: `SRS-MED-DISPLAY-014`: *"The medication list shall show each medication's status and place active medications before inactive medications."* It also compares options for status interpretation, sorting, and display and identifies affected components, data flows, interfaces, and trade-offs. Reviewers agree the SRS, acceptance criteria, architecture and API decisions, or return unclear needs to Planning.
+With `URS-MED-014` approved, an agent helps translate the need into a candidate software requirement: `SRS-MED-CAPTURE-014`: *"The application shall record the medication name, dose, route, administration date and time, and trial participant identifier; associate the record with the relevant pre-treatment and post-treatment efficacy assessments; and apply the approved timing rules."* It compares workflow, data-model, interface, validation, timing, and access-control options and identifies affected components, data flows, and trade-offs. The design does not add medication-administration or efficacy-analysis functions. Reviewers agree the SRS, acceptance criteria, architecture, and interface decisions or return unclear needs to Planning.
 
 ## Development
 
@@ -102,21 +104,21 @@ Using the approved software requirement and design, a read-only agent identifies
 
 ## Testing
 
-Using `SRS-MED-DISPLAY-014`, its acceptance criteria, and the candidate implementation, an agent is asked to propose normal, missing-data, stale-data, boundary, localisation, and accessibility scenarios. It links each scenario to the relevant criterion and may prepare test automation in an isolated branch. Testers establish expected results from the approved requirement, review any generated code, run the tests, and retain the execution evidence. The agent may then help group failures or suggest investigation paths, while testers decide whether the result is acceptable.
+Using `SRS-MED-CAPTURE-014`, its acceptance criteria, and the candidate implementation, an agent proposes scenarios for valid recording, missing or invalid data, timing boundaries, trial-participant and assessment association, access control, concurrent updates, localisation, and accessibility. It also checks that the application neither represents the medication as administered by the system nor produces an efficacy conclusion. The agent links each scenario to the relevant criterion and may prepare test automation in an isolated branch. Testers establish expected results from the approved requirement, review generated code, run the tests, and retain execution evidence. The agent may help group failures or suggest investigation paths, while testers decide whether the result is acceptable.
 
 ## Deployment
 
 Using the accepted change record, test evidence, and existing runbooks, a read-only agent drafts release notes, runbook updates, smoke checks, and rollback steps. It may also compare approved configuration snapshots without production access. Release staff review the drafts, confirm the approvals and evidence, and verify the real environment, commands, monitoring, and rollback state before acting.
 
-Planning and design often use Ask or Search, while development and testing may move into Act. Deployment can benefit from read-only support around controlled actions and observed evidence. The mode changes with the task, while the human-led loop provides continuity.
+Ask, Search, and Act are choices within these activities rather than SDLC stages. Planning may combine all three, while later work may use read-only or editing support as the task requires. The mode changes with the task; the human-led loop provides continuity.
 
 # 6. Summary
 
-Across the SDLC, the task, tool, and level of access may change, while the same human-led loop connects the work: teams prepare bounded tasks, AI produces inspectable proposals, and people check, accept, or revise them. The medication-display example shows this approach carrying evidence and decisions from planning through design, development, testing, and deployment. The following playbooks explore how it can be applied within each stage.
+Across the SDLC, the task, tool, and level of access may change, while the same human-led loop connects the work: teams prepare bounded tasks, AI produces inspectable proposals, and people check, accept, or revise them. The medication-capture example shows this approach carrying evidence and decisions from Planning through Design, Development, Testing, and Deployment. The following playbooks explore how it can be applied within each stage.
 
 | Playbook | Focus |
 | --- | --- |
-| **02: AI-Assisted Planning** | Concept exploration, context, stakeholder needs, high-level URS, assumptions, gaps, risks, and traceability. |
+| **02: AI-Assisted Planning** | Concept exploration, context, stakeholder needs, assumption and risk evaluation, high-level URS, and traceability. |
 | **03: AI-Assisted Design** | SRS, acceptance criteria, solution options, architecture, interfaces, data flows, trade-offs, and design decisions. |
 | **04: AI-Assisted Development** | Codebase exploration, coding, refactoring, review, documentation, and provenance. |
 | **05: AI-Assisted Testing** | Test design, automation, data, coverage, boundaries, failure analysis, and execution evidence. |
