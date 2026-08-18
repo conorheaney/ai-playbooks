@@ -46,6 +46,14 @@
 - Prompt record: a precise-object edit added only the wavy tear boundary and a subtle separated panel treatment; the single lens, trays, Human Review gate, centred outcomes, and arrows remain unchanged.
 - Approval: the content owner requested and approved the matching tearaway treatment on 18 August 2026.
 
+## Playbook 02 Robot-Head Consistency Revision
+
+- Revision: replace the abstract sparkle AI markers in all five Playbook 02 illustrations with the small robot-head marker established in the Playbook 01 lifecycle illustration.
+- Final assets: `illustrations/02-planning-four-activities.webp`, `illustrations/02-explore-medication-capture.webp`, `illustrations/02-search-evidence-map.webp`, `illustrations/02-challenge-assumptions-risks.webp`, and `illustrations/02-finalise-urs-handoff.webp`.
+- Prompt record: use the Playbook 01 robot-head asset as the visual reference; preserve the `AI ASSIST` labels, dotted proposal/checking connectors, human review cues, and existing compositions, with subtle spacing adjustments where required.
+- Approval: the content owner requested and approved the robot-head consistency revision on 18 August 2026.
+- Interpretation note: the robot head is a compact visual marker for AI assistance, not an autonomous actor or decision authority.
+
 ## Approved Baseline Asset
 
 - Concept: text, image, audio, and code inputs pass through an abstract model network and emerge as corresponding outputs.
