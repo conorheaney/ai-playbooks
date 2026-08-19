@@ -1,5 +1,15 @@
 # AI Playbook Decision Log
 
+## Playbook 03 Design Activity Illustrations
+
+- Concept: show the four Design activities—`Frame`, `Specify`, `Model`, and `Review`—with AI assistance represented by a small robot head and human review retaining authority; show the `Frame` activity as one approved URS item passing through the bounded `create-srs` skill into a draft SRS skeleton and human review.
+- Style: lightweight editorial illustration with warm off-white background, rounded geometric forms, restrained navy, teal, sky-blue, coral, and muted-yellow accents, subtle texture, generous whitespace, consistent line weight, and minimal embedded labels.
+- Final assets: `illustrations/03-design-activities-ai-assist.webp`, `illustrations/03-frame-create-srs.webp`, `illustrations/03-specify-grill-me.webp`, `illustrations/03-model-wireframe-ai-process.webp`, `illustrations/03-model-entry-workflow-ai-process.webp`, `illustrations/03-model-validation-correction-ai-process.webp`, and `illustrations/03-model-data-dictionary-ai-process.webp`.
+- Output: each asset is 1200 x 800 WebP and below 100 KB.
+- Prompt record: seven integrated `infographic-diagram` concepts. The first shows the Design activity map; the second shows the bounded `create-srs` Frame workflow; and the third shows the human-controlled `grill-me` Specify workflow. Four Model concepts then show bounded SRS context, prescriptive prompts, relevant skills or tools, and human review. The medication capture wireframe uses the `imagegen` tool directly without `create-srs`; the remaining concepts cover the medication entry workflow, medication validation and correction workflow, and medication entry data dictionary recorded in Design History.
+- Approval: generated and integrated for Playbook 03 on 18 August 2026.
+- Interpretation note: the robot head represents provisional AI assistance only. The illustrations do not imply autonomous design authority, a mandatory delivery sequence, or approval by AI.
+
 ## Approved AI-Assisted Planning Illustration Set
 
 - Concept: replace the previous five Playbook 02 illustrations with a coherent set that uses the working URS as the visual anchor. The set shows one URS refined through Explore, Build, Challenge, and Finalise; separates need from later solution design; traces approved sources through human verification into URS sections; classifies Challenge findings as supported, uncertain, or unresolved; and ends Finalise at a human-controlled handoff to Design.
