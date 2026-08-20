@@ -59,7 +59,7 @@ Model uses bounded SRS context, prescriptive prompts, skills, and tools to creat
 
 A person writes a prompt using the accepted SRS context. AI generates the medication capture wireframe and records it in Design History. The person reviews the result and refines the prompt until the wireframe is acceptable.
 
-> Using the accepted context for the SRS item linked to `URS-{NNN}`, generate a low-fidelity medication capture wireframe showing participant and assessment context, medication and timing fields, validation guidance, and Save and Cancel actions. Use the `imagegen` tool and supplied labels. Exclude unsupported controls and final visual styling. Save the wireframe and add its link, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
+> Using the accepted context for the SRS item linked to `URS-MED-014`, generate a low-fidelity medication capture wireframe showing participant and assessment context, medication and timing fields, validation guidance, and Save and Cancel actions. Use the `imagegen` tool and supplied labels. Exclude unsupported controls and final visual styling. Save the wireframe and add its link, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
 
 ![AI-assisted process for generating the medication capture wireframe.](illustrations/03-model-wireframe-ai-process.webp)
 
@@ -67,7 +67,7 @@ A person writes a prompt using the accepted SRS context. AI generates the medica
 
 A person writes a prompt using the accepted SRS context. AI generates the medication entry workflow and records it in Design History. The person reviews the result and refines the prompt until the workflow is acceptable.
 
-> Using the accepted context for the SRS item linked to `URS-{NNN}`, generate a medication entry workflow from test completion through screen display, context review, medication entry, submission, and confirmation. Use the `imagegen` tool and supplied labels. Show user actions and application responses and exclude exception behaviour. Save the workflow and add its link, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
+> Using the accepted context for the SRS item linked to `URS-MED-014`, generate a medication entry workflow from test completion through screen display, context review, medication entry, submission, and confirmation. Use the `imagegen` tool and supplied labels. Show user actions and application responses and exclude exception behaviour. Save the workflow and add its link, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
 
 ![AI-assisted process for generating the medication entry workflow.](illustrations/03-model-entry-workflow-ai-process.webp)
 
@@ -75,7 +75,7 @@ A person writes a prompt using the accepted SRS context. AI generates the medica
 
 A person writes a prompt using the accepted criteria, risks, and design decisions. AI generates the validation and correction workflow and records it in Design History. The person reviews the result and refines the prompt until the workflow is acceptable.
 
-> Using the accepted context for the SRS item linked to `URS-{NNN}`, generate a medication validation and correction workflow covering authorisation, required-field and timing validation, correction before saving, save confirmation, and correction history after saving. Use the `imagegen` tool and supplied labels. Mark unsupported branches as unresolved. Save the workflow and add its link, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
+> Using the accepted context for the SRS item linked to `URS-MED-014`, generate a medication validation and correction workflow covering authorisation, required-field and timing validation, correction before saving, save confirmation, and correction history after saving. Use the `imagegen` tool and supplied labels. Mark unsupported branches as unresolved. Save the workflow and add its link, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
 
 ![AI-assisted process for generating the medication validation and correction workflow.](illustrations/03-model-validation-correction-ai-process.webp)
 
@@ -83,37 +83,27 @@ A person writes a prompt using the accepted criteria, risks, and design decision
 
 A person writes a prompt using the accepted SRS context and workflow fields. AI generates the data dictionary and records it in Design History. The person reviews the result and refines the prompt until the table is acceptable.
 
-> Using the accepted context for the SRS item linked to `URS-{NNN}`, generate the Medication entry data dictionary with columns for Data item, Type or allowed values, Required, and Use in the workflow. Use only supplied evidence, mark unknown values as unresolved, and preserve names used by the workflows. Add the proposed table, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
+> Using the accepted context for the SRS item linked to `URS-MED-014`, generate the Medication entry data dictionary with columns for Data item, Type or allowed values, Required, and Use in the workflow. Use only supplied evidence, mark unknown values as unresolved, and preserve names used by the workflows. Add the proposed table, prompt, sources, date, and status to Design History. Return the draft for human review and revise it when feedback is provided.
 
 ![AI-assisted process for generating the medication entry data dictionary.](illustrations/03-model-data-dictionary-ai-process.webp)
 
 # 6. Review
 
-Use a fresh context or independent reviewer to challenge the AI-assisted draft. Ask AI to compare the Requirement, Acceptance Criteria, workflows, data dictionary, wireframe, and sources for:
+Review combines deterministic validation with human judgement. An AI agent can run a read-only `validate-srs` tool that applies versioned rules and returns the same results for the same inputs. The tool verifies structure, identifiers, one related URS, required sections, Acceptance Criteria syntax, unresolved placeholders, traceability fields, closed decisions with Design History, and valid links to referenced artefacts. It reports rule IDs, locations, and pass, warning, or failure status; it does not rewrite or approve the SRS.
 
-- unsupported scope or invented policy;
-- ambiguous terms or missing states;
-- wrong participant or assessment association;
-- missing validation, authorisation, or correction behaviour;
-- inconsistent field names or diagrams; and
-- gaps in traceability or verification.
+| Deterministic tool | Human reviewer |
+| --- | --- |
+| Verifies repeatable structural, formatting, linking, and traceability rules. | Reviews intent, evidence, ambiguity, workflow completeness, risk, and usability. |
+| Produces a versioned machine-readable report for the AI agent to summarise. | Decides whether findings are resolved, waived, or returned for revision. |
+| Can be rerun after changes to confirm that mechanical failures are cleared. | Remains responsible for approval for Development. |
 
-> Review this SRS item against its one related URS item and labelled source context. Identify unsupported behaviour, ambiguity, missing application states, access-control gaps, validation gaps, correction-history gaps, and discrepancies between the text and design artifacts. Return evidence and proposed questions. Do not close questions, accept risks, or approve the item.
+Use this prompt:
 
-Record each resolved question in Design History with the evidence considered, options, human decision, approver, affected criterion or artifact, and date. A closed question without design detail is not an adequate decision record.
+> Run the `validate-srs` tool against the SRS item linked to `URS-MED-014`, its approved template, related URS, and referenced artefacts. Do not edit any files. Return the tool version and findings grouped by failure, warning, and pass, with rule ID, file or section, and evidence. Summarise the findings for the human reviewer and identify any semantic questions the deterministic rules cannot answer. Do not waive findings, close questions, accept risks, or approve the SRS. After human-directed revisions, rerun the tool and record the final report and human decision in Traceability and Verification.
 
-Before handoff, a person confirms that the SRS item contains:
+![The AI agent runs deterministic SRS validation before findings pass to human review and approval.](illustrations/03-review-validation-human-review.webp)
 
-- one approved related URS item;
-- a concise Requirement and Rationale;
-- application-facing Acceptance Criteria ready for development and testing;
-- risks and mitigations, dependencies, and assumptions;
-- traceability and verification placeholders;
-- closed Questions or Decisions with detailed Design History;
-- linked wireframes, workflow diagrams, or data dictionaries; and
-- enough evidence to explain material AI assistance.
-
-Mark the item **Approved for development** only through the agreed human review authority. If implementation or testing reveals an unclear need, return it to Design or Planning rather than silently changing the requirement.
+The human reviewer compares the SRS, URS, sources, and generated artefacts, resolves semantic findings, and records material decisions in Design History. The item is marked **Approved for development** only through the agreed human authority; the validation report is supporting evidence, not approval.
 
 # 7. Summary
 
