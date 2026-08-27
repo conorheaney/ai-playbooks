@@ -25,7 +25,7 @@ This document governs tracking and content rules for the playbook series that co
 | 00: AI Concepts | `00-ai-concepts.md` | Draft; under review. |
 | 01: Using AI in the SDLC | `01-using-ai-in-the-sdlc.md` | Complete. |
 | 02: AI-Assisted Planning | `02-ai-assisted-planning.md` | Complete. |
-| 03: AI-Assisted Design | `03-ai-assisted-design.md` | Draft; under review. |
+| 03: AI-Assisted Design | `03-ai-assisted-design.md` | Complete. |
 | 04: AI-Assisted Development | Not created | Pending. |
 | 05: AI-Assisted Testing | Not created | Pending. |
 | 06: AI-Assisted Deployment | Not created | Pending. |
