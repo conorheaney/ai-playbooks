@@ -1,0 +1,33 @@
+{
+  "name": "playbook-videos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remotion project for all AI concepts training videos (one composition per lesson in lessons/)",
+  "scripts": {
+    "studio": "remotion studio",
+    "render:trains": "remotion render HowAITrains out/how-ai-trains/how-ai-trains-1080p.mp4",
+    "render:trains:4k": "remotion render HowAITrains out/how-ai-trains/how-ai-trains-2160p.mp4 --scale=2",
+    "render:responds": "remotion render HowAIResponds out/how-ai-responds/how-ai-responds-1080p.mp4",
+    "render:responds:4k": "remotion render HowAIResponds out/how-ai-responds/how-ai-responds-2160p.mp4 --scale=2",
+    "render:context": "remotion render HowAIGetsContext out/how-ai-gets-context/how-ai-gets-context-1080p.mp4",
+    "render:context:4k": "remotion render HowAIGetsContext out/how-ai-gets-context/how-ai-gets-context-2160p.mp4 --scale=2",
+    "still": "remotion still",
+    "sfx": "node scripts/generate-sfx.mjs",
+    "center:trains": "node scripts/measure-centering.mjs HowAITrains lessons/how-ai-trains/centering.ts --fixed=0-230:0 --fixed=2413-2693:0",
+    "center:responds": "node scripts/measure-centering.mjs HowAIResponds lessons/how-ai-responds/centering.ts",
+    "center:context": "node scripts/measure-centering.mjs HowAIGetsContext lessons/how-ai-gets-context/centering.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.290",
+    "@remotion/google-fonts": "4.0.290",
+    "@remotion/studio": "4.0.290",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.290"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.6.3"
+  }
+}
