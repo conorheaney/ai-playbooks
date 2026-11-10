@@ -472,6 +472,37 @@ const SOUNDS = {
     return fade(out, 0.01, 0.04);
   },
 
+  // how-ai-takes-action: a ticket or receipt printing, a quick ratchet of small paper ticks over a soft feed hiss.
+  'print.wav': () => {
+    const out = buffer(0.5);
+    const rand = mulberry32(31);
+    const bp = bandpass(2.2);
+    for (let i = 0; i < out.length; i++) {
+      const t = i / SR;
+      const p = Math.min(1, t / 0.42);
+      out[i] = 0.18 * bp(noise(rand), 3200) * Math.sin(Math.PI * p) * (t < 0.42 ? 1 : 0);
+    }
+    for (let k = 0; k < 11; k++) {
+      addBlip(out, 0.02 + k * 0.036, 1900 + (k % 2) * 300, 0.35, 0.004);
+      addBlip(out, 0.02 + k * 0.036, 260, 0.25, 0.006, 0.3);
+    }
+    return fade(out, 0.005, 0.06);
+  },
+
+  // how-ai-takes-action: rewinding, a falling filtered sweep with a fast flutter.
+  'rewind.wav': () => {
+    const out = buffer(0.6);
+    const rand = mulberry32(32);
+    const bp = bandpass(4);
+    for (let i = 0; i < out.length; i++) {
+      const t = i / SR;
+      const p = t / 0.6;
+      const flutter = 0.55 + 0.45 * Math.sin(TAU * (34 - 18 * p) * t);
+      out[i] = 0.8 * bp(noise(rand), 4200 - 3400 * p) * Math.sin(Math.PI * p) * flutter;
+    }
+    return fade(out, 0.01, 0.08);
+  },
+
   // Bubbles and cards appearing: a short, soft pop.
   'pop.wav': () => {
     const out = buffer(0.25);

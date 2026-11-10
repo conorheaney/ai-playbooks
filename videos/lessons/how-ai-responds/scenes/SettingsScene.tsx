@@ -16,6 +16,9 @@ const LANES_X = 1230;
 const LANE_W = 980;
 const LANE_Y = [440, 575, 710];
 const SLIDER = {x: 1230, y: 262, w: 600};
+// The stamp lands 20 px lower than before and scales in from 1.45, so even its first, largest frame
+// keeps a clear gap below run 3. The caption under it says variation and correctness are separate.
+const STAMP = {y: 880, from: 1.45};
 
 // What the three runs say at each knob position. Only the last phase has a fluent mistake.
 const TEXTS = [
@@ -47,7 +50,7 @@ export const SettingsScene: React.FC = () => {
   const abs = SCENES.settings.from + frame;
   const dur = SCENES.settings.durationInFrames;
   const smooth = (start: number, duration = 15) => spring({frame: frame - start, fps, config: {damping: 200}, durationInFrames: duration});
-  const content = presence(frame, 0, dur, 12, 15);
+  const content = presence(frame, 0, dur, 12, dur - S.out);
 
   // The knob starts in the middle, goes down, then up.
   const [down, up] = S.knobMoves;
@@ -66,6 +69,8 @@ export const SettingsScene: React.FC = () => {
   const textOpacity = Number.isFinite(P.clear) ? interpolate(frame, [P.clear - 10, P.clear], [1, 0], clampOpts) : 1;
   const typing = S.phases.reduce((max, p) => Math.max(max, presence(frame, p.type[0][0], p.type[2][1] + 4, 4, 6)), 0);
   const stamp = spring({frame: frame - S.stamp, fps, config: {damping: 12, stiffness: 170}});
+  // As the stamp lands, the slider and the two correct runs step back, so the wrong run and the stamp carry the end.
+  const focus = smooth(S.stamp - 6, 12);
 
   return (
     <AbsoluteFill>
@@ -78,13 +83,13 @@ export const SettingsScene: React.FC = () => {
         </defs>
         <LockedCube id="st-cube" absFrame={abs} {...CUBE_HOME} glow={typing * (0.3 + 0.3 * Math.sin(frame / 4))} />
 
-        <g opacity={content * smooth(0, 14)}>
+        <g opacity={content * smooth(0, 14) * lerp(1, 0.3, focus)}>
           <Caption x={SLIDER.x} y={SLIDER.y - 52} text="VARIATION" color={COLORS.white} size={22} />
           <rect x={SLIDER.x - SLIDER.w / 2} y={SLIDER.y - 6} width={SLIDER.w} height={12} rx={6} fill={rgba(COLORS.white, 0.12)} />
           <rect x={SLIDER.x - SLIDER.w / 2} y={SLIDER.y - 6} width={knobX - (SLIDER.x - SLIDER.w / 2)} height={12} rx={6} fill="url(#st-track)" />
           <circle cx={knobX} cy={SLIDER.y} r={20} fill={COLORS.charcoal} stroke={COLORS.cyan} strokeWidth={4} />
-          <Caption x={SLIDER.x - SLIDER.w / 2 - 24} y={SLIDER.y} text="LOW" anchor="end" opacity={knob < 0.35 ? 1 : 0.45} />
-          <Caption x={SLIDER.x + SLIDER.w / 2 + 24} y={SLIDER.y} text="HIGH" anchor="start" opacity={knob > 0.65 ? 1 : 0.45} />
+          <Caption x={SLIDER.x - SLIDER.w / 2 - 28} y={SLIDER.y} text="LOW" anchor="end" size={22} color={COLORS.white} opacity={knob < 0.35 ? 1 : 0.5} />
+          <Caption x={SLIDER.x + SLIDER.w / 2 + 28} y={SLIDER.y} text="HIGH" anchor="start" size={22} color={COLORS.white} opacity={knob > 0.65 ? 1 : 0.5} />
         </g>
       </svg>
 
@@ -114,11 +119,11 @@ export const SettingsScene: React.FC = () => {
                 alignItems: 'center',
                 fontFamily: FONT,
                 color: COLORS.white,
-                opacity: smooth(4 + i * 4, 12),
+                opacity: smooth(4 + i * 4, 12) * (phase === WRONG.phase && i !== WRONG.lane ? lerp(1, 0.35, focus) : 1),
                 transform: `translateY(${(1 - smooth(4 + i * 4, 12)) * 20}px)`,
               }}
             >
-              <div style={{width: 130, flexShrink: 0, textAlign: 'center', fontSize: 18, fontWeight: 700, letterSpacing: '0.16em', color: rgba(COLORS.white, 0.55)}}>RUN {i + 1}</div>
+              <div style={{width: 130, flexShrink: 0, textAlign: 'center', fontSize: 20, fontWeight: 700, letterSpacing: '0.16em', color: rgba(COLORS.white, 0.7)}}>RUN {i + 1}</div>
               <div style={{fontSize: 34, fontWeight: 500, whiteSpace: 'nowrap', opacity: textOpacity}}>
                 <Typed text={text} chars={chars} wrong={isWrong ? WRONG.word : undefined} />
               </div>
@@ -136,15 +141,15 @@ export const SettingsScene: React.FC = () => {
             style={{
               position: 'absolute',
               left: LANES_X,
-              top: 870,
-              transform: `translate(-50%, -50%) rotate(-4deg) scale(${lerp(1.6, 1, stamp)})`,
+              top: STAMP.y,
+              transform: `translate(-50%, -50%) rotate(-4deg) scale(${lerp(STAMP.from, 1, stamp)})`,
               opacity: Math.min(1, stamp * 1.4),
-              padding: '12px 36px',
-              border: `4px solid ${COLORS.error}`,
-              borderRadius: 14,
+              padding: '10px 28px',
+              border: `3px solid ${COLORS.error}`,
+              borderRadius: 12,
               fontFamily: FONT,
               fontWeight: 800,
-              fontSize: 52,
+              fontSize: 40,
               letterSpacing: '0.04em',
               color: COLORS.error,
               background: rgba(COLORS.charcoal, 0.85),

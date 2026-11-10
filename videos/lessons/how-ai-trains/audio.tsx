@@ -2,7 +2,7 @@ import React from 'react';
 import {Cue, Mixer} from '../../shared/audio';
 import {
   EVALS,
-  EXAMPLE_TRAVEL,
+  exampleArrive,
   FEEDBACK,
   FINETUNE,
   LOCK,
@@ -56,7 +56,7 @@ export const SFX: Cue[] = [
   {src: 'sfx/rapid-typing.wav', from: at('rawData', RAW.counterStart), durationInFrames: RAW.counterEnd - RAW.counterStart, volume: 0.45},
   {src: 'sfx/tick-up.wav', from: at('rawData', RAW.counterStart), durationInFrames: RAW.counterEnd - RAW.counterStart, volume: 0.45},
   // 2 · Tokenize
-  ...TOKEN.cuts.map((cut) => hit('sfx/slice.wav', 'tokenize', cut, 0.6, 15)),
+  ...[...new Set(TOKEN.cuts)].map((cut) => hit('sfx/slice.wav', 'tokenize', cut, 0.6, 15)),
   {src: 'sfx/space-hum.wav', from: at('tokenize', TOKEN.morph), durationInFrames: SCENES.tokenize.durationInFrames - TOKEN.morph, volume: 0.3},
   // 3 · Weights
   {src: 'sfx/data-pulse.wav', from: at('weights', WEIGHTS.forward1), durationInFrames: 60, volume: 0.4},
@@ -70,7 +70,7 @@ export const SFX: Cue[] = [
   hit('sfx/absorb-whoosh.wav', 'fineTune', FINETUNE.questionIn - 9, 0.4, 30),
   {src: 'sfx/rapid-typing.wav', from: at('fineTune', FINETUNE.ramble), durationInFrames: FINETUNE.rambleEnd - FINETUNE.ramble, volume: 0.3},
   hit('sfx/error-buzzer.wav', 'fineTune', FINETUNE.rambleReject, 0.25, 30),
-  ...FINETUNE.examples.map((s) => hit('sfx/pop.wav', 'fineTune', s + EXAMPLE_TRAVEL, 0.35, 8)),
+  ...FINETUNE.examples.map((_, i) => hit('sfx/pop.wav', 'fineTune', exampleArrive(i), 0.35, 8)),
   hit('sfx/absorb-whoosh.wav', 'fineTune', FINETUNE.question2In - 9, 0.4, 30),
   hit('sfx/chime.wav', 'fineTune', FINETUNE.emblem, 0.4, 45),
   {src: 'sfx/rapid-typing.wav', from: at('fineTune', FINETUNE.answer), durationInFrames: FINETUNE.answerEnd - FINETUNE.answer, volume: 0.3},
@@ -83,9 +83,9 @@ export const SFX: Cue[] = [
   hit('sfx/rating-ding.wav', 'feedback', FEEDBACK.signalEnd),
   // 6 · Reinforcement learning
   ...REINFORCE.cycles.flatMap((c, i) => {
-    const verdict = c.start + 5 + c.travel;
+    const verdict = c.start + c.lead + c.travel;
     return [
-      hit('sfx/pop.wav', 'reinforce', c.start + 5, 0.3, 8),
+      hit('sfx/pop.wav', 'reinforce', c.start + c.lead, 0.3, 8),
       RL_OK[i] ? hit('sfx/rating-ding.wav', 'reinforce', verdict, 0.4) : hit('sfx/error-buzzer.wav', 'reinforce', verdict, 0.18, 15),
       ...(RL_OK[i] ? [hit('sfx/lock-click.wav', 'reinforce', verdict + RL_RESULT_TO_REWARD + c.travel, 0.35, 15)] : []),
     ];

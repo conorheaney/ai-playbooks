@@ -26,6 +26,7 @@ type BubbleProps = {
   mark?: 'ok' | 'bad';
   markScale?: number;
   fontSize?: number;
+  labelSize?: number; // label text size; defaults to 16
 };
 
 // HTML text card centred on (x, y). The untyped remainder is laid out invisibly, so the card
@@ -43,6 +44,7 @@ export const Bubble: React.FC<BubbleProps> = ({
   mark,
   markScale = 0,
   fontSize = 30,
+  labelSize = 16,
 }) => {
   if (opacity <= 0.001) {
     return null;
@@ -67,7 +69,7 @@ export const Bubble: React.FC<BubbleProps> = ({
       }}
     >
       {label ? (
-        <div style={{fontSize: 16, fontWeight: 700, letterSpacing: '0.18em', color, marginBottom: 8}}>{label}</div>
+        <div style={{fontSize: labelSize, fontWeight: 700, letterSpacing: '0.18em', color, marginBottom: 8}}>{label}</div>
       ) : null}
       <div style={{fontSize, fontWeight: 500, lineHeight: 1.3}}>
         {text.slice(0, typed)}

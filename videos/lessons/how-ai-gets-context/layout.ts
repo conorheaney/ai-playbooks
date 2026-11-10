@@ -1,9 +1,17 @@
+import {centredRow} from '../../shared/lib/row';
+
 // Home positions and the running example's text, shared across scenes.
 // The trip from how-ai-responds continues: the viewer is booking Canberra and asks about company travel policy.
 // Amounts, section numbers and hotel names are illustrative.
 
 // The model cube's and the context window's resting places, as in how-ai-responds.
 export const CUBE_HOME = {x: 520, y: 540, size: 80};
+
+// Scenes 1-4 lay their areas out in a row centred on screen, with this gap between neighbouring areas
+// (see shared/lib/row.ts). The cube's area includes its "v1.0 · LOCKED" tag.
+export const ROW_GAP = 110;
+export const CUBE_W = 300;
+export const PROMPT_CARD_W = 760; // Scene 2's prompt card
 export const TANK_HOME = {x: 1300, y: 560, w: 320, h: 760};
 
 // Illustrative only; the readout always says EXAMPLE CAPACITY.
@@ -21,7 +29,6 @@ export const POLICY = {
 // The search index: 6 × 4 slots. Scene 5 files the twelve new chunks into the empty slots;
 // Scene 6 searches the whole index. Every slot carries its source reference.
 export const INDEX = {x: 1340, y: 560, w: 520, h: 480, cols: 6, rows: 4} as const;
-export const INDEX_ASK = {x: 620, y: 520, scale: 0.8} as const;
 
 // The three documents Scene 5 splits, four chunks each, in order.
 export const NEW_DOCS = [
@@ -58,9 +65,24 @@ export const CANDIDATES: {ref: string; score: number}[] = [
 ];
 export const TOP_N = 2;
 
-// Where Scene 6 leaves the window, so Scene 7 can pick it up.
-// A little lower and shorter than home, so its readout clears the status badge.
-export const ASK_TANK = {x: 1480, y: 600, w: 320, h: 700};
+// Scene 6: the question sits in a search bar centred at the top. Below it the index, the ranked list and the
+// window form a centred row (see shared/lib/row.ts); the ranked list joins the row as the candidates lift out.
+export const ASK_BAR = {x: 960, y: 160, w: 860};
+export const ASK_INDEX_SCALE = 0.8;
+export const ASK_ROW = {
+  y: 620, // the index's and the ranked list's vertical centre
+  index: {w: 520 * ASK_INDEX_SCALE},
+  ranked: {w: 300 + 90, anchor: 150}, // the TOP 2 label hangs off its right side
+  tank: {w: 320 + 290, anchor: 160}, // the window's slice labels sit to its right
+};
+// Where Scene 6 leaves the window, so Scene 7 can pick it up: the row's final place, low enough that its
+// readout clears the search bar.
+export const ASK_TANK = {
+  x: centredRow([{...ASK_ROW.index, p: 1}, {...ASK_ROW.ranked, p: 1}, {...ASK_ROW.tank, p: 1}], ROW_GAP)[2],
+  y: 650,
+  w: 320,
+  h: 620,
+};
 export const ASK_SEGMENTS = {
   instructions: [0, 0.06],
   retrieved: [

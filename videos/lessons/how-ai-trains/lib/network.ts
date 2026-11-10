@@ -4,7 +4,7 @@ import {clamp, seeded} from '../../../shared/lib/math';
 // Shared by Scene 3 (training) and Scene 4 (collapse) so the hand-off is seamless.
 
 export const LAYERS = [4, 6, 6, 3] as const;
-// Candidate next words after "The cat sat"; the model first guesses "car", then learns "on".
+// Candidate next words after "The cat sprawled"; the model first guesses "car", then learns "on".
 export const OUTPUT_LABELS = ['on', 'car', 'down'] as const;
 export const TARGET_INDEX = 0;
 export const WRONG_INDEX = 1;
@@ -48,6 +48,6 @@ export const EDGES: NetEdge[] = LAYERS.slice(0, -1).flatMap((count, layer) =>
   ).flat(),
 );
 
-export const strokeForWeight = (w: number) => 1 + 5 * w;
+export const strokeForWeight = (w: number) => 1 + 7 * w;
 
 export const NODE_RADIUS = 18;

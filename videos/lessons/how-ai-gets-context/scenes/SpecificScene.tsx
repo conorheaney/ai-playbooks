@@ -7,23 +7,29 @@ import {Pinned} from '../../../shared/components/Stage';
 import {LockedCube} from '../../../shared/components/context/Pieces';
 import {FONT} from '../../../shared/fonts';
 import {clampOpts, flashAt} from '../../../shared/lib/motion';
+import {centredRow} from '../../../shared/lib/row';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {DocIcon, Note, RefChipHtml} from '../components/Parts';
-import {CUBE_HOME} from '../layout';
+import {CUBE_HOME, CUBE_W, PROMPT_CARD_W, ROW_GAP} from '../layout';
 import {SCENES, SPECIFIC as S} from '../timing';
 
-const DOCS = [
-  {name: 'hotel-options.md', y: 480},
-  {name: 'travel-policy-2025.pdf', y: 690},
-];
-const DOC_X = 220;
+const DOC_NAMES = ['hotel-options.md', 'travel-policy-2025.pdf'];
+// One stack of the same documents, between the lanes; both lanes' lines fork from its right side.
+const STACK = {y: 540, w: 340};
+// The row, left to right: the documents, the prompts, the results. Each area joins the row as it first appears, and
+// the documents leave as the results arrive (both prompts have them by then), so whatever is on screen stays
+// centred with even gaps.
+const CALLOUT = {w: 300, gap: 36}; // the CHECK callout beside the specific result's flagged row
+// Where Scene 2 leaves the cube, so it fades out in place.
+const [SCENE2_CUBE_X] = centredRow([{w: CUBE_W, p: 1}, {w: PROMPT_CARD_W, p: 1}], ROW_GAP);
 const LANES = [
-  {key: 'vague', label: 'VAGUE', y: 380, prompt: 'Summarise these.'},
-  {key: 'specific', label: 'SPECIFIC', y: 780, prompt: "Compare each hotel with the policy's nightly limit. Table. Cite the section."},
+  {key: 'vague', label: 'VAGUE', y: 365, prompt: 'Summarise these.'},
+  {key: 'specific', label: 'SPECIFIC', y: 765, prompt: "Compare each hotel with the policy's nightly limit. Table. Cite the section."},
 ];
-const PROMPT = {x: 700, w: 400};
-const MODEL_X = 1000;
-const RESULT = {x: 1400, w: 560, h: 280};
+const PROMPT = {w: 480};
+const RESULT = {w: 640, h: 320, pad: 28};
+// The specific result's table: a header row, then one row per hotel.
+const TABLE = {head: 28, row: 72};
 
 const QUESTIONS = ['Which ones fit the limit?', 'Says who?', 'Which hotel?'];
 const ROWS = [
@@ -32,6 +38,8 @@ const ROWS = [
   {hotel: 'Capital Tower', price: '$289', fits: false},
 ];
 const CHECK_ROW = 1;
+// The flagged row's centre, from the result's centre.
+const CHECK_ROW_DY = -RESULT.h / 2 + RESULT.pad + TABLE.head + TABLE.row * (CHECK_ROW + 0.5);
 
 export const SpecificScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -48,24 +56,43 @@ export const SpecificScene: React.FC = () => {
   const specificChars = interpolate(frame, [S.specific[0], S.specific[1]], [0, LANES[1].prompt.length], clampOpts);
   const review = smooth(S.review, 14);
   const check = spring({frame: frame - S.check, fps, config: {damping: 12, stiffness: 170}});
-  const generating = (lane: number) => interpolate(frame, [S.results[0] - 10 + lane * 6, S.results[0], S.results[1] - 10, S.results[1]], [0, 1, 1, 0], clampOpts);
+  const resultsIn = smooth(S.results[0] - 8, 14);
+  // The documents hand over to the results: they fade and leave the row as the results join it.
+  const docsGone = interpolate(frame, [S.results[0] - 20, S.results[0]], [0, 1], ease);
+  const docsShown = smooth(S.docs, 14) * (1 - docsGone);
+  const calloutIn = interpolate(frame, [S.check, S.check + 14], [0, 1], ease);
+  const [DOC_X, promptX, resultX] = centredRow(
+    [
+      {w: STACK.w, p: docsShown},
+      {w: PROMPT.w, p: interpolate(frame, [S.fork[0], S.fork[0] + 20], [0, 1], ease)},
+      {w: RESULT.w + (CALLOUT.gap + CALLOUT.w) * calloutIn, p: resultsIn, anchor: RESULT.w / 2},
+    ],
+    ROW_GAP,
+  );
+  const promptLeft = promptX - PROMPT.w / 2;
+  const resultLeft = resultX - RESULT.w / 2;
 
   return (
     <AbsoluteFill>
       <svg width={VIDEO.width} height={VIDEO.height} viewBox={`0 0 ${VIDEO.width} ${VIDEO.height}`}>
         {/* The model from Scene 2 steps aside; each lane shows a small copy of it. */}
-        {cubeOut > 0.001 ? <LockedCube id="gc-s-cube" absFrame={abs} {...CUBE_HOME} appear={cubeOut} /> : null}
+        {cubeOut > 0.001 ? <LockedCube id="gc-s-cube" absFrame={abs} {...CUBE_HOME} x={SCENE2_CUBE_X} appear={cubeOut} /> : null}
 
         <g opacity={out}>
-          {DOCS.map((d, i) => (
-            <DocIcon key={d.name} x={DOC_X} y={d.y} name={d.name} opacity={smooth(S.docs + i * 6, 14)} />
-          ))}
-          {/* The same material feeds both prompts. */}
-          {DOCS.flatMap((d) =>
-            LANES.map((l) => (
+          {/* One stack of the same documents feeds both prompts. */}
+          <g opacity={docsShown}>
+            {DOC_NAMES.map((name, i) => (
+              <DocIcon key={name} x={DOC_X - 14 + i * 28} y={STACK.y - 70 + i * 22} opacity={smooth(S.docs + i * 6, 14)} />
+            ))}
+            <Caption x={DOC_X} y={STACK.y + 46} text="SAME DOCUMENTS" color={COLORS.cyan} size={20} />
+            {DOC_NAMES.map((name, i) => (
+              <Caption key={name} x={DOC_X} y={STACK.y + 84 + i * 30} text={name} color={rgba(COLORS.white, 0.8)} size={17} />
+            ))}
+            {LANES.map((l) => (
               <path
-                key={`${d.name}-${l.key}`}
-                d={`M${DOC_X + 60} ${d.y} C ${DOC_X + 200} ${d.y}, ${PROMPT.x - PROMPT.w / 2 - 140} ${l.y}, ${PROMPT.x - PROMPT.w / 2 - 12} ${l.y}`}
+                key={l.key}
+                // Out level from the icons, then curving to the lane only once past the captions under the stack.
+                d={`M${DOC_X + 64} ${STACK.y - 48} H ${DOC_X + 180} C ${DOC_X + 240} ${STACK.y - 48}, ${DOC_X + 220} ${l.y}, ${promptLeft - 12} ${l.y}`}
                 fill="none"
                 stroke={rgba(COLORS.cyan, 0.55)}
                 strokeWidth={3}
@@ -73,18 +100,19 @@ export const SpecificScene: React.FC = () => {
                 strokeDasharray="1 1"
                 strokeDashoffset={1 - fork}
               />
-            )),
-          )}
+            ))}
+          </g>
 
           {LANES.map((l, i) => {
             const shown = smooth(i === 0 ? S.vague[0] - 10 : S.specific[0] - 10, 12);
             return (
               <g key={l.key} opacity={shown}>
-                <Caption x={PROMPT.x - PROMPT.w / 2} y={l.y - (i === 0 ? 70 : 110)} text={l.label} anchor="start" color={i === 0 ? rgba(COLORS.white, 0.75) : COLORS.cyan} size={20} />
-                <line x1={PROMPT.x + PROMPT.w / 2 + 12} x2={MODEL_X - 56} y1={l.y} y2={l.y} stroke={rgba(COLORS.white, 0.35)} strokeWidth={3} strokeDasharray="8 8" />
-                <line x1={MODEL_X + 56} x2={RESULT.x - RESULT.w / 2 - 12} y1={l.y} y2={l.y} stroke={rgba(COLORS.white, 0.35)} strokeWidth={3} strokeDasharray="8 8" />
-                <path d={`M${RESULT.x - RESULT.w / 2 - 24} ${l.y - 9}L${RESULT.x - RESULT.w / 2 - 12} ${l.y}L${RESULT.x - RESULT.w / 2 - 24} ${l.y + 9}`} fill="none" stroke={rgba(COLORS.white, 0.5)} strokeWidth={3} />
-                <LockedCube id={`gc-s-mini-${i}`} absFrame={abs} x={MODEL_X} y={l.y} size={26} glow={generating(i) * 0.6} />
+                <Caption x={promptLeft} y={l.y - (i === 0 ? 70 : 110)} text={l.label} anchor="start" color={i === 0 ? rgba(COLORS.white, 0.75) : COLORS.cyan} size={20} />
+                {/* Prompt to result. */}
+                <g opacity={resultsIn}>
+                  <line x1={promptX + PROMPT.w / 2 + 14} x2={resultLeft - 14} y1={l.y} y2={l.y} stroke={rgba(COLORS.white, 0.35)} strokeWidth={3} strokeDasharray="8 8" />
+                  <path d={`M${resultLeft - 26} ${l.y - 9}L${resultLeft - 14} ${l.y}L${resultLeft - 26} ${l.y + 9}`} fill="none" stroke={rgba(COLORS.white, 0.5)} strokeWidth={3} />
+                </g>
               </g>
             );
           })}
@@ -92,7 +120,7 @@ export const SpecificScene: React.FC = () => {
           {/* Review ring around the specific result. */}
           {review > 0.001 ? (
             <rect
-              x={RESULT.x - RESULT.w / 2 - 12}
+              x={resultLeft - 12}
               y={LANES[1].y - RESULT.h / 2 - 12}
               width={RESULT.w + 24}
               height={RESULT.h + 24}
@@ -103,19 +131,19 @@ export const SpecificScene: React.FC = () => {
               opacity={review * 0.9}
             />
           ) : null}
-          <Caption x={RESULT.x + RESULT.w / 2} y={LANES[1].y - RESULT.h / 2 - 40} text="EASY TO REVIEW" anchor="end" color={COLORS.cyan} size={20} opacity={review} />
+          <Caption x={resultX + RESULT.w / 2} y={LANES[1].y - RESULT.h / 2 - 40} text="EASY TO REVIEW" anchor="end" color={COLORS.cyan} size={20} opacity={review} />
         </g>
       </svg>
 
       <AbsoluteFill style={{opacity: out}}>
-        <Bubble x={PROMPT.x} y={LANES[0].y} width={PROMPT.w} text={LANES[0].prompt} chars={vagueChars} fontSize={24} label="PROMPT" color={rgba(COLORS.white, 0.6)} opacity={smooth(S.vague[0] - 10, 12)} />
-        <Bubble x={PROMPT.x} y={LANES[1].y} width={PROMPT.w} text={LANES[1].prompt} chars={specificChars} fontSize={24} label="PROMPT" opacity={smooth(S.specific[0] - 10, 12)} />
+        <Bubble x={promptX} y={LANES[0].y} width={PROMPT.w} text={LANES[0].prompt} chars={vagueChars} fontSize={24} label="PROMPT" color={rgba(COLORS.white, 0.6)} opacity={smooth(S.vague[0] - 10, 12)} />
+        <Bubble x={promptX} y={LANES[1].y} width={PROMPT.w} text={LANES[1].prompt} chars={specificChars} fontSize={24} label="PROMPT" opacity={smooth(S.specific[0] - 10, 12)} />
 
         {/* Vague result: a general paragraph that leaves questions open. */}
-        <ResultPanel y={LANES[0].y} opacity={smooth(S.results[0], 14)}>
-          <div style={{fontSize: 15, fontWeight: 700, letterSpacing: '0.18em', color: rgba(COLORS.white, 0.6), marginBottom: 18}}>ANSWER</div>
+        <ResultPanel x={resultX} y={LANES[0].y} opacity={smooth(S.results[0], 14)}>
+          <div style={{fontSize: 18, fontWeight: 700, letterSpacing: '0.18em', color: rgba(COLORS.white, 0.6), marginBottom: 22}}>ANSWER</div>
           {[0.92, 0.84, 0.9, 0.55].map((w, i) => (
-            <div key={i} style={{height: 12, width: `${w * 62}%`, borderRadius: 6, background: rgba(COLORS.white, 0.22), marginBottom: 20, opacity: smooth(S.results[0] + 4 + i * 8, 10)}} />
+            <div key={i} style={{height: 12, width: `${w * 48}%`, borderRadius: 6, background: rgba(COLORS.white, 0.22), marginBottom: 22, opacity: smooth(S.results[0] + 4 + i * 8, 10)}} />
           ))}
         </ResultPanel>
         {QUESTIONS.map((q, i) => {
@@ -126,9 +154,10 @@ export const SpecificScene: React.FC = () => {
               key={q}
               style={{
                 position: 'absolute',
-                left: RESULT.x + RESULT.w / 2 - 150,
-                top: LANES[0].y - 80 + i * 72,
-                transform: `translate(-50%, -50%) scale(${(0.8 + 0.2 * s) * (1 + 0.1 * pulse)})`,
+                left: resultX + RESULT.w / 2 - 28,
+                top: LANES[0].y - 76 + i * 72,
+                transform: `translate(-100%, -50%) scale(${(0.8 + 0.2 * s) * (1 + 0.1 * pulse)})`,
+                transformOrigin: '100% 50%',
                 opacity: s,
                 padding: '8px 18px',
                 borderRadius: 22,
@@ -136,7 +165,7 @@ export const SpecificScene: React.FC = () => {
                 background: rgba(COLORS.charcoal, 0.95),
                 fontFamily: FONT,
                 fontWeight: 500,
-                fontSize: 21,
+                fontSize: 20,
                 color: COLORS.white,
                 whiteSpace: 'nowrap',
               }}
@@ -147,10 +176,25 @@ export const SpecificScene: React.FC = () => {
         })}
 
         {/* Specific result: a table with a source on every row. */}
-        <ResultPanel y={LANES[1].y} opacity={smooth(S.results[0] + 6, 14)} color={COLORS.cyan}>
-          <div style={{display: 'grid', gridTemplateColumns: '1.7fr 1fr 0.6fr 0.9fr', columnGap: 10, rowGap: 14, alignItems: 'center'}}>
+        <ResultPanel x={resultX} y={LANES[1].y} opacity={smooth(S.results[0] + 6, 14)} color={COLORS.cyan}>
+          {/* The flagged row is tinted red when it's marked for checking. */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 12,
+              right: 12,
+              top: RESULT.pad + TABLE.head + TABLE.row * CHECK_ROW + 6,
+              height: TABLE.row - 12,
+              boxSizing: 'border-box',
+              borderRadius: 12,
+              background: rgba(COLORS.error, 0.12),
+              border: `2px solid ${rgba(COLORS.error, 0.6)}`,
+              opacity: calloutIn,
+            }}
+          />
+          <div style={{position: 'relative', display: 'grid', gridTemplateColumns: '1.7fr 1fr 0.6fr 0.9fr', gridTemplateRows: `${TABLE.head}px repeat(${ROWS.length}, ${TABLE.row}px)`, columnGap: 10, alignItems: 'center'}}>
             {['HOTEL', '$/NIGHT', 'FITS', 'SOURCE'].map((h) => (
-              <div key={h} style={{fontSize: 14, fontWeight: 700, letterSpacing: '0.16em', color: COLORS.cyan}}>
+              <div key={h} style={{fontSize: 16, fontWeight: 700, letterSpacing: '0.16em', color: COLORS.cyan, alignSelf: 'start'}}>
                 {h}
               </div>
             ))}
@@ -174,31 +218,36 @@ export const SpecificScene: React.FC = () => {
             })}
           </div>
         </ResultPanel>
-        {/* Clear structure, but the numbers still need checking. */}
+        {/* Clear structure, but the numbers still need checking: the price comes from a separate source. */}
         {check > 0.001 ? (
           <div
             style={{
               position: 'absolute',
-              left: RESULT.x + RESULT.w / 2 + 64,
-              top: LANES[1].y - 20,
-              transform: `translate(-50%, -50%) scale(${1.4 - 0.4 * check})`,
+              left: resultX + RESULT.w / 2 + CALLOUT.gap,
+              top: LANES[1].y + CHECK_ROW_DY,
+              width: CALLOUT.w,
+              boxSizing: 'border-box',
+              transform: `translateY(-50%) scale(${1.25 - 0.25 * check})`,
+              transformOrigin: '0% 50%',
               opacity: Math.min(1, check * 1.4),
-              padding: '4px 12px',
-              borderRadius: 10,
+              padding: '14px 18px 16px 22px',
+              borderRadius: 14,
               border: `3px solid ${COLORS.error}`,
-              background: rgba(COLORS.charcoal, 0.9),
+              background: rgba(COLORS.charcoal, 0.95),
               fontFamily: FONT,
-              fontWeight: 800,
-              fontSize: 18,
-              letterSpacing: '0.12em',
-              color: COLORS.error,
+              color: COLORS.white,
             }}
           >
-            CHECK
+            {/* A pointer back to the flagged row. */}
+            <div style={{position: 'absolute', left: -12, top: '50%', width: 18, height: 18, transform: 'translateY(-50%) rotate(45deg)', background: COLORS.charcoal, borderLeft: `3px solid ${COLORS.error}`, borderBottom: `3px solid ${COLORS.error}`}} />
+            <div style={{fontSize: 18, fontWeight: 800, letterSpacing: '0.12em', color: COLORS.error, marginBottom: 6}}>CHECK</div>
+            <div style={{fontSize: 18, fontWeight: 500, lineHeight: 1.35}}>
+              Price from <span style={{fontWeight: 700}}>hotel-options.md</span>, not the policy. Is it current?
+            </div>
           </div>
         ) : null}
 
-        <Note x={(DOC_X + RESULT.x + RESULT.w / 2) / 2} y={985} text="Clearer to review. Not guaranteed correct." opacity={smooth(S.caption, 14)} />
+        <Note x={VIDEO.width / 2} y={985} text="Clearer to review. Not guaranteed correct." opacity={smooth(S.caption, 14)} />
       </AbsoluteFill>
 
       <Pinned>
@@ -208,17 +257,17 @@ export const SpecificScene: React.FC = () => {
   );
 };
 
-const ResultPanel: React.FC<{y: number; opacity: number; color?: string; children: React.ReactNode}> = ({y, opacity, color = rgba(COLORS.white, 0.35), children}) =>
+const ResultPanel: React.FC<{x: number; y: number; opacity: number; color?: string; children: React.ReactNode}> = ({x, y, opacity, color = rgba(COLORS.white, 0.35), children}) =>
   opacity > 0.001 ? (
     <div
       style={{
         position: 'absolute',
-        left: RESULT.x - RESULT.w / 2,
+        left: x - RESULT.w / 2,
         top: y - RESULT.h / 2,
         width: RESULT.w,
         height: RESULT.h,
         boxSizing: 'border-box',
-        padding: '24px 28px',
+        padding: RESULT.pad,
         borderRadius: 22,
         border: `2px solid ${color}`,
         background: rgba(COLORS.charcoal, 0.92),

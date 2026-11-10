@@ -4,7 +4,7 @@ The sequel to `how-ai-trains`. That video ends with a locked model released to t
 
 Source material: `00-ai-concepts.md` §3 **Context** and **Generation**.
 
-1920×1080 authoring space · 30 fps · 2544 frames (1:24.8) · 4K master via `--scale=2`.
+1920×1080 authoring space · 30 fps · 2574 frames (1:25.8) · 4K master via `--scale=2`.
 Every visual is SVG or live text, so nothing is rasterised before the final render.
 
 Every scene is timed to its recorded voiceover take (see [Voiceover script](#voiceover-script)).
@@ -53,8 +53,8 @@ Type: Inter, as in `how-ai-trains`. 800 for headlines, 700 for labels, 500 for p
 ## Series conventions
 
 - **Screen chrome stays in the corners; content leads in the centre.** The scene title sits top-left and status badges top-right. Corner titles are small (24% of the 140px hero size, about 34px) and settle to 50% opacity 15 frames after they land, so they never compete with the content; this is the shared `SceneTitle` default. The main content is kept centred horizontally at all times: the whole video sits in a shared `Stage` (`shared/components/Stage.tsx`) that slides content left or right using a per-frame track in `centering.ts`. Screen chrome, full-frame overlays and anything that must sit at true screen centre are wrapped in `Pinned`, so they don't move. Positions given in the scene tables below are design positions, before this shift.
-- **The centring track is measured, not hand-set.** `npm run center:<lesson>` (`scripts/measure-centering.mjs`) renders the video uncentred at half size and finds each frame's content extent. It ignores the title/badge band and the faint background, filters out elements that only pass through, and looks ahead so things fading in aren't pushed off-screen. It keeps content at least 60 px from the screen edges, smooths the result over about 1 s and writes `centering.ts`. Re-run it after any layout or timing change. `--fixed=<from>-<to>:<px>` holds a frame range at a set shift.
-- **One window, one tank.** `ContextTank` draws the context window in every scene that needs it. Its home is centred at (1300, 560), 320 × 760 px. It has an optional 0–100% ruler on its left edge, 18px / 700 segment labels on its right edge (pushed apart so thin neighbours never overlap), and a token readout above it. The readout always says `EXAMPLE CAPACITY` (200,000 tokens) because real limits vary by model and product, and switches to `NEAR LIMIT` in error red at 90%.
+- **The centring track is measured, not hand-set.** `npm run center:<lesson>` (`scripts/measure-centering.mjs`) renders the video uncentred at half size and finds each frame's content extent. It ignores the title/badge band and the faint background, filters out elements that only pass through, and looks ahead so things fading in aren't pushed off-screen. It keeps content at least 60 px from the screen edges, smooths the result over about 1 s and writes `centering.ts`. Re-run it after any layout or timing change. `--fixed=<from>-<to>:<px>` holds a frame range at a set shift. This lesson measures with `--look-ahead=8 --smooth=7 --trim=0.002 --clamp` (see `package.json`): it tracks what is on screen now more tightly than the defaults, measures true visible edges so sparse text beside a large shape still counts, and re-applies the screen margins after smoothing. Where a scene's elements arrive one after another, content can still sit off-centre for up to about a second while the next element comes in.
+- **One window, one tank.** `ContextTank` draws the context window in every scene that needs it. Its home is centred at (1300, 560), 320 × 760 px. It has an optional 0–100% ruler on its left edge, segment labels on its right edge (pushed apart so thin neighbours never overlap; a segment's `labelNudge` moves its label down onto a short leader tick), and a token readout above it. This lesson passes `TANK_TEXT` (`layout.ts`) to every tank through `ContextTank`'s optional `textSizes` prop: 20px labels at least 28px apart, 18px ruler figures, an 18px "% · EXAMPLE CAPACITY" line, 18px in-segment text and a 22px remaining-region label. Lessons that leave `textSizes` out keep the original sizes. The readout always says `EXAMPLE CAPACITY` (200,000 tokens) because real limits vary by model and product, and switches to `NEAR LIMIT` in error red at 90%.
 - **Segment styles.** Colours alone don't tell the segments apart, so each type also gets its own fill pattern:
 
   | Segment | Fill |
@@ -76,14 +76,17 @@ Type: Inter, as in `how-ai-trains`. 800 for headlines, 700 for labels, 500 for p
 
 | Local frame | Event |
 |---|---|
-| 0–18 | "STEP 1: CONTEXT" springs from 0.86 to 1.0 scale at dead centre |
-| 40–70 | Title glides to top-left (scale 1 → 0.34) |
-| 30–75 | Prompt bar (900 × 96, centred at (1190, 860)) rises 40px and types "What's the capital of Australia?"; label "YOUR MESSAGE" |
-| 70–90 | Locked cube springs in at home; a dashed line draws from the prompt toward the model |
-| 92 | Red ✕ snaps onto the line on "just your message"; "NOT JUST YOUR MESSAGE" in red under the bar |
-| 120 | Gear + "THE APP" at (1080, 690) on "The app assembles"; badge: **APP ACTION** |
-| 168 / 198 / 234 / 266 | Cards (380 × 136) fly in, each landing on its word: **SYSTEM INSTRUCTIONS** "You are a helpful travel assistant." (top-left), **CONVERSATION HISTORY** "Planning a 5-day trip in March…" (left), **DOCUMENTS** `trip-plan.md` (bottom), **TOOL DEFINITIONS** `search_web(query)` (top) |
-| 292–326 | Cards and the prompt bar morph straight into their slices at the tank's home position; text fades, borders and fills become segment styles |
+| 0–18 | "CONTEXT" springs from 0.86 to 1.0 scale at dead centre |
+| 24–54 | Title glides to top-left (scale 1 → 0.34), clearing the centre for the prompt bar |
+| 30–75 | Prompt bar (900 × 96) rises 40px into the vertical centre of the screen, where it stays until the first card arrives (y = 560, so the bar and its "YOUR MESSAGE" label are centred together) and types "What's the capital of Australia?" |
+| 70–92 | The bar stays centred while the cube arrives beside it; the red ✕ lands in the short gap between them |
+| 70–90 | Locked cube springs in at home; a solid line (white at 60%) draws from the left end of the prompt bar to the model's side |
+| 92 | Red ✕ snaps onto the line on "just your message"; "NOT JUST YOUR MESSAGE" (28px) in red under the bar |
+| 120 | On "The app assembles", the app's tray draws around the message: a dashed purple frame (960 × 640, centred at (1190, 520), 5% purple fill) with a small gear + "THE APP" tab on its top edge; badge: **APP ACTION**. The app reads as the container that gathers everything, rather than as a label floating above the message |
+| 154–178 | As the system instructions card arrives, the bar glides down to its place at (1190, 760), its label moving with it |
+| 168 / 198 / 234 / 266 | Cards (380 × 136) glide 70px in from their side while fading in, always inside the tray, each landing on its word, into a 2 × 2 grid with even 44px gaps centred over the prompt bar: **SYSTEM INSTRUCTIONS** "You are a helpful travel assistant." (top-left), **CONVERSATION HISTORY** "Planning a 5-day trip in March…" (left), **DOCUMENTS** `trip-plan.md` (right), **TOOL DEFINITIONS** `search_web(query)` (right); card labels 18px, body 24px |
+| 280–292 | All card text, the prompt text and the "YOUR MESSAGE" label fade out before anything moves; the tray fades with them |
+| 292–326 | One at a time, 4 frames apart and bottom slice first (instructions, tools, history, documents, then the prompt bar as the message), each shape moves for 18 frames into its slice at the tank's home position, its border and fill becoming the segment style. A card that has started moving rides above the ones still waiting, and the prompt bar stays underneath, so slices stack over it and it rises last from behind |
 | 320–334 | Hand-off from the HTML cards to the SVG tank segments; badge fades |
 
 ## Scene 2: The Context Window (frames 336–636)
@@ -91,37 +94,38 @@ Type: Inter, as in `how-ai-trains`. 800 for headlines, 700 for labels, 500 for p
 | Local frame | Event |
 |---|---|
 | 0–25 | Tank outline draws around the stacked input; ruler and readout fade in |
-| 25–90 | Readout counts 0 → 112,000; each slice's label appears as the counter passes it (instructions 6%, tools 8%, history 18%, documents 22%, message 2%) |
+| 25–90 | Readout counts 0 → 112,000; each slice's label appears as the counter passes it (instructions 6%, tools 8%, history 18%, documents 22%, message 2%). The thin message slice's label sits 24px below the slice on a short leader, clear of REASONING (HIDDEN) above |
 | 122 | The readout pulses cyan on "measured in tokens" |
 | 128–168 | **INPUT** bracket draws on the left, 0–56% |
-| 160–200 | On "The response, and any hidden reasoning": cube glows; a dashed stream flows from the cube into the tank; hatched **REASONING (HIDDEN)** grows 56 → 63% |
+| 160–200 | On "The response, and any hidden reasoning": cube glows; a dashed stream flows from the cube into the tank; hatched **REASONING (HIDDEN)** grows 56 → 63% (output has no height until reasoning finishes) |
 | 200–238 | **OUTPUT** grows 63 → 74%; readout reaches 148,000 |
 | 248 | Dashed **REMAINING** region outlines 74–100% on "what's left" |
 | 282–300 | Labels, ruler and bracket fade; reasoning and output drain away so the tank holds input only |
 
 ## Scene 3: One Token at a Time (frames 636–996)
 
-Layout: cube at home, tank shrinks to 192 × 456 at (1640, 540), score panel 580 × 340 centred at (1080, 420), response line along y = 860. A dashed cyan line flows from the tank back into the cube the whole time: the whole context feeds every step.
+Layout: cube at home, tank shrinks to 192 × 456 at (1640, 540), score panel 580 × 340 centred at (1080, 420), response line along y = 860. A faint dashed cyan line (30%) flows from the tank back into the cube while the answer generates: the whole context feeds every step. As each new token starts its flight, the earlier chips dim to 40%, so the newest token always stands out. From frame 256 (abs 892) the centring track holds a fixed 84px shift that centres the cube and panel together, while the response line glides by the opposite amount, so both rows finish centred on screen.
 
 The answer is split into realistic tokens, with "Canberra" as two: `The` · ` capital` · ` of` · ` Australia` · ` is` · ` Can` · `berra` · `.`
 
 | Local frame | Event |
 |---|---|
-| 0–25 | Layout transition; readout fades; "Q: What's the capital of Australia?" appears above the response line |
-| 25–95 | First five tokens, 14 frames each: the panel (at 0.8 scale) shows that step's four candidates, the top one is ringed, its chip flies from the cube to the response line, and a cyan dot carries a sliver into the tank |
-| 103–165 | On "It scores the likely next tokens", generation slows. The panel grows to full size with candidates for the next token: ` Can` 0.71, ` Sydney` 0.19, ` Melbourne` 0.06, ` the` 0.03 (bars stagger in 8 frames apart) |
+| 0–25 | Layout transition; readout fades; the question "What's the capital of Australia?" appears in a prompt box on the response line, then fades out as the first answer token flies in (24–36), leaving the line to the answer |
+| 25–95 | First five tokens, 14 frames each: the panel (at 0.8 scale and 70% opacity, a montage) shows that step's four candidates, the top one is ringed, its chip flies from the cube to the response line, and a cyan dot carries a sliver into the tank |
+| 103–165 | On "It scores the likely next tokens", generation slows. The panel grows to full size with candidates for the next token: ` Can` 0.71, ` Syd` 0.19, ` Mel` 0.06, ` the` 0.03 (shown as the token pieces they would be; rows and bars stagger in 8 frames apart; each score shows its final value at once and only the bar grows) |
 | 166 | Selection ring springs onto ` Can` on "picks one" |
 | 189–205 | ` Can` flies to the response line on "adds it" |
-| 196–221 | Purple arrow draws from the response line into the tank: "EACH TOKEN BECOMES CONTEXT" |
-| 210 / 226 | On "and repeats", two quick steps: `berra` and `.`, each with a small score tag (0.98, 0.91) above its chip; the panel stays on ` Can` |
+| 196–221 | Purple arrow draws from the response line into the tank: "EACH TOKEN BECOMES CONTEXT" (22px) |
+| 210 / 226 | On "and repeats", two quick steps: `berra` and `.`; the panel stays on ` Can` |
 | 244 | Dashed `END` chip appears after the full stop |
-| 246 | On "Those scores are patterns", "SCORES ARE PATTERNS, NOT FACTS" (56px / 800) rises in above the panel |
-| 262 / 300 | The ` Sydney` row pulses error red (the second on "not facts") |
-| 340–358 | Everything except the cube fades, including the tank |
+| 242–262 | On "Those scores are patterns", the generation scaffolding clears away: the window, the feed line and the purple loop arrow with its caption all fade, and the response line dims to 40%. At the same time the score panel slides down 120px to line up with the cube, and the cube-and-panel row and the response line each glide to true screen centre |
+| 274 | Only once that has settled, "SCORES ARE PATTERNS, NOT FACTS" (48px / 800) rises in just above the panel (top 250) |
+| 282 / 300 | The ` Syd` row pulses error red (the second on "not facts") |
+| 340–358 | Everything except the cube fades |
 
-## Scene 4: Same Prompt, Different Answers (frames 996–1316)
+## Scene 4: Same Prompt, Different Answers (frames 996–1346)
 
-The same prompt runs three times at each setting of a **VARIATION** slider (LOW ↔ HIGH, cyan → purple track) above three 980 × 96 lanes, **RUN 1–3**. This is about how much randomness the app allows when the model picks each token, not about reasoning.
+The same prompt runs three times at each setting of a **VARIATION** slider (LOW ↔ HIGH at 22px, full white when active and 50% otherwise; cyan → purple track) above three 980 × 96 lanes, **RUN 1–3** (20px). This is about how much randomness the app allows when the model picks each token, not about reasoning.
 
 | Local frame | Event |
 |---|---|
@@ -134,77 +138,81 @@ The same prompt runs three times at each setting of a **VARIATION** slider (LOW 
 | 192–215 | Knob glides to HIGH |
 | 215–268 | "Canberra is the capital of Australia." ✓ · "Australia's capital? Canberra." ✓ · "The capital of Australia is Sydney." with "Sydney" typed in red |
 | 268 | Red ✕ on run 3; its border turns red |
-| 272 | On "correct", stamp "FLUENT ≠ CORRECT" slams in (scale 1.6 → 1, rotated −4°) |
-| 305–320 | Content fades; cube stays |
+| 266–278 | As the stamp lands, the slider dims to 30% and runs 1 and 2 to 35%, leaving run 3 and the stamp as the focus |
+| 272 | On "correct", stamp "FLUENT ≠ CORRECT" (40px) slams in at y = 880 (scale 1.45 → 1, rotated −4°), clear of run 3 even on its first frame. No caption under it, to keep the ending's text to a minimum |
+| 340–350 | After a 2 s hold on the stamp, content fades; cube stays |
 
-## Scene 5: Lost in the Middle (frames 1316–1592)
+## Scene 5: Lost in the Middle (frames 1346–1622)
 
 | Local frame | Event |
 |---|---|
 | 0–12 | Empty tank fades in at home |
-| 10–60 | On "A bigger window", the tank stretches to 980px tall with a **BIGGER WINDOW** double arrow; 16 document rows fill it to 92% |
-| 92–110 | On "Details", row 8 lights purple ("PASSPORT RULE"), with a callout: **IN THE DOCUMENTS** "Passport must be valid for 6 months after arrival." |
-| 105–150 | On "buried in the middle", attention beams fan out from the cube: rows near the top and bottom brighten, middle rows dim to 30%, the passport row and callout dim with them |
-| 150–172 | **YOUR QUESTION** "Any document rules for my trip?" flies into the cube |
-| 176–202 | **RESPONSE** types: "Just bring your booking confirmation." |
-| 207 | On "overlooked": red ✕ on the response; the passport row pulses a red outline and reads **MISSED**; the callout turns red |
-| 215 | Caption (28px): "Not a fixed zone. It varies by model, task and position." |
+| 10–60 | On "A bigger window", the tank stretches to 900px tall (y 110–1010, inside the screen margins) with a **BIGGER WINDOW** double arrow; 16 document rows fill it to 92% |
+| 92–110 | On "Details", row 8 lights purple ("PASSPORT RULE", 18px), with a short callout (22px, no label, since the row names it): "Valid 6 months after arrival." |
+| 105–150 | On "buried in the middle", attention beams fan out from the cube: thick and bright to the top and bottom rows, thinner and fainter towards the middle, and none at all to rows 6–11. Middle rows dim to 15%; the passport row and callout dim with them |
+| 128–172 | The question "Any document rules?" (no label) appears bottom-left at 128 and holds, then flies into the cube (150–172) |
+| 176–202 | The response types (no label): "Just bring your booking." |
+| 207 | On "overlooked": red ✕ on the response; the passport row pulses a red outline and reads **MISSED**; the callout turns red (its text stays the same, so MISSED appears only once) |
+| 215 | Caption in a dim pill (26px), centred at (560, 985): "It varies by model and task." |
 | 256–276 | Rows, beams and callouts fade; tank shrinks back to its home size |
 
-## Scene 6: Compaction (frames 1592–1922)
+## Scene 6: Compaction (frames 1622–1952)
 
 The old and new contexts sit side by side: tank A moves to x = 780 and tank B sits at x = 1640, both 700 tall centred at y = 600 so their readouts clear the badge. The cube moves aside to (300, 540) at size 60.
 
 | Local frame | Event |
 |---|---|
 | 0–18 | Tank at home fades in a quarter full (instructions, tools, early history) |
-| 14–68 | Ten conversation turns stream in from the left as pills (4 frames apart) and drop in as history; readout climbs to 94% |
+| 14–68 | Ten short conversation turns (a few words each: "Best city for museums?" · "Canberra." · "What about Melbourne?" · "Long drive away." · "Skip Melbourne." · "Hotels near Parliament?" · "Three options…" · "Dates may change." · "Need a visa?" · "Here’s the visa site.") appear as a left-aligned transcript (20px pills, 4 frames apart, left edge x = 640) in evenly spaced rows between the cube and the tank. Each slides right along its own row and shrinks to 60%, fully faded by the time its right edge reaches the tank's edge, so no two ever cross and none is clipped; readout climbs to 94% |
 | ~64 | On "limit", the outline and readout turn error red at 90%: **NEAR LIMIT** |
 | 72–98 | Tank A and the cube slide aside |
-| 74 | On "the app", gear + "THE APP" above the funnel; badge: **APP ACTION** |
+| 74 | On "the app", gear + "THE APP" above the funnel; badge: **APP ACTION**. The gear fades out by 120 (the badge stays), so the summary card is the only new element when it pops |
 | 78–100 | A purple funnel draws between the tanks |
 | 82–104 | Tank B's outline and readout draw on |
 | 94–128 | On "compact it into a summary", the oldest history (14–82%) lifts out of tank A and squeezes through the funnel |
 | 100–125 | Instructions and tool definitions copy across unchanged |
-| 128 | A **SUMMARY** card pops out of the funnel: "Trip: Canberra, 5 days, March. Chose a hotel near Parliament."; tank A dims to 30% |
-| 146–164 | The most recent turns copy across unchanged |
-| 150–166 | The summary card shrinks into an 8% **SUMMARY** slice; tank B reads 68,000 tokens (34%) |
-| 150 | On "That frees space", a dashed **SPACE FREED** region outlines 34–100% |
-| 182 / 208 / 230 | On "decisions", "caveats" and "sources", detail leaks from the funnel's lower edge and is struck through in red as it falls: "Why we ruled out Melbourne" · "Dates still tentative" · "Link to visa rules" |
-| 292–322 | Tank B glides to the home position; tank A, funnel and gear fade; the cube returns home |
+| 114–128 | Tank A and its readout dim to 30% before the card pops |
+| 128 | A 440px **SUMMARY** card (18px label, 22px text) pops out of the funnel to centre stage at (1210, 410), midway between the tanks: "Canberra, 5 days in March. Hotel near Parliament."; it holds until 162 (about 1.1 s) |
+| 158–176 | The most recent turns fade into place in tank B (no block crosses the frame, so nothing passes the card) |
+| 162–178 | The summary card shrinks towards its 8% **SUMMARY** slice and cross-fades into it before it crosses tank B's outline; tank B reads 68,000 tokens (34%) |
+| 178 | At the end of "That frees space", once the summary has landed, a dashed **SPACE FREED** region outlines 34–100% |
+| 182 / 208 / 230 | On "decisions", "caveats" and "sources", a detail (24px) slips out of the funnel's lower edge and drops into a pile centred under the funnel's opening (x = 1200), each settling 56px above the one before so none falls through another: "Why not Melbourne" (bottom) · "Dates may change" · "Visa site link" (top). Each is readable for about 0.6 s before a red strike-through draws across it; it then dims to 55%, and the struck-through pile stays until the funnel fades |
+| 272–290 | The funnel fades out completely |
+| 292–322 | Tank B glides to the home position; tank A fades; the cube returns home |
 
-## Scene 7: Stopping Generation (frames 1922–2202)
+## Scene 7: Stopping Generation (frames 1952–2232)
 
 Two 1080 × 110 lanes centred at x = 1290; top-right badge: **STREAMING**.
 
 | Local frame | Event |
 |---|---|
-| 0–14 | The compacted tank from Scene 6 fades away |
+| 0–6 | The compacted tank from Scene 6 fades away, clear before the lanes are more than faintly visible |
 | 0–15 | Lanes **A** and **B** appear |
 | 8–54 | Lane A streams "Pack warm layers. Canberra nights get cold in March." |
 | 58 | On "natural end", a dashed `END` chip springs on after lane A's text |
 | 14–114 | Lane B streams a structured record: `{"day": 3, "plan": "Visit Parliament House and the` |
-| 110–114 | On "limit", a red **MAX OUTPUT** wall drops onto the lane's right edge (lane shakes ±4px for 6 frames); the cursor stops |
-| 138–158 | On "mid-sentence", lane B turns red; the unfinished string gets a wavy red underline; a dashed red `"}` ghost shows what's missing; **INCOMPLETE** |
+| 110–114 | On "limit", a red **MAX OUTPUT** wall drops right after lane B's last character (x = 1582; the limit is a token count, not a width), and the lane's unused width beyond it is hatched red (lane shakes ±4px for 6 frames); the cursor stops |
+| 138–158 | On "mid-sentence", lane B turns red; the unfinished string gets a wavy red underline; a dashed red `"}` ghost past the wall shows what's missing; **INCOMPLETE** |
 | 190 | On "finish reason", a tag under lane A: `FINISH REASON: STOP` cyan ✓ |
 | 205 | On "tells you which", a tag under lane B: `FINISH REASON: LENGTH` red ✕ |
 | 224 | Caption: "Check the finish reason, not just the text." |
+| 234 | Footnote (22px, 60% white): "Names vary by API, e.g. stop / end_turn, length / max_tokens." |
 | 265–280 | Content fades |
 
-## Scene 8: Context Is Temporary (frames 2202–2544)
+## Scene 8: Context Is Temporary (frames 2232–2574)
 
 | Local frame | Event |
 |---|---|
-| 0–16 | The compacted tank fades back in; a window frame labelled **SESSION** draws around the cube and tank |
-| 30–40 | On "ends", the close button flashes red |
-| 36–50 | The frame folds away; the corner title "AFTER THE SESSION" and the readout appear |
+| 0–16 | The compacted tank fades back in; a window frame labelled **SESSION** (20px, in a 56px title bar) draws around the cube and tank |
+| 30–40 | On "ends", the close button (radius 21) flashes red |
+| 36–50 | The frame folds away; the corner title "AFTER THE SESSION" appears, then the readout (50–58, once the frame has gone) |
 | 50–92 | On "the context is gone", the tank drains from the top; 28 particles fall away below it; readout counts to 0 |
 | 104–126 | On "Nothing was added to the weights", push in on the cube (to (960, 500), size 120); the empty tank fades |
-| 110–158 | Frozen weight values sit around the cube, perfectly still, with **WEIGHTS UNCHANGED** above and the "v1.0 · LOCKED" tag below (callback to video 1 Scene 9) |
-| 152–174 | Push back out to home |
+| 110–158 | Frozen weight values sit around the cube, perfectly still (none inside the cube's footprint or crowding each other), with **WEIGHTS UNCHANGED** above and the "v1.0 · LOCKED" tag below (callback to video 1 Scene 9) |
+| 152–174 | Push back out, to 120px right of home (640, 540), so the cube and the new tank read as one group |
 | 158–178 | On "Each new request", a new, empty tank draws at home |
-| 210 | Gear + "THE APP"; badge: **APP ACTION** |
-| 212–234 | On "only what the app puts in", a **SAVED INSTRUCTIONS** slice (5%) drops in and bounces; readout 10,000; caption "ONLY WHAT THE APP ADDS" |
+| 210 | Gear + "THE APP" at (870, 300), between the cube and the tank and clear of the dropping slice's label; badge: **APP ACTION** |
+| 212–234 | On "only what the app puts in", a **SAVED INSTRUCTIONS** slice (8%) drops in and bounces, with a brief purple glow as it first lands (219); readout 16,000; caption "ONLY WHAT THE APP ADDS" (26px, white) |
 | 250–268 | Finale: everything in the scene (cube, tank, labels, badge, corner title) fades out completely, leaving only the background |
 | 270 | On the empty background, "CONTEXT IS TEMPORARY." (110px) springs in at centre x, y = 450, then scales 1 → 1.06 to the end |
 | 288–326 | Prompt bar types "What's the capital of Australia?" with a blinking cursor, looping back to Scene 1 |
@@ -216,7 +224,7 @@ Two 1080 × 110 lanes centred at x = 1290; top-right badge: **STREAMING**.
 | 1 | `01-assemble.wav` | "When you send a prompt, the model doesn't see just your message. The app assembles a context: instructions, conversation history, documents and tool definitions." | 25 / 11.2 s (recorded: 10.4 s) |
 | 2 | `02-window.wav` | "That context fills a fixed space called the context window, measured in tokens. The response, and any hidden reasoning, has to fit in what's left." | 25 / 10 s (recorded: 9.2 s) |
 | 3 | `03-tokens.wav` | "The model then writes its answer one token at a time. It scores the likely next tokens, picks one, adds it, and repeats. Those scores are patterns, not facts." | 30 / 12 s (recorded: 10.9 s) |
-| 4 | `04-settings.wav` | "Ask the same question twice and you can get different answers. Apps can turn that variation up or down, but a fluent answer still isn't proof it's correct." | 28 / 10.7 s (recorded: 9.8 s) |
+| 4 | `04-settings.wav` | "Ask the same question twice and you can get different answers. Apps can turn that variation up or down, but a fluent answer still isn't proof it's correct." | 28 / 11.7 s (recorded: 9.8 s, plus a 2 s hold on the stamp) |
 | 5 | `05-middle.wav` | "A bigger window doesn't guarantee better use. Details buried in the middle of a long context can be overlooked." | 19 / 9.2 s (recorded: 7.4 s) |
 | 6 | `06-compaction.wav` | "When a long conversation nears the limit, the app may compact it into a summary. That frees space, but decisions, caveats and sources can be lost." | 27 / 11 s (recorded: 9.4 s) |
 | 7 | `07-stopping.wav` | "Generation stops at a natural end, or when it hits a limit, sometimes mid-sentence. The finish reason tells you which." | 20 / 9.3 s (recorded: 7.7 s) |

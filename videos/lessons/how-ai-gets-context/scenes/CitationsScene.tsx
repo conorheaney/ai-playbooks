@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Mark} from '../../../shared/components/Bubble';
+import {Caption} from '../../../shared/components/People';
 import {SceneTitle} from '../../../shared/components/SceneTitle';
 import {Pinned} from '../../../shared/components/Stage';
 import {ContextTank, Segment} from '../../../shared/components/context/ContextTank';
@@ -9,20 +10,33 @@ import {FONT} from '../../../shared/fonts';
 import {lerp} from '../../../shared/lib/math';
 import {clampOpts} from '../../../shared/lib/motion';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
-import {FlowLine, Note, RefChipHtml} from '../components/Parts';
+import {FlowLine, RefChipHtml} from '../components/Parts';
 import {ASK_SEGMENTS, ASK_TANK, CUBE_HOME, POLICY} from '../layout';
 import {CITATIONS as C, SCENES} from '../timing';
 
 const CARD = {x: 990, y: 560, w: 600, h: 330};
 const ROW_Y = [470, 560, 650];
-const SOURCE = {x: 1630, w: 450, h: 124, y: [400, 560, 720]};
+const SOURCE = {x: 1660, w: 500, h: 140, y: [400, 560, 720]};
 
-// Each claim cites a real section; the third section doesn't support its claim.
+// Each claim cites a real section; the third section doesn't support its claim. On "fail to support" the words
+// that don't match (the claim's subject and the section's subject) are highlighted in red.
 const CLAIMS = [
-  {text: 'Hotel limit: $250 a night.', source: POLICY.s42, ok: true},
-  {text: 'Book through the travel portal.', source: POLICY.s31, ok: true},
-  {text: 'Breakfast is included.', source: POLICY.s43, ok: false},
+  {text: 'Hotel limit: $250 a night.', source: POLICY.s42, ok: true, mismatch: ''},
+  {text: 'Book through the travel portal.', source: POLICY.s31, ok: true, mismatch: ''},
+  {text: 'Breakfast is included.', source: POLICY.s43, ok: false, mismatch: 'Breakfast'},
 ];
+const SOURCE_MISMATCH = 'Taxis';
+
+// Text with its leading word highlighted (for the mismatch), or plain while there's nothing to point at.
+const Marked: React.FC<{text: string; word: string; highlight: number}> = ({text, word, highlight}) =>
+  word && highlight > 0.001 && text.startsWith(word) ? (
+    <>
+      <span style={{color: COLORS.error, background: rgba(COLORS.error, 0.28 * highlight), borderRadius: 6, boxShadow: `0 0 0 4px ${rgba(COLORS.error, 0.28 * highlight)}`}}>{word}</span>
+      {text.slice(word.length)}
+    </>
+  ) : (
+    <>{text}</>
+  );
 
 // Scene 6's window, as it hands its context to the model.
 const HANDED: Segment[] = [
@@ -56,6 +70,8 @@ export const CitationsScene: React.FC = () => {
   const verdictAt = (i: number) => (CLAIMS[i].ok ? C.supported[0] + i * 12 : C.unsupported);
   const revealAt = (i: number) => (CLAIMS[i].ok ? C.supported[0] + i * 12 - 6 : C.reveal3);
   const failed = frame >= C.unsupported;
+  // A brief highlight on the mismatched words; their red text stays.
+  const mismatch = interpolate(frame, [C.unsupported, C.unsupported + 6, C.unsupported + 50, C.unsupported + 66], [0, 1, 1, 0], clampOpts);
 
   return (
     <AbsoluteFill>
@@ -66,6 +82,7 @@ export const CitationsScene: React.FC = () => {
         <FlowLine from={{x: CUBE_HOME.x + 150, y: CUBE_HOME.y - 10}} to={{x: CARD.x - CARD.w / 2 - 10, y: CARD.y}} frame={frame} opacity={writing * out} />
 
         <g opacity={out}>
+          <Caption x={(CUBE_HOME.x - 140 + SOURCE.x + SOURCE.w / 2) / 2} y={880} text="A REAL CITATION ISN'T PROOF" color={COLORS.white} size={26} opacity={smooth(C.caption, 14)} />
           {/* Threads from each claim's reference to its source. */}
           {CLAIMS.map((c, i) => {
             const bad = !c.ok && failed;
@@ -137,7 +154,7 @@ export const CitationsScene: React.FC = () => {
                     textUnderlineOffset: 6,
                   }}
                 >
-                  {c.text.slice(0, typed)}
+                  {typed >= c.text.length && failed ? <Marked text={c.text} word={c.mismatch} highlight={Math.max(0.001, mismatch)} /> : c.text.slice(0, typed)}
                 </div>
                 <div style={{opacity: typed >= c.text.length ? 1 : 0}}>
                   <RefChipHtml text={c.source.ref} color={bad ? COLORS.error : COLORS.cyan} />
@@ -163,7 +180,7 @@ export const CitationsScene: React.FC = () => {
                 width: SOURCE.w,
                 height: SOURCE.h,
                 boxSizing: 'border-box',
-                padding: '14px 20px',
+                padding: '16px 22px',
                 borderRadius: 18,
                 border: `2px solid ${bad ? COLORS.error : rgba(COLORS.cyan, 0.7)}`,
                 background: rgba(COLORS.charcoal, 0.94),
@@ -175,24 +192,24 @@ export const CitationsScene: React.FC = () => {
             >
               <div style={{display: 'flex', alignItems: 'center', gap: 12}}>
                 <RefChipHtml text={c.source.ref} color={bad ? COLORS.error : COLORS.cyan} />
-                <span style={{fontSize: 14, fontWeight: 500, color: rgba(COLORS.white, 0.6), whiteSpace: 'nowrap'}}>travel-policy-2025.pdf</span>
-                <span style={{marginLeft: 'auto', fontSize: 13, fontWeight: 700, letterSpacing: '0.14em', color: c.ok ? COLORS.cyan : COLORS.error, opacity: verdict, whiteSpace: 'nowrap'}}>
+                <span style={{marginLeft: 'auto', fontSize: 16, fontWeight: 700, letterSpacing: '0.14em', color: c.ok ? COLORS.cyan : COLORS.error, opacity: verdict, whiteSpace: 'nowrap'}}>
                   {c.ok ? 'SUPPORTED' : 'NOT SUPPORTED'}
                 </span>
               </div>
-              <div style={{position: 'relative', marginTop: 12, height: 52}}>
+              <div style={{position: 'relative', marginTop: 14, height: 56}}>
                 <div style={{position: 'absolute', inset: 0, opacity: 1 - reveal}}>
                   {[0.9, 0.6].map((w, k) => (
                     <div key={k} style={{height: 10, width: `${w * 100}%`, borderRadius: 5, background: rgba(COLORS.white, 0.18), marginBottom: 14}} />
                   ))}
                 </div>
-                <div style={{position: 'absolute', inset: 0, opacity: reveal, fontSize: 20, fontWeight: 500, lineHeight: 1.3}}>{c.source.text}</div>
+                <div style={{position: 'absolute', inset: 0, opacity: reveal, fontSize: 21, fontWeight: 500, lineHeight: 1.3}}>
+                  {bad ? <Marked text={c.source.text} word={SOURCE_MISMATCH} highlight={Math.max(0.001, mismatch)} /> : c.source.text}
+                </div>
               </div>
             </div>
           ) : null;
         })}
 
-        <Note x={(CUBE_HOME.x - 140 + SOURCE.x + SOURCE.w / 2) / 2} y={880} text="A real citation isn't proof." opacity={smooth(C.caption, 14)} />
       </AbsoluteFill>
 
       <Pinned>

@@ -7,9 +7,9 @@ import {lerp} from '../../../shared/lib/math';
 import {clampOpts, flashAt, presence} from '../../../shared/lib/motion';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {ContextTank, fillTopY} from '../../../shared/components/context/ContextTank';
-import {Pinned} from '../../../shared/components/Stage';
-import {LockedCube, textWidth} from '../../../shared/components/context/Pieces';
-import {CAPACITY, CUBE_HOME, INPUT, INPUT_TOP, PROMPT, TANK_HOME} from '../layout';
+import {Pinned, useStageShift} from '../../../shared/components/Stage';
+import {LockedCube, PromptBar, textWidth} from '../../../shared/components/context/Pieces';
+import {CAPACITY, CUBE_HOME, INPUT, INPUT_TOP, PROMPT, TANK_HOME, TANK_TEXT} from '../layout';
 import {SCENES, TOKENS as T} from '../timing';
 
 const SMALL = {x: 1640, y: 540, w: 192, h: 456};
@@ -18,6 +18,8 @@ const LINE_Y = 860;
 const CHIP = {font: 36, h: 64, pad: 36, gap: 12};
 const SLIVER = 0.015; // window share each new token adds (exaggerated so it can be seen)
 const SLIVER_TRAVEL = 12;
+const QUESTION_W = textWidth(PROMPT, 38) + 100;
+const DIMMED = 0.4; // earlier tokens once a newer one is on its way
 
 // Realistic tokens: "Canberra" is two. Scores are illustrative.
 const STEPS: {tok: string; cands: [string, number][]}[] = [
@@ -26,7 +28,7 @@ const STEPS: {tok: string; cands: [string, number][]}[] = [
   {tok: ' of', cands: [[' of', 0.93], [' city', 0.04], [' is', 0.02], [' for', 0.01]]},
   {tok: ' Australia', cands: [[' Australia', 0.96], [' the', 0.02], [' AU', 0.01], [' this', 0.01]]},
   {tok: ' is', cands: [[' is', 0.95], [' city', 0.03], [',', 0.01], [' was', 0.01]]},
-  {tok: ' Can', cands: [[' Can', 0.71], [' Sydney', 0.19], [' Melbourne', 0.06], [' the', 0.03]]},
+  {tok: ' Can', cands: [[' Can', 0.71], [' Syd', 0.19], [' Mel', 0.06], [' the', 0.03]]},
   {tok: 'berra', cands: [['berra', 0.98]]},
   {tok: '.', cands: [['.', 0.91]]},
 ];
@@ -58,6 +60,7 @@ export const TokensScene: React.FC = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const abs = SCENES.tokens.from + frame;
+  const shift = useStageShift();
   const smooth = (start: number, duration = 15) => spring({frame: frame - start, fps, config: {damping: 200}, durationInFrames: duration});
   const out = interpolate(frame, [T.out, T.out + 18], [1, 0], clampOpts);
 
@@ -76,13 +79,30 @@ export const TokensScene: React.FC = () => {
   const panelStep = BEATS.reduce((cur, b, i) => (i <= FOCUS && frame >= b.start ? i : cur), 0);
   const panelIn = presence(frame, T.fastStart, T.out + 18, 10, 18);
   const panelScale = interpolate(frame, [T.focus - 5, T.focus + 11], [0.8, 1], {...clampOpts, easing: Easing.out(Easing.cubic)});
+  // The quick steps are a montage: dimmed, so the full-size panel at the focus step reads as "now look closely".
+  const panelDim = interpolate(frame, [T.focus - 5, T.focus + 5], [0.7, 1], clampOpts);
   const beat = BEATS[panelStep];
   const ring = panelStep === FOCUS ? spring({frame: frame - beat.select, fps, config: {damping: 14, stiffness: 160}}) : interpolate(frame, [beat.select, beat.select + 3], [0, 1], clampOpts);
   const sydney = Math.max(...T.sydneyPulses.map((p) => flashAt(frame, p, 26)));
 
   const generating = presence(frame, T.fastStart, T.end + 6, 6, 10);
   const loopArrow = interpolate(frame, [T.loopArrow, T.loopArrow + 25], [0, 1], clampOpts);
-  const feed = presence(frame, T.layout, T.out + 18, 12, 18);
+  // On "Those scores are patterns" the generation scaffolding clears away (window, feed line, loop arrow, question)
+  // and the response dims, so the score panel and the closing caption have the screen to themselves.
+  // The panel also slides down to line up with the cube; the closing caption waits until all of this has settled.
+  const settle = interpolate(frame, [T.settle, T.settle + 20], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.cubic)});
+  const feed = presence(frame, T.layout, T.settle + 18, 12, 18);
+  const response = out * lerp(1, 0.4, settle);
+  // The scene's tail holds a fixed centring shift that centres the cube and panel; the response line cancels it as
+  // things settle, so both rows finish centred on screen.
+  const lineX = -shift * settle;
+  // The question shows in a prompt box on the response line, then fades out as the first answer token flies in.
+  const question = smooth(T.layout, 12) * interpolate(frame, [BEATS[0].fly - 8, BEATS[0].fly + 4], [1, 0], clampOpts);
+  // As each new token starts its flight, everything already written dims, so the newest token stands out.
+  const dimFor = (i: number) => {
+    const next = BEATS[i + 1];
+    return next ? interpolate(frame, [next.fly - 6, next.fly], [1, DIMMED], clampOpts) : 1;
+  };
 
   return (
     <AbsoluteFill>
@@ -96,20 +116,20 @@ export const TokensScene: React.FC = () => {
           strokeDasharray="4 12"
           strokeDashoffset={-frame * 1.5}
           strokeLinecap="round"
-          opacity={0.45 * feed}
+          opacity={0.3 * feed}
         />
         <LockedCube id="tk-cube" absFrame={abs} {...CUBE_HOME} glow={generating * (0.3 + 0.3 * Math.sin(frame / 4))} />
 
         <ContextTank
-          id="tk-tank"
+          id="tk-tank" textSizes={TANK_TEXT}
           {...tank}
-          opacity={out}
+          opacity={out * (1 - settle)}
           segments={[...INPUT, {kind: 'output', from: INPUT_TOP, to: level}]}
           readout={{tokens: INPUT_TOP * CAPACITY, capacity: CAPACITY, opacity: interpolate(frame, [0, 12], [1, 0], clampOpts)}}
         />
 
         {/* Score panel. */}
-        <g opacity={panelIn} transform={`translate(${PANEL.x} ${PANEL.y}) scale(${panelScale}) translate(${-PANEL.x} ${-PANEL.y})`}>
+        <g opacity={panelIn * panelDim} transform={`translate(0 ${(CUBE_HOME.y - PANEL.y) * settle}) translate(${PANEL.x} ${PANEL.y}) scale(${panelScale}) translate(${-PANEL.x} ${-PANEL.y})`}>
           <rect x={PANEL.x - PANEL.w / 2} y={PANEL.y - PANEL.h / 2} width={PANEL.w} height={PANEL.h} rx={24} fill={rgba(COLORS.charcoal, 0.92)} stroke={rgba(COLORS.cyan, 0.5)} strokeWidth={2} />
           <Caption x={PANEL.x} y={PANEL.y - PANEL.h / 2 + 38} text="SCORES FOR THE NEXT TOKEN" size={18} />
           {STEPS[panelStep].cands.map(([tok, v], j) => {
@@ -128,7 +148,7 @@ export const TokensScene: React.FC = () => {
                 <rect x={PANEL.x - 70} y={y - 10} width={270} height={20} rx={10} fill={rgba(COLORS.white, 0.08)} />
                 <rect x={PANEL.x - 70} y={y - 10} width={Math.max(0, 270 * v * grow)} height={20} rx={10} fill={color} />
                 <text x={PANEL.x + PANEL.w / 2 - 24} y={y} fill={rgba(COLORS.white, 0.85)} fontFamily={FONT} fontWeight={700} fontSize={24} textAnchor="end" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
-                  {fmtScore(v * grow)}
+                  {fmtScore(v)}
                 </text>
               </g>
             );
@@ -149,10 +169,8 @@ export const TokensScene: React.FC = () => {
           ) : null}
         </g>
 
-        <g opacity={out}>
-          <text x={960} y={LINE_Y - 82} fill={rgba(COLORS.white, 0.55)} fontFamily={FONT} fontWeight={500} fontSize={24} textAnchor="middle" dominantBaseline="central" opacity={smooth(T.layout, 12)}>
-            {`Q: ${PROMPT}`}
-          </text>
+
+        <g opacity={response} transform={`translate(${lineX} 0)`}>
 
           {/* Response line: each chip flies from the model to its slot, then a sliver flies on into the window. */}
           {STEPS.map((s, i) => {
@@ -165,23 +183,17 @@ export const TokensScene: React.FC = () => {
             const y = lerp(CUBE_HOME.y, LINE_Y, t) - 90 * Math.sin(Math.PI * t);
             const sliver = interpolate(frame, [b.land, b.land + SLIVER_TRAVEL], [0, 1], clampOpts);
             const tankTop = {x: tank.x, y: fillTopY(tank, level)};
-            const tag = i > FOCUS ? presence(frame, b.land, b.land + 60, 6, 14) : 0;
             return (
               <g key={i}>
                 {sliver > 0 && sliver < 1 ? (
                   <circle cx={lerp(SLOTS[i], tankTop.x, sliver)} cy={lerp(LINE_Y, tankTop.y, sliver) - 120 * Math.sin(Math.PI * sliver)} r={7} fill={COLORS.cyan} />
                 ) : null}
-                <g transform={`translate(${x} ${y}) scale(${lerp(0.6, 1, t)})`}>
+                <g transform={`translate(${x} ${y}) scale(${lerp(0.6, 1, t)})`} opacity={dimFor(i)}>
                   <rect x={-WIDTHS[i] / 2} y={-CHIP.h / 2} width={WIDTHS[i]} height={CHIP.h} rx={14} fill={rgba(COLORS.cyan, 0.12)} stroke={COLORS.cyan} strokeWidth={2.5} />
                   <text x={0} y={0} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={CHIP.font} textAnchor="middle" dominantBaseline="central">
                     {s.tok.trim()}
                   </text>
                 </g>
-                {tag > 0 ? (
-                  <text x={SLOTS[i]} y={LINE_Y - 52} fill={COLORS.cyan} opacity={tag} fontFamily={FONT} fontWeight={700} fontSize={20} textAnchor="middle" dominantBaseline="central">
-                    {fmtScore(s.cands[0][1])}
-                  </text>
-                ) : null}
               </g>
             );
           })}
@@ -195,7 +207,7 @@ export const TokensScene: React.FC = () => {
           ) : null}
 
           {loopArrow > 0 ? (
-            <g opacity={presence(frame, T.loopArrow, T.out + 18, 6, 18)}>
+            <g opacity={presence(frame, T.loopArrow, T.settle + 14, 6, 14)}>
               <path
                 d={`M${LINE_END + 18} ${LINE_Y} C ${LINE_END + 120} ${LINE_Y}, ${SMALL.x} ${LINE_Y + 40}, ${SMALL.x} ${SMALL.y + SMALL.h / 2 + 22}`}
                 pathLength={1}
@@ -207,11 +219,13 @@ export const TokensScene: React.FC = () => {
                 strokeLinecap="round"
               />
               <path d={`M${SMALL.x - 12} ${SMALL.y + SMALL.h / 2 + 34} L${SMALL.x} ${SMALL.y + SMALL.h / 2 + 16} L${SMALL.x + 12} ${SMALL.y + SMALL.h / 2 + 34}`} fill="none" stroke={COLORS.purple} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" opacity={loopArrow > 0.95 ? 1 : 0} />
-              <Caption x={1520} y={LINE_Y + 96} text="EACH TOKEN BECOMES CONTEXT" color={COLORS.purple} size={20} />
+              <Caption x={1520} y={LINE_Y + 96} text="EACH TOKEN BECOMES CONTEXT" color={COLORS.purple} size={22} />
             </g>
           ) : null}
         </g>
       </svg>
+
+      <PromptBar x={960} y={LINE_Y} width={QUESTION_W} text={PROMPT} chars={PROMPT.length} opacity={question} frame={frame} cursor={false} />
 
       <Pinned>
         <div
@@ -219,11 +233,11 @@ export const TokensScene: React.FC = () => {
             position: 'absolute',
             left: 0,
             right: 0,
-            top: 146,
+            top: 250, // just above the panel once it has settled beside the cube
             textAlign: 'center',
             fontFamily: FONT,
             fontWeight: 800,
-            fontSize: 56,
+            fontSize: 48,
             letterSpacing: '-0.01em',
             color: COLORS.white,
             textShadow: `0 0 28px ${rgba(COLORS.cyan, 0.35)}`,

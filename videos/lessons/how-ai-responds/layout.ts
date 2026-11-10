@@ -1,10 +1,13 @@
-import type {Segment} from '../../shared/components/context/ContextTank';
+import type {Segment, TankTextSizes} from '../../shared/components/context/ContextTank';
 
 // The model cube's resting place in every scene.
 export const CUBE_HOME = {x: 520, y: 540, size: 80};
 
 // The context window's resting place: centre (1300, 560), 320 × 760.
 export const TANK_HOME = {x: 1300, y: 560, w: 320, h: 760};
+
+// Text sizes for every tank in this lesson: larger than ContextTank's defaults, for the 1080p legibility floor.
+export const TANK_TEXT: TankTextSizes = {label: 20, labelGap: 28, ruler: 18, readoutSub: 18, segment: 18, remaining: 22};
 
 // Illustrative only; the readout always says EXAMPLE CAPACITY.
 export const CAPACITY = 200_000;

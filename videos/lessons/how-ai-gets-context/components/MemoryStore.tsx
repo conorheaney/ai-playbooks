@@ -52,7 +52,7 @@ export const MemoryStore: React.FC<{
               <rect x={left + 16 * scale} y={c.y - (DRAWER_H * scale) / 2} width={w - 32 * scale} height={DRAWER_H * scale} rx={10 * scale} fill={rgba(COLORS.charcoal, 0.95)} stroke={rgba(COLORS.purple, isNew && open > 0 ? 1 : 0.6)} strokeWidth={2} />
               <rect x={x - 26 * scale} y={c.y + (DRAWER_H * scale) / 2 - 16 * scale} width={52 * scale} height={6 * scale} rx={3 * scale} fill={rgba(COLORS.purple, 0.7)} />
               {textOpacity > 0.001 ? (
-                <text x={x} y={c.y - 6 * scale} fill={isNew ? COLORS.white : rgba(COLORS.white, 1)} opacity={textOpacity} fontFamily={FONT} fontWeight={500} fontSize={19 * scale} textAnchor="middle" dominantBaseline="central">
+                <text x={x} y={c.y - 6 * scale} fill={isNew ? COLORS.white : rgba(COLORS.white, 1)} opacity={textOpacity} fontFamily={FONT} fontWeight={500} fontSize={Math.max(16, 18 * scale)} textAnchor="middle" dominantBaseline="central">
                   {text}
                 </text>
               ) : null}

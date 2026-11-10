@@ -88,7 +88,7 @@ export const SearchIndex: React.FC<{
                     fill={s.fresh || hl > 0.01 ? COLORS.cyan : rgba(COLORS.white, 0.45)}
                     fontFamily={FONT}
                     fontWeight={700}
-                    fontSize={16 * geom.scale}
+                    fontSize={16 * Math.max(1, geom.scale)} // never below 16px, even when the index is shown smaller
                     textAnchor="middle"
                     dominantBaseline="central"
                   >

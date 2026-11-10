@@ -4,18 +4,21 @@ import {Caption} from '../../../shared/components/People';
 import {SceneTitle} from '../../../shared/components/SceneTitle';
 import {FONT} from '../../../shared/fonts';
 import {lerp} from '../../../shared/lib/math';
-import {clampOpts, presence} from '../../../shared/lib/motion';
+import {clampOpts, flashAt, presence} from '../../../shared/lib/motion';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
-import {ContextTank, fillTopY, Segment} from '../../../shared/components/context/ContextTank';
+import {ContextTank, fillTopY, Segment, segmentRect} from '../../../shared/components/context/ContextTank';
 import {Pinned} from '../../../shared/components/Stage';
 import {AppMarker, LockedCube, PromptBar, StatusBadge} from '../../../shared/components/context/Pieces';
-import {CAPACITY, COMPACTED, COMPACTED_TOP, CUBE_HOME, PROMPT, TANK_HOME} from '../layout';
+import {CAPACITY, COMPACTED, COMPACTED_TOP, CUBE_HOME, PROMPT, TANK_HOME, TANK_TEXT} from '../layout';
 import {SCENES, TEMPORARY as T} from '../timing';
 
 const ICE = '#D8FDFF';
-const FRAME = {x: 330, y: 92, w: 1220, h: 920, bar: 46};
+const FRAME = {x: 330, y: 92, w: 1220, h: 920, bar: 56};
 const PUSH = {x: 960, y: 500, size: 120};
-const SAVED = 0.05;
+// After the push-out the cube rests 120 px closer to the new tank, so the pair reads as one group.
+const NEW_CUBE = {x: CUBE_HOME.x + 120, y: CUBE_HOME.y, size: CUBE_HOME.size};
+const SAVED = 0.08;
+const SAVED_LAND = 219; // first touchdown of the bouncing drop (Easing.bounce over TEMPORARY.saved)
 const PARTICLES = 28;
 
 // The same frozen weights as how-ai-trains Scene 9, now perfectly still.
@@ -28,6 +31,18 @@ const NUMBERS = RINGS.flatMap((lift, ring) =>
     const a = (j / PER_RING) * Math.PI * 2 + (ring * Math.PI) / PER_RING + 0.4;
     return {a, lift, value: ((random(`weights-value-${i}`) - 0.5) * 4).toFixed(2)};
   }),
+);
+// Offsets from the cube's centre. Numbers inside the cube's footprint are left out, and where two
+// would crowd each other the farther one is left out, so the frozen weights never overlap the cube
+// or each other (as in how-ai-trains Scene 9).
+const CUBE_CLEAR = 1.75 * PUSH.size + 100;
+const OFFSETS = NUMBERS.map((n) => ({dx: Math.cos(n.a) * ORBIT.rx, dy: Math.sin(n.a) * ORBIT.ry + n.lift, depth: Math.sin(n.a)}));
+const SHOWN = OFFSETS.map(
+  (p, i) =>
+    Math.abs(p.dx) >= CUBE_CLEAR &&
+    !OFFSETS.some(
+      (q, j) => j !== i && Math.abs(q.dx) >= CUBE_CLEAR && (q.depth > p.depth || (q.depth === p.depth && j < i)) && Math.abs(q.dx - p.dx) < 90 && Math.abs(q.dy - p.dy) < 34,
+    ),
 );
 
 export const TemporaryScene: React.FC = () => {
@@ -51,7 +66,10 @@ export const TemporaryScene: React.FC = () => {
   const pushIn = smooth(T.pushIn, 22);
   const pushOut = smooth(T.pushOut, 22);
   const push = pushIn * (1 - pushOut);
-  const cube = {x: lerp(CUBE_HOME.x, PUSH.x, push), y: lerp(CUBE_HOME.y, PUSH.y, push), size: lerp(CUBE_HOME.size, PUSH.size, push)};
+  const rest = {x: lerp(CUBE_HOME.x, NEW_CUBE.x, pushOut), y: CUBE_HOME.y, size: CUBE_HOME.size};
+  const cube = {x: lerp(rest.x, PUSH.x, push), y: lerp(rest.y, PUSH.y, push), size: lerp(rest.size, PUSH.size, push)};
+  const savedGlow = flashAt(frame, SAVED_LAND, 24);
+  const savedRect = segmentRect(TANK_HOME, 0, SAVED);
   const weights = presence(frame, T.pushIn + 6, T.pushOut + 6, 16, 14);
 
   // A new request starts with only what the app adds.
@@ -65,6 +83,9 @@ export const TemporaryScene: React.FC = () => {
   const promptChars = interpolate(frame, [T.prompt[0] + 8, T.prompt[1]], [0, PROMPT.length], clampOpts);
 
   const renderNumber = (n: (typeof NUMBERS)[number], i: number) => {
+    if (!SHOWN[i]) {
+      return null;
+    }
     const depth = Math.sin(n.a);
     const near = (depth + 1) / 2;
     return (
@@ -91,11 +112,16 @@ export const TemporaryScene: React.FC = () => {
       {/* Scene content fades out completely before the finale title. */}
       <AbsoluteFill style={{opacity: 1 - finale}}>
         <svg width={VIDEO.width} height={VIDEO.height} viewBox={`0 0 ${VIDEO.width} ${VIDEO.height}`}>
+          <defs>
+            <filter id="tp-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation={8} />
+            </filter>
+          </defs>
           {NUMBERS.map((n, i) => (Math.sin(n.a) < 0 ? renderNumber(n, i) : null))}
           <LockedCube id="tp-cube" absFrame={abs} {...cube} />
           {NUMBERS.map((n, i) => (Math.sin(n.a) >= 0 ? renderNumber(n, i) : null))}
           <g opacity={weights}>
-            <Caption x={cube.x} y={cube.y - 290} text="WEIGHTS UNCHANGED" color={ICE} size={22} />
+            <Caption x={cube.x} y={cube.y - 215} text="WEIGHTS UNCHANGED" color={ICE} size={22} />
             <g transform={`translate(${cube.x} ${cube.y + 300})`}>
               <rect x={-180} y={-32} width={360} height={64} rx={32} fill={COLORS.charcoal} stroke={ICE} strokeWidth={3} />
               <text x={0} y={0} fill={ICE} fontFamily={FONT} fontWeight={800} fontSize={28} letterSpacing="0.08em" textAnchor="middle" dominantBaseline="central">
@@ -105,11 +131,11 @@ export const TemporaryScene: React.FC = () => {
           </g>
 
           <ContextTank
-            id="tp-old"
+            id="tp-old" textSizes={TANK_TEXT}
             {...TANK_HOME}
             opacity={oldTank}
             segments={drained}
-            readout={{tokens: COMPACTED_TOP * level * CAPACITY, capacity: CAPACITY, opacity: interpolate(frame, [T.fold + 10, T.fold + 20], [0, 1], clampOpts)}}
+            readout={{tokens: COMPACTED_TOP * level * CAPACITY, capacity: CAPACITY, opacity: interpolate(frame, [T.fold + 14, T.fold + 22], [0, 1], clampOpts)}} // after the session frame has folded away
           />
           {/* Drained context dissolves into particles below the window. */}
           {frame >= T.drain[0] && frame < T.drain[1] + 30
@@ -126,7 +152,7 @@ export const TemporaryScene: React.FC = () => {
             : null}
 
           <ContextTank
-            id="tp-new"
+            id="tp-new" textSizes={TANK_TEXT}
             {...TANK_HOME}
             opacity={newDraw > 0 ? 1 : 0}
             draw={newDraw}
@@ -134,8 +160,16 @@ export const TemporaryScene: React.FC = () => {
             labels={1}
             readout={{tokens: SAVED * drop * CAPACITY, capacity: CAPACITY, opacity: newDraw}}
           />
-          <AppMarker x={1540} y={760} opacity={app} frame={frame} />
-          <Caption x={TANK_HOME.x} y={TANK_HOME.y + TANK_HOME.h / 2 + 44} text="ONLY WHAT THE APP ADDS" color={COLORS.purple} size={20} opacity={presence(frame, T.saved[1], T.finale + 10, 12, 12)} />
+          {/* A brief purple glow as the saved instructions land. */}
+          {savedGlow > 0.001 ? (
+            <g opacity={savedGlow}>
+              <rect x={savedRect.x - 4} y={savedRect.y - 4} width={savedRect.w + 8} height={savedRect.h + 8} rx={8} fill="none" stroke={COLORS.purple} strokeWidth={10} filter="url(#tp-glow)" />
+              <rect x={savedRect.x} y={savedRect.y} width={savedRect.w} height={savedRect.h} rx={4} fill={rgba(COLORS.purple, 0.35)} stroke={COLORS.purple} strokeWidth={3} />
+            </g>
+          ) : null}
+          {/* Between the cube and the new tank, clear of the saved-instructions label as it drops down the right side. */}
+          <AppMarker x={870} y={300} opacity={app} frame={frame} />
+          <Caption x={TANK_HOME.x} y={TANK_HOME.y + TANK_HOME.h / 2 + 46} text="ONLY WHAT THE APP ADDS" color={COLORS.white} size={26} opacity={presence(frame, T.saved[1], T.finale + 10, 12, 12)} />
 
           {/* Session window. */}
           {fold < 1 ? (
@@ -143,10 +177,10 @@ export const TemporaryScene: React.FC = () => {
               <rect x={FRAME.x} y={FRAME.y} width={FRAME.w} height={FRAME.h} rx={20} fill="none" stroke={rgba(COLORS.white, 0.6)} strokeWidth={3} pathLength={1} strokeDasharray="1 1" strokeDashoffset={1 - frameDraw} />
               <g opacity={frameDraw}>
                 <line x1={FRAME.x} x2={FRAME.x + FRAME.w} y1={FRAME.y + FRAME.bar} y2={FRAME.y + FRAME.bar} stroke={rgba(COLORS.white, 0.3)} strokeWidth={2} />
-                <Caption x={FRAME.x + 28} y={FRAME.y + FRAME.bar / 2} text="SESSION" anchor="start" color={COLORS.white} size={18} />
-                <g transform={`translate(${FRAME.x + FRAME.w - 30} ${FRAME.y + FRAME.bar / 2})`}>
-                  <circle r={14} fill={close > 0 ? rgba(COLORS.error, 0.4 + 0.6 * close) : rgba(COLORS.white, 0.15)} />
-                  <path d="M-5 -5L5 5M5 -5L-5 5" stroke={COLORS.white} strokeWidth={2.5} strokeLinecap="round" />
+                <Caption x={FRAME.x + 28} y={FRAME.y + FRAME.bar / 2} text="SESSION" anchor="start" color={COLORS.white} size={20} />
+                <g transform={`translate(${FRAME.x + FRAME.w - 38} ${FRAME.y + FRAME.bar / 2})`}>
+                  <circle r={21} fill={close > 0 ? rgba(COLORS.error, 0.4 + 0.6 * close) : rgba(COLORS.white, 0.15)} />
+                  <path d="M-7.5 -7.5L7.5 7.5M7.5 -7.5L-7.5 7.5" stroke={COLORS.white} strokeWidth={3.5} strokeLinecap="round" />
                 </g>
               </g>
             </g>

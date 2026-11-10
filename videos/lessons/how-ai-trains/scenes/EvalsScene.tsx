@@ -25,8 +25,13 @@ const ROWS = [
 const ROW_Y = (i: number) => PANEL.y + 150 + i * 85;
 const STAGGER = 8;
 const FILL = 40;
+// Run 2 fills faster, so the approval can land early and hold before the scene ends.
+const STAGGER_2 = 4;
+const FILL_2 = 24;
+const GHOSTS = [2, 1]; // stacked scorecards behind the panel: four rows stand in for thousands of benchmarks
+const GHOST_STEP = 14;
 const LOOP = {from: {x: PANEL.x, y: ROW_Y(1)}, ctrl: {x: 740, y: 740}, to: {x: POSE.x + 60, y: POSE.y + 150}};
-const REVIEWERS = [1190, 1290];
+const REVIEWERS = [1150, 1250];
 
 const bez = (a: {from: Vec2; ctrl: Vec2; to: Vec2}, t: number): Vec2 => ({
   x: (1 - t) * (1 - t) * a.from.x + 2 * (1 - t) * t * a.ctrl.x + t * t * a.to.x,
@@ -42,8 +47,10 @@ export const EvalsScene: React.FC = () => {
   const pop = (start: number) => (frame >= start ? spring({frame: frame - start, fps, config: {damping: 10, stiffness: 180}}) : 0);
 
   const pose = cubePose(frame, fps, dur, POSE);
-  const content = interpolate(frame, [E.contentOut, E.contentOut + 12], [1, 0], clampOpts);
-  const badge = interpolate(frame, [0, 10, dur - 12, dur], [0, 1, 1, 0], clampOpts);
+  // Fades quickly, so the cube's glide home (last 20 frames) doesn't pass over a lingering scorecard.
+  const content = interpolate(frame, [E.contentOut, E.contentOut + 8], [1, 0], clampOpts);
+  // The humans-in-the-loop badge arrives with the reviewers.
+  const badge = interpolate(frame, [E.approve, E.approve + 10, dur - 12, dur], [0, 1, 1, 0], clampOpts);
   const secondRun = frame >= E.run2 - 6;
   const reset = interpolate(frame, [E.run2 - 6, E.run2], [1, 0], clampOpts);
 
@@ -51,6 +58,8 @@ export const EvalsScene: React.FC = () => {
   const loopT = interpolate(frame, [E.loopBack + 6, E.loopArrive], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.quad)});
   const loopDot = bez(LOOP, loopT);
   const loopFade = interpolate(frame, [E.run2, E.run2 + 10], [1, 0], clampOpts);
+  // "More training": the Scene 6 loop echoes around the model, in purple, as the path arrives.
+  const retrain = interpolate(frame, [E.loopArrive - 8, E.loopArrive, E.loopArrive + 12, E.loopArrive + 20], [0, 1, 1, 0], clampOpts);
 
   return (
     <AbsoluteFill>
@@ -58,14 +67,26 @@ export const EvalsScene: React.FC = () => {
         <defs>
           <GlowFilter id="ev-glow" blur={5} />
         </defs>
-        <ModelCube id="ev-cube" absFrame={abs} {...pose} emblem={1} glow={flashAt(frame, E.loopArrive, 24)} glowColor={COLORS.purple} />
-
         <g opacity={content}>
-          {/* Benchmark scorecard. */}
+          {/* Benchmark scorecard, with more stacked behind it. */}
           <g opacity={smooth(E.panel)}>
+            {GHOSTS.map((g) => (
+              <rect
+                key={g}
+                x={PANEL.x + g * GHOST_STEP}
+                y={PANEL.y - g * GHOST_STEP}
+                width={PANEL.w}
+                height={PANEL.h}
+                rx={24}
+                fill={COLORS.charcoal}
+                stroke={rgba(COLORS.white, 0.1 + 0.05 * (GHOSTS.length - g))}
+                strokeWidth={2}
+              />
+            ))}
             <rect x={PANEL.x} y={PANEL.y} width={PANEL.w} height={PANEL.h} rx={24} fill={rgba(COLORS.charcoal, 0.92)} stroke={rgba(COLORS.white, 0.25)} strokeWidth={2} />
             <Caption x={PANEL.x + 40} y={PANEL.y + 55} text="BENCHMARKS" anchor="start" color={COLORS.white} size={24} />
-            <Caption x={PANEL.x + PANEL.w - 40} y={PANEL.y + 55} text={secondRun ? 'RUN 2' : 'RUN 1'} anchor="end" size={18} />
+            <Caption x={PANEL.x + PANEL.w - 40} y={PANEL.y + 55} text={secondRun ? 'RUN 2' : 'RUN 1'} anchor="end" size={22} />
+            <Caption x={PANEL.x + PANEL.w / 2} y={PANEL.y + PANEL.h + 40} text="4 OF THOUSANDS OF BENCHMARKS" size={22} color={rgba(COLORS.white, 0.6)} />
             <line
               x1={BAR.x + BAR.w * PASS}
               y1={ROW_Y(0) - 35}
@@ -75,23 +96,24 @@ export const EvalsScene: React.FC = () => {
               strokeWidth={2}
               strokeDasharray="6 6"
             />
-            <Caption x={BAR.x + BAR.w * PASS} y={ROW_Y(0) - 52} text="PASS" size={16} />
+            <Caption x={BAR.x + BAR.w * PASS} y={ROW_Y(0) - 54} text="PASS" size={22} />
 
             {ROWS.map((row, i) => {
               const y = ROW_Y(i);
-              const runStart = (secondRun ? E.run2 : E.run1) + i * STAGGER;
-              const fill = interpolate(frame, [runStart, runStart + FILL], [0, 1], {...clampOpts, easing: Easing.out(Easing.cubic)});
+              const runStart = secondRun ? E.run2 + i * STAGGER_2 : E.run1 + i * STAGGER;
+              const fillFrames = secondRun ? FILL_2 : FILL;
+              const fill = interpolate(frame, [runStart, runStart + fillFrames], [0, 1], {...clampOpts, easing: Easing.out(Easing.cubic)});
               const score = (secondRun ? row.run2 : row.run1) * fill * (secondRun ? 1 : reset);
-              const done = frame >= runStart + FILL;
+              const done = frame >= runStart + fillFrames;
               const passed = (secondRun ? row.run2 : row.run1) >= PASS;
               const color = done && !passed ? COLORS.error : COLORS.cyan;
               return (
                 <g key={row.name}>
-                  <Caption x={PANEL.x + 40} y={y} text={row.name} anchor="start" color={COLORS.white} size={20} />
+                  <Caption x={PANEL.x + 40} y={y} text={row.name} anchor="start" color={COLORS.white} size={24} />
                   <rect x={BAR.x} y={y - BAR.h / 2} width={BAR.w} height={BAR.h} rx={BAR.h / 2} fill={rgba(COLORS.white, 0.08)} />
                   <rect x={BAR.x} y={y - BAR.h / 2} width={BAR.w * score} height={BAR.h} rx={BAR.h / 2} fill={color} />
                   {done && (secondRun || reset > 0) ? (
-                    <g transform={`translate(${BAR.x + BAR.w + 50} ${y}) scale(${0.8 * pop(runStart + FILL) * (secondRun ? 1 : reset)})`}>
+                    <g transform={`translate(${BAR.x + BAR.w + 50} ${y}) scale(${0.8 * pop(runStart + fillFrames) * (secondRun ? 1 : reset)})`}>
                       <Mark ok={passed} />
                     </g>
                   ) : null}
@@ -112,8 +134,15 @@ export const EvalsScene: React.FC = () => {
                 strokeWidth={3}
                 fill="none"
               />
-              <Caption x={760} y={700} text="BACK TO TRAINING" color={COLORS.purple} size={18} />
+              <Caption x={790} y={712} text="BACK TO TRAINING" color={COLORS.purple} size={24} />
               {loopT > 0 && loopT < 1 ? <circle cx={loopDot.x} cy={loopDot.y} r={12} fill={COLORS.purple} filter="url(#ev-glow)" /> : null}
+            </g>
+          ) : null}
+
+          {retrain > 0 ? (
+            <g opacity={retrain} fill="none" stroke={COLORS.purple} strokeWidth={3} strokeDasharray="12 12" filter="url(#ev-glow)">
+              <path d={`M${pose.x - 150} ${pose.y - 80}A190 150 0 0 1 ${pose.x + 150} ${pose.y - 80}`} strokeDashoffset={-frame * 3} />
+              <path d={`M${pose.x + 150} ${pose.y + 100}A190 150 0 0 1 ${pose.x - 150} ${pose.y + 100}`} strokeDashoffset={-frame * 3} />
             </g>
           ) : null}
 
@@ -122,15 +151,17 @@ export const EvalsScene: React.FC = () => {
             {REVIEWERS.map((x) => (
               <Person key={x} x={x} y={850} size={72} />
             ))}
-            <Caption x={(REVIEWERS[0] + REVIEWERS[1]) / 2} y={915} text="REVIEWERS" size={16} />
-            <g transform={`translate(1540 850) rotate(-6) scale(${pop(E.approve + 6)})`}>
-              <rect x={-170} y={-38} width={340} height={76} rx={12} fill="none" stroke={COLORS.cyan} strokeWidth={4} />
+            <Caption x={(REVIEWERS[0] + REVIEWERS[1]) / 2} y={918} text="REVIEWERS" size={24} />
+            <g transform={`translate(1540 850) rotate(-4) scale(${pop(E.approve + 6)})`}>
+              <rect x={-210} y={-38} width={420} height={76} rx={12} fill="none" stroke={COLORS.cyan} strokeWidth={4} />
               <text x={0} y={0} fill={COLORS.cyan} fontFamily={FONT} fontWeight={800} fontSize={26} letterSpacing="0.1em" textAnchor="middle" dominantBaseline="central">
                 APPROVED FOR RELEASE
               </text>
             </g>
           </g>
         </g>
+        {/* Drawn last: on its way home the cube passes in front of the fading scorecard, not behind it. */}
+        <ModelCube id="ev-cube" absFrame={abs} {...pose} emblem={1} glow={flashAt(frame, E.loopArrive, 24)} glowColor={COLORS.purple} />
       </svg>
 
       <div style={{opacity: content}}>

@@ -9,7 +9,7 @@ import {SceneTitle} from '../../../shared/components/SceneTitle';
 import {FONT} from '../../../shared/fonts';
 import {lerp, mix2, Vec2} from '../../../shared/lib/math';
 import {clampOpts, cubePose, flashAt} from '../lib/motion';
-import {COLORS, rgba, VIDEO} from '../../../shared/theme';
+import {COLORS, VIDEO} from '../../../shared/theme';
 import {FEEDBACK as F, SCENES} from '../timing';
 
 const POSE = {x: 960, y: 470, size: 80};
@@ -18,9 +18,14 @@ const ANSWER_A = 'Gravity is the curvature of spacetime described by general rel
 const ANSWER_B = 'Gravity is an invisible pull that makes things fall to the ground!';
 const CARD_A = {x: 410, y: 470};
 const CARD_B = {x: 1510, y: 470};
-const RATER = {x: 960, y: 820};
-const REWARD = {x: 1510, y: 830, w: 380, h: 130};
-const STREAM_DOTS = 12;
+const RATER = {x: 960, y: 800};
+// More people join once the comparisons start streaming: it's many people, not one.
+const CROWD = [
+  {x: 840, y: 790},
+  {x: 1080, y: 790},
+];
+const STREAM_DOTS = 15;
+const DOT_TRAVEL = 18;
 const COMPARISONS = 1_000_000;
 
 // Quadratic Bézier point.
@@ -28,6 +33,13 @@ const bez = (a: Vec2, c: Vec2, b: Vec2, t: number): Vec2 => ({
   x: (1 - t) * (1 - t) * a.x + 2 * (1 - t) * t * c.x + t * t * b.x,
   y: (1 - t) * (1 - t) * a.y + 2 * (1 - t) * t * c.y + t * t * b.y,
 });
+const SOURCES = [RATER, ...CROWD];
+// Each preference dot leaves one of the people and lands in the model.
+const DOTS = Array.from({length: STREAM_DOTS}, (_, i) => ({
+  start: F.streamStart + i * ((F.streamEnd - F.streamStart - DOT_TRAVEL) / (STREAM_DOTS - 1)),
+  from: SOURCES[i % SOURCES.length],
+}));
+const FIRST_ARRIVAL = DOTS[0].start + DOT_TRAVEL;
 
 export const FeedbackScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -41,21 +53,18 @@ export const FeedbackScene: React.FC = () => {
   const content = interpolate(frame, [F.contentOut, F.contentOut + 12], [1, 0], clampOpts);
   const badge = interpolate(frame, [0, 10, dur - 12, dur], [0, 1, 1, 0], clampOpts);
 
-  // The person picks B; A dims, B flies into the reward model.
+  // The person picks B; A dims, and the preferred answer goes straight into the model.
   const picked = smooth(F.pick, 10);
-  const toReward = interpolate(frame, [F.toReward, F.rewardIn], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.cubic)});
-  const bPos = mix2(CARD_B, REWARD, toReward);
-  const meter = interpolate(frame, [F.rewardIn - 4, F.rewardIn + 4, F.streamStart + 4, F.streamEnd], [0, 0.35, 0.35, 0.92], clampOpts);
-  const comparisons = interpolate(frame, [F.rewardIn, F.streamEnd], [1, COMPARISONS], {...clampOpts, easing: Easing.in(Easing.quad)});
+  const toModel = interpolate(frame, [F.toReward, F.rewardIn], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.cubic)});
+  const bPos = mix2(CARD_B, pose, toModel);
+  const crowd = smooth(F.streamStart, 12);
+  const counterIn = smooth(FIRST_ARRIVAL, 8);
+  const comparisons = Math.round(interpolate(frame, [FIRST_ARRIVAL, F.streamEnd], [1, COMPARISONS], {...clampOpts, easing: Easing.in(Easing.quad)}));
 
-  // Reward signal from the reward model back into the model.
-  const sigFrom = {x: REWARD.x - REWARD.w / 2, y: REWARD.y - 30};
-  const sigCtrl = {x: 1240, y: 640};
-  const sigTo = {x: POSE.x + 110, y: POSE.y + 60};
-  const sigDraw = interpolate(frame, [F.signal, F.signal + 12], [0, 1], clampOpts);
-  const sigT = interpolate(frame, [F.signal + 4, F.signalEnd], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.quad)});
-  const sigDot = bez(sigFrom, sigCtrl, sigTo, sigT);
-  const learnGlow = flashAt(frame, F.signalEnd, 26);
+  // The model takes on their preferences: it glows as each one lands, then once more as it settles.
+  const dotGlow = Math.max(0, ...DOTS.map((d) => flashAt(frame, d.start + DOT_TRAVEL, 10)));
+  const learnGlow = Math.max(flashAt(frame, F.rewardIn, 16), dotGlow * 0.6, flashAt(frame, F.signalEnd, 26));
+  const learnedLabel = interpolate(frame, [F.signal, F.signal + 10, F.contentOut, F.contentOut + 12], [0, 1, 1, 0], clampOpts);
 
   return (
     <AbsoluteFill>
@@ -66,10 +75,19 @@ export const FeedbackScene: React.FC = () => {
         <ModelCube id="fb-cube" absFrame={abs} {...pose} emblem={1} glow={learnGlow} glowColor={COLORS.purple} />
 
         <g opacity={content}>
-          {/* Person comparing the answers. */}
+          {/* People comparing answers: one picks first, then many more join. */}
+          <g opacity={crowd * 0.55}>
+            {CROWD.map((p) => (
+              <Person key={p.x} {...p} size={72} />
+            ))}
+          </g>
           <g opacity={smooth(F.rater)}>
             <Person {...RATER} size={96} />
-            <Caption x={RATER.x} y={RATER.y + 80} text="A PERSON PICKS THE BETTER ANSWER" />
+            <Caption x={RATER.x} y={RATER.y + 80} text="A PERSON PICKS THE BETTER ANSWER" size={24} opacity={1 - Math.min(1, crowd * 2)} />
+            <Caption x={RATER.x} y={RATER.y + 80} text="PEOPLE PICK THE BETTER ANSWER" size={24} opacity={Math.max(0, crowd * 2 - 1)} />
+            <text x={RATER.x} y={RATER.y + 124} fill={COLORS.white} opacity={counterIn * 0.85} fontFamily={FONT} fontWeight={700} fontSize={26} textAnchor="middle" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
+              {`${comparisons.toLocaleString('en-US')} ${comparisons === 1 ? 'comparison' : 'comparisons'}`}
+            </text>
             {picked > 0 ? (
               <line
                 x1={RATER.x + 40}
@@ -79,49 +97,24 @@ export const FeedbackScene: React.FC = () => {
                 stroke={COLORS.purple}
                 strokeWidth={4}
                 strokeDasharray="10 10"
-                opacity={1 - toReward}
+                opacity={1 - toModel}
               />
             ) : null}
           </g>
 
-          {/* Reward model: learns what people prefer. */}
-          <g opacity={smooth(F.toReward - 10)}>
-            <rect x={REWARD.x - REWARD.w / 2} y={REWARD.y - REWARD.h / 2} width={REWARD.w} height={REWARD.h} rx={20} fill={COLORS.charcoal} stroke={COLORS.purple} strokeWidth={3} filter={flashAt(frame, F.rewardIn) > 0.1 ? 'url(#fb-glow)' : undefined} />
-            <Caption x={REWARD.x - REWARD.w / 2 + 28} y={REWARD.y - 36} text="REWARD MODEL" anchor="start" color={COLORS.purple} />
-            <rect x={REWARD.x - REWARD.w / 2 + 28} y={REWARD.y - 6} width={REWARD.w - 56} height={14} rx={7} fill={rgba(COLORS.white, 0.1)} />
-            <rect x={REWARD.x - REWARD.w / 2 + 28} y={REWARD.y - 6} width={(REWARD.w - 56) * meter} height={14} rx={7} fill={COLORS.purple} />
-            <text x={REWARD.x - REWARD.w / 2 + 28} y={REWARD.y + 36} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={22} dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
-              {`${Math.round(comparisons).toLocaleString('en-US')} comparisons`}
-            </text>
-          </g>
-
-          {/* Many more comparisons streaming from people into the reward model. */}
-          {Array.from({length: STREAM_DOTS}, (_, i) => {
-            const start = F.streamStart + i * ((F.streamEnd - F.streamStart - 18) / (STREAM_DOTS - 1));
-            const t = (frame - start) / 18;
+          {/* Preferences stream from all the people straight into the model. */}
+          {DOTS.map((d, i) => {
+            const t = (frame - d.start) / DOT_TRAVEL;
             if (t < 0 || t > 1) {
               return null;
             }
-            const p = mix2({x: RATER.x + 60, y: RATER.y}, {x: REWARD.x - REWARD.w / 2, y: REWARD.y}, t);
+            const from = {x: d.from.x, y: d.from.y - 50};
+            const to = {x: pose.x, y: pose.y + 120};
+            const p = bez(from, {x: (from.x + to.x) / 2 + 40, y: (from.y + to.y) / 2}, to, Easing.inOut(Easing.quad)(t));
             return <circle key={i} cx={p.x} cy={p.y} r={7} fill={COLORS.purple} filter="url(#fb-glow)" />;
           })}
-
-          {/* Reward signal back into the model. */}
-          {sigDraw > 0 ? (
-            <>
-              <path
-                d={`M${sigFrom.x} ${sigFrom.y}Q${sigCtrl.x} ${sigCtrl.y} ${sigTo.x} ${sigTo.y}`}
-                pathLength={1}
-                strokeDasharray="1 1"
-                strokeDashoffset={1 - sigDraw}
-                stroke={COLORS.purple}
-                strokeWidth={3}
-                fill="none"
-              />
-              <Caption x={1290} y={600} text="REWARD SIGNAL" color={COLORS.purple} size={18} />
-              {sigT > 0 && sigT < 1 ? <circle cx={sigDot.x} cy={sigDot.y} r={12} fill={COLORS.purple} filter="url(#fb-glow)" /> : null}
-            </>
-          ) : null}
+          <Caption x={RATER.x + 190} y={665} text="PREFERENCES" anchor="start" color={COLORS.purple} size={24} opacity={crowd * (1 - learnedLabel)} />
+          <Caption x={RATER.x + 190} y={665} text="LEARNS THEIR PREFERENCES" anchor="start" color={COLORS.purple} size={24} opacity={learnedLabel} />
         </g>
       </svg>
 
@@ -133,8 +126,8 @@ export const FeedbackScene: React.FC = () => {
           width={460}
           label="ANSWER B"
           text={ANSWER_B}
-          opacity={smooth(F.cards) * (1 - toReward)}
-          scale={1 - 0.85 * toReward}
+          opacity={smooth(F.cards) * (1 - toModel)}
+          scale={1 - 0.85 * toModel}
           fontSize={26}
           mark="ok"
           markScale={pop(F.pick)}

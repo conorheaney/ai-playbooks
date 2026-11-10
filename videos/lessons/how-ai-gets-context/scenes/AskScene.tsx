@@ -7,22 +7,24 @@ import {ContextTank, Segment, SEGMENT_STYLE, segmentRect} from '../../../shared/
 import {PromptBar, StatusBadge} from '../../../shared/components/context/Pieces';
 import {FONT} from '../../../shared/fonts';
 import {lerp} from '../../../shared/lib/math';
-import {clampOpts, flashAt} from '../../../shared/lib/motion';
+import {clampOpts, flashAt, presence} from '../../../shared/lib/motion';
+import {centredRow} from '../../../shared/lib/row';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
-import {RefChip} from '../components/Parts';
+import {FlowLine, RefChip} from '../components/Parts';
 import {SearchIndex, slotRect, SlotState} from '../components/SearchIndex';
-import {ASK_SEGMENTS, ASK_TANK, CANDIDATES, CAPACITY, INDEX, INDEX_ASK, INDEX_SLOTS, QUESTION, TOP_N} from '../layout';
+import {ASK_BAR, ASK_INDEX_SCALE, ASK_ROW, ASK_SEGMENTS, ASK_TANK, CANDIDATES, CAPACITY, INDEX, INDEX_SLOTS, QUESTION, ROW_GAP, TOP_N} from '../layout';
 import {ASK as A, SCENES} from '../timing';
 
-const BAR = {x: 880, y: 960, w: 860};
-const RANK = {x: 1060, top: 300, step: 58, w: 300, h: 46};
+const RANK = {step: 58, w: 300, h: 46};
+const RANK_TOP = ASK_ROW.y - ((CANDIDATES.length - 1) / 2) * RANK.step;
+const BAR_H = 96;
 const SCORE_W = 110;
 
 // Candidate slots, in the order the scan finds them (left to right), with their sorted rank.
 const FOUND = CANDIDATES.map((c, rank) => ({...c, rank, slot: INDEX_SLOTS.findIndex((s) => s.ref === c.ref)})).sort(
   (a, b) => (a.slot % INDEX.cols) - (b.slot % INDEX.cols) || a.slot - b.slot,
 );
-const rowY = (i: number) => RANK.top + i * RANK.step;
+const rowY = (i: number) => RANK_TOP + i * RANK.step;
 
 export const AskScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -33,11 +35,25 @@ export const AskScene: React.FC = () => {
 
   const out = interpolate(frame, [A.out, dur], [1, 0], clampOpts);
   const mv = interpolate(frame, [A.move[0], A.move[1]], [0, 1], ease);
-  const geom = {x: lerp(INDEX.x, INDEX_ASK.x, mv), y: lerp(INDEX.y, INDEX_ASK.y, mv), scale: lerp(1, INDEX_ASK.scale, mv)};
+  // The window draws once the index has mostly slid aside, so the two never overlap.
+  const tankDraw = interpolate(frame, [A.move[0] + 14, A.move[1] + 14], [0, 1], ease);
+  // The row: the index, the ranked list (which opens as the candidates lift out) and the window.
+  const rankedIn = interpolate(frame, [A.scan[1] - 8, A.lift[0] + 6], [0, 1], ease);
+  const [indexX, rankX, tankX] = centredRow(
+    [
+      {...ASK_ROW.index, p: 1},
+      {...ASK_ROW.ranked, p: rankedIn},
+      {...ASK_ROW.tank, p: tankDraw},
+    ],
+    ROW_GAP,
+  );
+  const TANK = {...ASK_TANK, x: tankX};
+  const geom = {x: lerp(INDEX.x, indexX, mv), y: lerp(INDEX.y, ASK_ROW.y, mv), scale: lerp(1, ASK_INDEX_SCALE, mv)};
+  // Once typed, a copy of the question drops into the window as its own slice.
+  const asked = interpolate(frame, [A.bar[1] + 4, A.bar[1] + 20], [0, 1], ease);
   const scan = interpolate(frame, [A.scan[0], A.scan[1]], [0, 1], clampOpts);
   const sort = interpolate(frame, [A.sort[0], A.sort[1]], [0, 1], ease);
   const notUsed = interpolate(frame, [A.notUsed, A.notUsed + 14], [0, 1], ease);
-  const tankDraw = interpolate(frame, [A.move[0], A.move[1]], [0, 1], ease);
 
   const lift = (i: number) => interpolate(frame, [A.lift[0] + i * 2, A.lift[0] + i * 2 + 14], [0, 1], ease);
   const into = (rank: number) => interpolate(frame, [A.intoTank[0] + rank * 10, A.intoTank[0] + rank * 10 + 22], [0, 1], ease);
@@ -68,8 +84,9 @@ export const AskScene: React.FC = () => {
       kind: 'message',
       from: ASK_SEGMENTS.retrieved[0][0] + msgShift,
       to: ASK_SEGMENTS.retrieved[0][0] + msgShift + (ASK_SEGMENTS.message[1] - ASK_SEGMENTS.message[0]),
+      opacity: asked >= 1 ? 1 : 0,
       label: 'YOUR QUESTION',
-      labelOpacity: 1,
+      labelOpacity: smooth(A.bar[1] + 20, 10),
     },
   ];
   const tokens = (0.1 + 0.18 * (interpolate(into(0), [0.7, 1], [0, 0.5], clampOpts) + interpolate(into(1), [0.7, 1], [0, 0.5], clampOpts))) * CAPACITY;
@@ -77,11 +94,15 @@ export const AskScene: React.FC = () => {
   return (
     <AbsoluteFill>
       <svg width={VIDEO.width} height={VIDEO.height} viewBox={`0 0 ${VIDEO.width} ${VIDEO.height}`}>
+        {/* The question goes to the search index. */}
+        <g opacity={out}>
+          <FlowLine from={{x: ASK_BAR.x - ASK_BAR.w / 2 + 120, y: ASK_BAR.y + BAR_H / 2 + 8}} to={{x: indexX, y: ASK_ROW.y - 250}} frame={frame} opacity={presence(frame, A.scan[0] - 8, A.lift[0] + 10, 8, 12)} bend={-30} />
+        </g>
         <g opacity={out}>
           <SearchIndex geom={geom} slots={slots} scan={scan} />
         </g>
 
-        <ContextTank id="gc-a-tank" {...ASK_TANK} draw={tankDraw} opacity={tankDraw > 0 ? 1 : 0} segments={segments} labels={tankDraw} readout={{tokens, capacity: CAPACITY, opacity: tankDraw}} />
+        <ContextTank id="gc-a-tank" {...TANK} draw={tankDraw} opacity={tankDraw > 0 ? 1 : 0} segments={segments} labels={tankDraw} readout={{tokens, capacity: CAPACITY, opacity: tankDraw}} />
 
         <g opacity={out}>
           {/* Candidates lift out of the index, rank themselves, and the best two enter the window. */}
@@ -97,27 +118,36 @@ export const AskScene: React.FC = () => {
             }
             const from = slotRect(geom, c.slot);
             const rankY = lerp(rowY(i), rowY(c.rank), sort);
-            const rowX = RANK.x - (top ? 0 : 40 * notUsed);
+            const rowX = rankX - (top ? 0 : 40 * notUsed);
             let x = lerp(from.cx, rowX, l);
             let y = lerp(from.cy, rankY, l);
             let w = lerp(from.w, RANK.w, l);
             let h = lerp(from.h, RANK.h, l);
             let fill = rgba(COLORS.charcoal, 0.95);
             if (t > 0) {
-              const r = segmentRect(ASK_TANK, ASK_SEGMENTS.retrieved[c.rank][0], ASK_SEGMENTS.retrieved[c.rank][1]);
-              x = lerp(x, r.x + r.w / 2, t);
-              y = lerp(y, r.y + r.h / 2, t);
-              w = lerp(w, r.w, t);
-              h = lerp(h, r.h, t);
+              // Out to the right along its own row first (the top two sit above the cut, so this never crosses the
+              // rest of the list or the TOP 2 label), then down inside the window into its slice.
+              const r = segmentRect(TANK, ASK_SEGMENTS.retrieved[c.rank][0], ASK_SEGMENTS.retrieved[c.rank][1]);
+              const across = interpolate(t, [0, 0.5], [0, 1], ease);
+              const down = interpolate(t, [0.45, 1], [0, 1], ease);
+              x = lerp(x, r.x + r.w / 2, across);
+              y = lerp(y, r.y + r.h / 2, down);
+              w = lerp(w, r.w, across);
+              h = lerp(h, r.h, down);
               fill = SEGMENT_STYLE.retrieved.fill;
             }
             const content = l * (1 - interpolate(t, [0, 0.4], [0, 1], clampOpts));
             const dim = top ? 1 : lerp(1, 0.35, notUsed);
+            // On the cut, the top two are ringed and held in place before they fly.
+            const ring = top ? presence(frame, A.cut, A.intoTank[0] + 4, 6, 6) : 0;
             return (
               <g key={c.ref} opacity={dim}>
+                {ring > 0.001 ? (
+                  <rect x={x - w / 2 - 6} y={y - h / 2 - 6} width={w + 12} height={h + 12} rx={16} fill="none" stroke={COLORS.cyan} strokeWidth={3} opacity={ring} style={{filter: `drop-shadow(0 0 8px ${rgba(COLORS.cyan, 0.6)})`}} />
+                ) : null}
                 <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={lerp(8, 12, l)} fill={fill} stroke={top && frame >= A.cut ? COLORS.cyan : rgba(COLORS.cyan, 0.6)} strokeWidth={2} />
                 <g opacity={content}>
-                  <RefChip x={x - w / 2 + 50} y={y} text={c.ref} scale={0.9} />
+                  <RefChip x={x - w / 2 + 50} y={y} text={c.ref} />
                   <rect x={x - 34} y={y - 6} width={SCORE_W} height={12} rx={6} fill={rgba(COLORS.white, 0.12)} />
                   <rect x={x - 34} y={y - 6} width={SCORE_W * c.score} height={12} rx={6} fill={top ? COLORS.cyan : rgba(COLORS.cyan, 0.55)} />
                   <text x={x + w / 2 - 14} y={y + 1} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={18} textAnchor="end" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
@@ -127,28 +157,49 @@ export const AskScene: React.FC = () => {
               </g>
             );
           })}
-          <Caption x={RANK.x} y={RANK.top - 52} text="RANKED" color={rgba(COLORS.white, 0.7)} size={20} opacity={smooth(A.lift[0], 12)} />
+          <Caption x={rankX} y={RANK_TOP - 52} text="RANKED" color={rgba(COLORS.white, 0.7)} size={20} opacity={smooth(A.lift[0], 12)} />
           {frame >= A.cut ? (
             <g opacity={smooth(A.cut, 10)}>
-              <line x1={RANK.x - RANK.w / 2 - 14} x2={RANK.x + RANK.w / 2 + 14} y1={rowY(TOP_N) - RANK.step / 2} y2={rowY(TOP_N) - RANK.step / 2} stroke={COLORS.cyan} strokeWidth={3} strokeDasharray="10 8" />
-              <Caption x={RANK.x + RANK.w / 2 + 26} y={rowY(TOP_N) - RANK.step / 2} text={`TOP ${TOP_N}`} anchor="start" color={COLORS.cyan} size={18} />
+              <line x1={rankX - RANK.w / 2 - 14} x2={rankX + RANK.w / 2 + 14} y1={rowY(TOP_N) - RANK.step / 2} y2={rowY(TOP_N) - RANK.step / 2} stroke={COLORS.cyan} strokeWidth={3} strokeDasharray="10 8" />
+              <Caption x={rankX + RANK.w / 2 + 26} y={rowY(TOP_N) - RANK.step / 2} text={`TOP ${TOP_N}`} anchor="start" color={COLORS.cyan} size={18} />
             </g>
           ) : null}
-          <Caption x={RANK.x - 40} y={rowY(CANDIDATES.length) + 6} text="NOT USED" color={rgba(COLORS.white, 0.6)} size={18} opacity={notUsed} />
+          <Caption x={rankX - 40} y={rowY(CANDIDATES.length) + 6} text="NOT USED" color={rgba(COLORS.white, 0.6)} size={18} opacity={notUsed} />
         </g>
       </svg>
 
       <AbsoluteFill style={{opacity: out}}>
         <PromptBar
-          x={BAR.x}
-          y={BAR.y + 40 * (1 - smooth(A.bar[0], 15))}
-          width={BAR.w}
+          x={ASK_BAR.x}
+          y={ASK_BAR.y - 30 * (1 - smooth(A.bar[0], 15))}
+          width={ASK_BAR.w}
           text={QUESTION}
           chars={interpolate(frame, [A.bar[0] + 4, A.bar[1]], [0, QUESTION.length], clampOpts)}
           opacity={smooth(A.bar[0], 15)}
           frame={frame}
-          cursor={frame < A.scan[0]}
+          cursor={frame < A.bar[1] + 4}
         />
+        {asked > 0 && asked < 1
+          ? (() => {
+              const r = segmentRect(TANK, ASK_SEGMENTS.retrieved[0][0], ASK_SEGMENTS.retrieved[0][0] + (ASK_SEGMENTS.message[1] - ASK_SEGMENTS.message[0]));
+              return (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: lerp(ASK_BAR.x, r.x + r.w / 2, asked) - lerp(ASK_BAR.w, r.w, Math.min(1, asked * 2.5)) / 2,
+                    top: lerp(ASK_BAR.y, r.y + r.h / 2, asked) - lerp(BAR_H, r.h, Math.min(1, asked * 2.5)) / 2,
+                    width: lerp(ASK_BAR.w, r.w, Math.min(1, asked * 2.5)), // shrinks first, then travels
+                    height: lerp(BAR_H, r.h, Math.min(1, asked * 2.5)),
+                    boxSizing: 'border-box',
+                    borderRadius: lerp(48, 4, Math.min(1, asked * 2.5)),
+                    border: `2px solid ${COLORS.cyan}`,
+                    background: SEGMENT_STYLE.message.fill,
+                    opacity: interpolate(asked, [0, 0.2], [0, 1], clampOpts),
+                  }}
+                />
+              );
+            })()
+          : null}
       </AbsoluteFill>
 
       <Pinned>

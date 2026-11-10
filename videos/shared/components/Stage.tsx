@@ -22,3 +22,6 @@ export const Pinned: React.FC<{children: React.ReactNode}> = ({children}) => {
 // The shift for a frame from a per-frame track; empty or short tracks fall back to no shift.
 export const trackAt = (track: readonly number[], frame: number) =>
   track.length === 0 ? 0 : track[Math.max(0, Math.min(track.length - 1, Math.round(frame)))];
+
+// The Stage's current shift, for content that should glide to true screen centre (or partly cancel the shift).
+export const useStageShift = () => useContext(ShiftContext);

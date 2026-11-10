@@ -1,9 +1,16 @@
 // Measures where each frame's main content sits and writes a per-frame horizontal shift that centres it.
 //
 // Usage: node scripts/measure-centering.mjs <CompositionId> <output .ts file> [--fixed=<from>-<to>:<px> ...]
+//          [--look-ahead=<frames>] [--smooth=<frames>] [--trim=<share>] [--clamp]
 //   e.g. npm run center:responds
 //   --fixed holds a frame range at a set shift, for scenes whose layout is already designed around
 //   screen centre (a full-screen effect, or an object that must stay dead centre).
+//   --look-ahead and --smooth override the defaults below. Smaller values keep what is on screen now
+//   centred more tightly (less shifting early to make room for content that hasn't appeared yet).
+//   --trim overrides the share of content ignored on each side (e.g. 0.002 measures the true visible
+//   edges, so sparse text beside a large bright shape still counts).
+//   --clamp re-applies the screen-margin limits after smoothing, so tighter tracking never lets
+//   content that is fading in sit past the margins.
 //
 // How it works:
 // 1. Renders the composition at half size, silent and uncentred (input prop center: false).
@@ -34,6 +41,14 @@ const FIXED = args
     if (!m) throw new Error(`Bad option ${a}; expected --fixed=<from>-<to>:<px>`);
     return {from: Number(m[1]), to: Number(m[2]), px: Number(m[3])};
   });
+const option = (name, fallback) => {
+  const hit = args.find((a) => a.startsWith(`--${name}=`));
+  if (!hit) return fallback;
+  const v = Number(hit.split('=')[1]);
+  if (!Number.isInteger(v) || v < 0) throw new Error(`Bad option ${hit}; expected a whole number of frames`);
+  return v;
+};
+const CLAMP = args.includes('--clamp');
 if (!id || !outArg) {
   console.error('Usage: node scripts/measure-centering.mjs <CompositionId> <output .ts file>');
   process.exit(1);
@@ -49,11 +64,17 @@ const SCALE = 1920 / W;
 const TOP_BAND = Math.round((215 / 1080) * H); // title, badges and the lane things fly in along live above this
 const THRESHOLD = 55; // grey level that separates content from the background
 const MIN_PIXELS = 25; // fewer bright pixels than this counts as an empty frame
-const TRIM = 0.03; // share of content ignored on each side
-const SMOOTH = 15; // half-width of each box-blur pass, in frames (two passes ≈ 1 s)
+const TRIM = (() => {
+  const hit = args.find((a) => a.startsWith('--trim='));
+  const v = hit ? Number(hit.split('=')[1]) : 0.03;
+  if (!(v >= 0 && v < 0.5)) throw new Error(`Bad option ${hit}; expected a share between 0 and 0.5`);
+  return v;
+})(); // share of content ignored on each side
+const SMOOTH = option('smooth', 15); // half-width of each box-blur pass, in frames (two passes ≈ 1 s)
 const LIMIT = 260; // never shift further than this, in px
+const RAMP = 2 * SMOOTH; // frames over which the shift eases away from a --fixed range
 const LOOK_BACK = 6; // frames of past content each frame still makes room for
-const LOOK_AHEAD = 30; // frames of upcoming content each frame makes room for, so things fading in aren't pushed off-screen
+const LOOK_AHEAD = option('look-ahead', 30); // frames of upcoming content each frame makes room for, so things fading in aren't pushed off-screen
 const MARGIN = 60; // content never shifts closer than this to the screen edge, in px
 const MEDIAN = 12; // half-width of the median filter that drops brief passers-by, in frames
 
@@ -195,6 +216,7 @@ const steady = centres.map((_, i) => {
 //    it, so elements that are fading in are already accounted for. The shift is then limited so that
 //    combined extent stays inside the screen margins. Empty frames hold the last value.
 let last = 0;
+const bounds = []; // per frame: the shift range that keeps the looked-at content inside the margins
 const raw = steady.map((_, f) => {
   const fixed = FIXED.find((r) => f >= r.from && f < r.to);
   if (fixed) return (last = fixed.px);
@@ -207,6 +229,7 @@ const raw = steady.map((_, f) => {
     }
   }
   if (!Number.isFinite(left)) return last;
+  bounds[f] = {min: MARGIN - left, max: 1920 - MARGIN - right};
   let shift = 960 - (left + right) / 2;
   shift = Math.min(shift, 1920 - MARGIN - right); // keep the right edge on screen
   shift = Math.max(shift, MARGIN - left); // ...and the left edge, which wins if both can't fit
@@ -224,7 +247,24 @@ const blur = (values) =>
     }
     return sum / n;
   });
-const shift = blur(blur(raw)).map((v) => Math.round(v));
+const shift = blur(blur(raw)).map((v, f) => {
+  const fixed = FIXED.find((r) => f >= r.from && f < r.to);
+  if (fixed) return fixed.px;
+  const b = CLAMP ? bounds[f] : undefined;
+  // The left limit wins if both can't fit, as in step 2.
+  const clamped = b ? Math.max(b.min, Math.min(b.max, v)) : v;
+  const limited = Math.max(-LIMIT, Math.min(LIMIT, clamped));
+  // Ease away from (and into) a fixed range, so content glides rather than jumping at its edges.
+  let near = null;
+  for (const r of FIXED) {
+    const d = f < r.from ? r.from - f : f - (r.to - 1);
+    if (d <= RAMP && (!near || d < near.d)) near = {d, px: r.px};
+  }
+  if (!near) return Math.round(limited);
+  const t = near.d / RAMP;
+  const s = t * t * (3 - 2 * t);
+  return Math.round(near.px + (limited - near.px) * s);
+});
 
 const rows = [];
 for (let i = 0; i < shift.length; i += 30) rows.push(`  ${shift.slice(i, i + 30).join(', ')},`);

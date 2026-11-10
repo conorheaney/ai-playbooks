@@ -15,8 +15,12 @@ import {LOCK_POSE} from './LockInScene';
 
 const RACKS = {x: 470, y: 520, w: 110, h: 300, gap: 22, count: 3};
 const GLOBE = {x: 1340, y: 500, r: 250};
-const TEAM = {x: [300, 380, 460], y: 880};
-const NEXT = {x: 660, y: 880};
+const TEAM = {x: [700, 780, 860], y: 880};
+// The next model: as large as the bottom row allows, beside the team, with the cycle arcing back to the start.
+const NEXT = {x: 420, y: 862, size: 40};
+const CYCLE = {from: {x: 330, y: 900}, ctrl: {x: 120, y: 900}, to: {x: 130, y: 640}};
+// The locked model stays visible, parked on top of the middle rack.
+const PARKED = {x: 470, y: 300, size: 24};
 const USERS_TOTAL = 100_000_000;
 const PROMPT_TEXT = 'How can I help you today?';
 const CHANNELS = [
@@ -26,7 +30,7 @@ const CHANNELS = [
 ];
 const ARC_FROM = {x: RACKS.x + 1.5 * RACKS.w + RACKS.gap + 10, y: RACKS.y};
 // Users' feedback travels from the globe to the monitoring team, arcing above the next-model cube.
-const FEEDBACK_ARC = {from: {x: GLOBE.x - 120, y: GLOBE.y + GLOBE.r - 40}, ctrl: {x: 900, y: 700}, to: {x: TEAM.x[2] + 30, y: TEAM.y - 30}};
+const FEEDBACK_ARC = {from: {x: GLOBE.x - 150, y: GLOBE.y + GLOBE.r - 50}, ctrl: {x: 1020, y: 760}, to: {x: TEAM.x[2] + 30, y: TEAM.y - 30}};
 const BUBBLES = [
   {x: 1660, y: 250, text: 'Help me write a poem'},
   {x: 1720, y: 650, text: 'Debug this code'},
@@ -64,8 +68,7 @@ export const ReleaseScene: React.FC = () => {
   // 1. The locked model is deployed into data centres.
   const racksIn = smooth(R.racks, 20);
   const deploy = interpolate(frame, [R.intoRacks, R.powerOn - 5], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.cubic)});
-  const cube = {x: lerp(LOCK_POSE.x, RACKS.x, deploy), y: lerp(LOCK_POSE.y, RACKS.y - 40, deploy), size: lerp(LOCK_POSE.size, 26, deploy)};
-  const cubeVisible = interpolate(frame, [R.powerOn - 12, R.powerOn - 2], [1, 0], clampOpts);
+  const cube = {x: lerp(LOCK_POSE.x, PARKED.x, deploy), y: lerp(LOCK_POSE.y, PARKED.y, deploy), size: lerp(LOCK_POSE.size, PARKED.size, deploy)};
   const powered = frame >= R.powerOn;
 
   // 2. Served worldwide.
@@ -76,9 +79,13 @@ export const ReleaseScene: React.FC = () => {
   // 3. People monitor usage; feedback feeds the next model.
   const monitor = smooth(R.monitor, 15);
   const nextIn = smooth(R.nextModel, 15);
+  const cycleDraw = interpolate(frame, [R.nextModel + 8, R.nextModel + 30], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.cubic)});
+  // Beat 1 only: user requests pop up, then clear before the monitoring beat.
+  const bubblesOut = interpolate(frame, [R.bubblesOut, R.bubblesOut + 12], [1, 0], clampOpts);
 
   // 4. Finale.
-  const dim = interpolate(frame, [R.finale, R.finale + 15], [0, 0.78], clampOpts);
+  // The whole scene fades out to the empty background before the closing title (as in how-ai-responds).
+  const sceneOut = interpolate(frame, [R.finale, R.finale + 12], [1, 0], clampOpts);
   const titleIn = spring({frame: frame - R.titleIn, fps, config: {damping: 14}});
   const titleScale = interpolate(titleIn, [0, 1], [0.7, 1]) * interpolate(frame, [R.titleIn, dur], [1, 1.06], clampOpts);
   const promptIn = smooth(R.promptIn, 20);
@@ -107,6 +114,7 @@ export const ReleaseScene: React.FC = () => {
 
   return (
     <AbsoluteFill>
+      <AbsoluteFill style={{opacity: sceneOut}}>
       <svg width={VIDEO.width} height={VIDEO.height} viewBox={`0 0 ${VIDEO.width} ${VIDEO.height}`}>
         <defs>
           <GlowFilter id="rl-led" blur={3} />
@@ -134,14 +142,10 @@ export const ReleaseScene: React.FC = () => {
               </g>
             );
           })}
-          <Caption x={RACKS.x} y={RACKS.y + RACKS.h / 2 + 36} text="DATA CENTRES" />
+          <Caption x={RACKS.x} y={RACKS.y + RACKS.h / 2 + 38} text="DATA CENTRES" size={24} />
           {powered ? <circle cx={RACKS.x} cy={RACKS.y} r={40 + 200 * interpolate(frame, [R.powerOn, R.powerOn + 20], [0, 1], clampOpts)} fill="none" stroke={COLORS.cyan} strokeWidth={3} opacity={interpolate(frame, [R.powerOn, R.powerOn + 20], [0.8, 0], clampOpts)} /> : null}
         </g>
-        {cubeVisible > 0 ? (
-          <g opacity={cubeVisible}>
-            <ModelCube id="rs-cube" absFrame={abs} {...cube} emblem={1} frost={1} lock={1} />
-          </g>
-        ) : null}
+        <ModelCube id="rs-cube" absFrame={abs} {...cube} emblem={1} frost={1} lock={1} />
 
         {/* Distribution channels. */}
         {CHANNELS.map((c, i) => {
@@ -165,8 +169,8 @@ export const ReleaseScene: React.FC = () => {
               />
               {draw >= 1 ? <circle cx={packet.x} cy={packet.y} r={6} fill={COLORS.cyan} filter="url(#rl-dot)" /> : null}
               <g transform={`translate(${mid.x} ${mid.y}) scale(${pop(R.channels[i])})`}>
-                <rect x={-58} y={-24} width={116} height={48} rx={24} fill={COLORS.charcoal} stroke={COLORS.cyan} strokeWidth={2.5} />
-                <text x={0} y={0} fill={COLORS.white} fontFamily={FONT} fontWeight={800} fontSize={20} letterSpacing="0.12em" textAnchor="middle" dominantBaseline="central">
+                <rect x={-68} y={-26} width={136} height={52} rx={26} fill={COLORS.charcoal} stroke={COLORS.cyan} strokeWidth={2.5} />
+                <text x={0} y={0} fill={COLORS.white} fontFamily={FONT} fontWeight={800} fontSize={22} letterSpacing="0.12em" textAnchor="middle" dominantBaseline="central">
                   {c.label}
                 </text>
               </g>
@@ -212,7 +216,7 @@ export const ReleaseScene: React.FC = () => {
                 </g>
               );
             })}
-            <Caption x={GLOBE.x} y={GLOBE.y + GLOBE.r + 40} text="PEOPLE USING IT" opacity={smooth(R.usersStart)} />
+            <Caption x={GLOBE.x} y={GLOBE.y + GLOBE.r + 40} text="PEOPLE USING IT" opacity={smooth(R.usersStart)} size={24} />
             <text
               x={GLOBE.x}
               y={GLOBE.y + GLOBE.r + 90}
@@ -235,7 +239,7 @@ export const ReleaseScene: React.FC = () => {
           {TEAM.x.map((x) => (
             <Person key={x} x={x} y={TEAM.y} size={64} />
           ))}
-          <Caption x={TEAM.x[1]} y={TEAM.y + 62} text="SAFETY & MONITORING TEAMS" size={16} />
+          <Caption x={TEAM.x[1]} y={TEAM.y + 64} text="SAFETY & MONITORING TEAMS" size={22} />
         </g>
         {Array.from({length: 10}, (_, i) => {
           const start = R.feedbackStart + i * 4;
@@ -246,13 +250,28 @@ export const ReleaseScene: React.FC = () => {
           const p = bez(FEEDBACK_ARC.from, FEEDBACK_ARC.ctrl, FEEDBACK_ARC.to, Easing.inOut(Easing.quad)(t));
           return <circle key={i} cx={p.x} cy={p.y} r={7} fill={COLORS.purple} filter="url(#rl-dot)" />;
         })}
-        {frame >= R.feedbackStart ? <Caption x={930} y={735} text="FEEDBACK & REPORTS" color={COLORS.purple} size={16} opacity={monitor} /> : null}
         <g opacity={nextIn}>
-          <line x1={TEAM.x[2] + 50} y1={TEAM.y} x2={NEXT.x - 60} y2={NEXT.y} stroke={COLORS.purple} strokeWidth={3} strokeDasharray="8 8" strokeDashoffset={-frame} />
-          <g opacity={0.55}>
-            <ModelCube id="rs-next" absFrame={abs} x={NEXT.x} y={NEXT.y - 6} size={22} appear={nextIn} />
+          <line x1={TEAM.x[0] - 50} y1={TEAM.y} x2={NEXT.x + 90} y2={NEXT.y} stroke={COLORS.purple} strokeWidth={3} strokeDasharray="8 8" strokeDashoffset={frame} />
+          <g opacity={0.7}>
+            <ModelCube id="rs-next" absFrame={abs} x={NEXT.x} y={NEXT.y} size={NEXT.size} appear={nextIn} />
           </g>
-          <Caption x={NEXT.x} y={NEXT.y + 62} text="NEXT MODEL" color={COLORS.purple} size={16} />
+          <Caption x={NEXT.x} y={NEXT.y + 100} text="NEXT MODEL" color={COLORS.purple} size={24} />
+          {/* The cycle restarts: data, training, release, again. */}
+          {cycleDraw > 0 ? (
+            <polyline
+              points={Array.from({length: 25}, (_, j) => bez(CYCLE.from, CYCLE.ctrl, CYCLE.to, (j / 24) * cycleDraw))
+                .map((q) => `${q.x},${q.y}`)
+                .join(' ')}
+              stroke={COLORS.purple}
+              strokeWidth={3}
+              strokeDasharray="8 8"
+              strokeDashoffset={frame}
+              fill="none"
+            />
+          ) : null}
+          {cycleDraw >= 1 ? (
+            <path d={`M${CYCLE.to.x - 12} ${CYCLE.to.y + 14}L${CYCLE.to.x} ${CYCLE.to.y}L${CYCLE.to.x + 12} ${CYCLE.to.y + 14}`} stroke={COLORS.purple} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          ) : null}
         </g>
         {powered ? (
           <circle cx={RACKS.x} cy={RACKS.y} r={6} fill={COLORS.cyan} opacity={flashAt(frame, R.powerOn, 30)} />
@@ -260,7 +279,7 @@ export const ReleaseScene: React.FC = () => {
       </svg>
 
       {BUBBLES.map((b, i) => (
-        <Bubble key={b.text} x={b.x} y={b.y} width={300} text={b.text} fontSize={22} opacity={pop(R.bubbles[i])} scale={0.6 + 0.4 * pop(R.bubbles[i])} />
+        <Bubble key={b.text} x={b.x} y={b.y} width={300} text={b.text} fontSize={24} opacity={Math.min(1, pop(R.bubbles[i])) * bubblesOut} scale={0.6 + 0.4 * pop(R.bubbles[i])} />
       ))}
       <Pinned>
         <SceneTitle text="RELEASED TO THE WORLD" mode="corner" />
@@ -268,10 +287,10 @@ export const ReleaseScene: React.FC = () => {
       <Pinned>
         <LoopBadge kind="human" opacity={monitor} />
       </Pinned>
+      </AbsoluteFill>
 
-      {/* Finale: full-frame dimmer, title and prompt bar stay at true screen centre. */}
+      {/* Finale: title and prompt bar stay at true screen centre. */}
       <Pinned>
-        <AbsoluteFill style={{backgroundColor: COLORS.charcoal, opacity: dim}} />
         <div
           style={{
             position: 'absolute',

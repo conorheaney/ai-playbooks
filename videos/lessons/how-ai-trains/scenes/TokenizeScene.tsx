@@ -4,23 +4,20 @@ import {Pinned} from '../../../shared/components/Stage';
 import {GlowFilter} from '../../../shared/components/Glow';
 import {SceneTitle} from '../../../shared/components/SceneTitle';
 import {FONT} from '../../../shared/fonts';
-import {Camera, lerp, mix2, mix3, project, Vec3} from '../../../shared/lib/math';
+import {lerp, mix2, mix3, project, Vec3} from '../../../shared/lib/math';
 import {CENTER, COLORS, rgba, VIDEO} from '../../../shared/theme';
-import {SCENES, TOKEN} from '../timing';
+import {TOKEN} from '../timing';
+import {CAT_INDEX, TOKENS, WORD_SIZE, tokenCamera} from '../lib/tokens';
 
-const BOX_W = 220;
 const BOX_H = 124;
 const GAP_MAX = 64;
-const WORD_SIZE = 84;
 const LABEL_SIZE = 34;
 const CUT_HALF = 110;
+const ID_SIZE = 26;
+const STAGGER = 3; // frames between each token starting its morph
+const SUBWORD = 2; // "sprawl" + "ed": butted together until the cut
 
-const TOKENS: {text: string; id: number; pos: Vec3}[] = [
-  {text: 'The', id: 464, pos: {x: -0.62, y: 0.48, z: 0.42}},
-  {text: 'cat', id: 3797, pos: {x: 0.3, y: 0.1, z: -0.3}},
-  {text: 'sat', id: 7731, pos: {x: -0.28, y: -0.46, z: -0.52}},
-];
-const CAT = TOKENS[1].pos;
+const CAT = TOKENS[CAT_INDEX].pos;
 const KITTEN: Vec3 = {x: 0.66, y: 0.42, z: -0.22};
 const CAR_START: Vec3 = {x: 0.08, y: -0.22, z: -0.36};
 const CAR_END: Vec3 = {x: 1.7, y: -0.6, z: 0.6}; // deliberately outside the grid
@@ -47,29 +44,36 @@ export const TokenizeScene: React.FC = () => {
   const kitten = smooth(TOKEN.kittenIn, 20);
   const carIn = smooth(TOKEN.carIn, 14);
   const carFly = smooth(TOKEN.carFly, 30);
+  const contrast = smooth(TOKEN.contrast, 12);
+  const dims = smooth(TOKEN.dimensions, 20);
+  // IDs are gone by the time the blocks start shrinking, so the morph stays clean.
+  const idsOut = interpolate(frame, [TOKEN.morph - 10, TOKEN.morph], [1, 0], clampOpts);
 
-  const cam: Camera = {
-    yaw: interpolate(frame, [TOKEN.morph, SCENES.tokenize.durationInFrames], [-0.55, 0.35], clampOpts),
-    pitch: -0.38,
-    distance: 4.2,
-    scale: 250,
-    cx: CENTER.x,
-    cy: CENTER.y + 10,
-  };
+  const cam = tokenCamera(frame);
   const P = (v: Vec3) => project(v, cam);
 
   const catP = P(CAT);
   const kittenP = P(KITTEN);
   const carP = P(mix3(CAR_START, CAR_END, carFly));
   const linkEnd = mix2(catP, kittenP, kitten);
-  // "similar" sits on the link's lower-right normal, clear of the cat/kitten labels.
-  const linkLen = Math.hypot(kittenP.x - catP.x, kittenP.y - catP.y) || 1;
-  const similarAt = {
-    x: (catP.x + kittenP.x) / 2 - ((kittenP.y - catP.y) / linkLen) * 40,
-    y: (catP.y + kittenP.y) / 2 + ((kittenP.x - catP.x) / linkLen) * 40,
+  // Labels sit on the links' lower-right normals, clear of the word labels.
+  const normalAt = (a: {x: number; y: number}, b: {x: number; y: number}, d: number) => {
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    return {x: (a.x + b.x) / 2 - ((b.y - a.y) / len) * d, y: (a.y + b.y) / 2 + ((b.x - a.x) / len) * d};
   };
+  const similarAt = normalAt(catP, kittenP, 44);
+  const closeAt = normalAt(catP, kittenP, 70);
+  const farAt = normalAt(catP, carP, 34);
 
-  const label = (x: number, y: number, text: string, size: number, opacity: number, fill: string = COLORS.white) => (
+  // Block centres in a row; widths differ per token.
+  const total = TOKENS.reduce((sum, t) => sum + t.w, 0) + gap * (TOKENS.length - 1);
+  const boxes = TOKENS.reduce<{x: number; left: number; right: number}[]>((acc, t, i) => {
+    const left = i === 0 ? CENTER.x - total / 2 : acc[i - 1].right + gap;
+    acc.push({left, right: left + t.w, x: left + t.w / 2});
+    return acc;
+  }, []);
+
+  const label = (x: number, y: number, text: string, size: number, opacity: number, fill: string = COLORS.white, anchor: 'start' | 'middle' | 'end' = 'middle') => (
     <text
       x={x}
       y={y}
@@ -78,12 +82,14 @@ export const TokenizeScene: React.FC = () => {
       fontFamily={FONT}
       fontWeight={700}
       fontSize={size}
-      textAnchor="middle"
+      textAnchor={anchor}
       dominantBaseline="central"
     >
       {text}
     </text>
   );
+
+  const d2 = P(AXES[1].to);
 
   return (
     <AbsoluteFill>
@@ -113,10 +119,12 @@ export const TokenizeScene: React.FC = () => {
             return (
               <g key={axis.label}>
                 <line x1={o.x} y1={o.y} x2={end.x} y2={end.y} stroke={COLORS.cyan} strokeWidth={3} filter="url(#tok-glow-soft)" />
-                {label(end.x + (end.x - o.x) * 0.06, end.y + (end.y - o.y) * 0.06, axis.label, 26, 0.8, COLORS.cyan)}
+                {label(end.x + (end.x - o.x) * 0.07, end.y + (end.y - o.y) * 0.07, axis.label, 28, 1, COLORS.cyan)}
               </g>
             );
           })}
+          {/* "multi-dimensional": three axes stand in for thousands. */}
+          {label(d2.x - 30, d2.y + 30, '+ 1,000s MORE', 22, 0.6 * dims, COLORS.cyan, 'end')}
         </g>
 
         {/* "car" starts beside "cat", then flies to the far corner of the space. */}
@@ -129,10 +137,11 @@ export const TokenizeScene: React.FC = () => {
             stroke={COLORS.white}
             strokeWidth={2}
             strokeDasharray="6 10"
-            opacity={0.45 * (1 - carFly * 0.6)}
+            opacity={0.45 * (1 - carFly * 0.4)}
           />
           <circle cx={carP.x} cy={carP.y} r={12 * carP.k * carIn} fill={COLORS.white} filter="url(#tok-glow)" />
           {label(carP.x, carP.y + 40 * carP.k, 'car', LABEL_SIZE * carP.k, 1)}
+          {label(farAt.x, farAt.y, 'far = different', 24, 0.85 * contrast)}
         </g>
 
         {/* cat <-> kitten: near neighbours in meaning. */}
@@ -140,52 +149,60 @@ export const TokenizeScene: React.FC = () => {
           <line x1={catP.x} y1={catP.y} x2={linkEnd.x} y2={linkEnd.y} stroke={COLORS.purple} strokeWidth={4} filter="url(#tok-glow)" />
           <circle cx={kittenP.x} cy={kittenP.y} r={12 * kittenP.k * kitten} fill={COLORS.purple} filter="url(#tok-glow)" />
           {label(kittenP.x + 8, kittenP.y - 40 * kittenP.k, 'kitten', LABEL_SIZE * kittenP.k, 1)}
-          {label(similarAt.x, similarAt.y, 'similar', 22, 0.85, COLORS.purple)}
+          {label(similarAt.x, similarAt.y, 'similar', 26, 1 - contrast, COLORS.purple)}
+          {label(closeAt.x + 40, closeAt.y, 'close = similar', 24, contrast, COLORS.purple)}
         </g>
 
         {/* Tokens: sentence -> sliced blocks -> glowing points in the grid. */}
         {TOKENS.map((t, i) => {
-          const m = smooth(TOKEN.morph + i * 6, 30);
+          const m = smooth(TOKEN.morph + i * STAGGER, 30);
           const target = P(t.pos);
-          const box = {x: CENTER.x + (i - 1) * (BOX_W + gap), y: CENTER.y};
+          const box = {x: boxes[i].x, y: CENTER.y};
           const pos = mix2(box, target, m);
-          const w = BOX_W * (1 - m);
-          const h = BOX_H * (1 - m);
-          const isCat = i === 1;
+          // Word and block shrink together, so the word never outgrows its box.
+          const s = lerp(1, (LABEL_SIZE * target.k) / WORD_SIZE, m);
+          const labelPos = {x: pos.x, y: pos.y + lerp(0, -40 * target.k, m)};
+          // Sub-word pieces sit flush ("sprawled") until the cut, then centre in their blocks.
+          const flush = i === SUBWORD ? boxes[i].right - 1 - t.textW / 2 : i === SUBWORD + 1 ? boxes[i].left + 1 + t.textW / 2 : box.x;
+          const textX = m > 0 ? labelPos.x : lerp(flush, box.x, split);
+          const w = t.w * s;
+          const h = BOX_H * s;
+          // Boxes are gone by the morph's midpoint, so the in-between is just words travelling to their points.
+          const boxOut = Math.max(0, 1 - 2 * m);
           return (
             <g key={t.text} opacity={sentenceIn} transform={`translate(0 ${(1 - sentenceIn) * 30})`}>
               <rect
-                x={pos.x - w / 2}
-                y={pos.y - h / 2}
+                x={labelPos.x - w / 2}
+                y={labelPos.y - h / 2}
                 width={w}
                 height={h}
-                rx={18 * (1 - m)}
-                fill={rgba(COLORS.cyan, 0.08 * split)}
+                rx={18 * s}
+                fill={rgba(COLORS.cyan, 0.08 * split * boxOut)}
                 stroke={COLORS.cyan}
-                strokeOpacity={split * (1 - m)}
+                strokeOpacity={split * boxOut}
                 strokeWidth={3}
               />
-              {label(pos.x, pos.y + lerp(0, -40 * target.k, m), t.text, lerp(WORD_SIZE, LABEL_SIZE * target.k, m), 1)}
-              {label(box.x, box.y + BOX_H / 2 + 34, `#${t.id}`, 22, split * (1 - m), COLORS.cyan)}
+              {label(textX, labelPos.y, t.text, WORD_SIZE * s, 1)}
+              {label(box.x, box.y + BOX_H / 2 + 36, `#${t.id}`, ID_SIZE, split * idsOut, COLORS.cyan)}
               <circle
                 cx={pos.x}
                 cy={pos.y}
                 r={12 * target.k * m}
-                fill={isCat ? COLORS.purple : COLORS.cyan}
+                fill={i === CAT_INDEX ? COLORS.purple : COLORS.cyan}
                 filter="url(#tok-glow)"
               />
             </g>
           );
         })}
 
-        {/* Slicing beams between the words. */}
+        {/* Slicing beams between the tokens; the last one splits "sprawled" into sub-word pieces. */}
         {TOKEN.cuts.map((cut, c) => {
           const draw = interpolate(frame, [cut, cut + 8], [0, 1], {...clampOpts, easing: Easing.out(Easing.cubic)});
           const fade = interpolate(frame, [cut + 10, cut + 22], [1, 0], clampOpts);
-          const x = CENTER.x + (c === 0 ? -1 : 1) * (BOX_W + gap) / 2;
+          const x = boxes[c].right + gap / 2;
           return (
             <line
-              key={cut}
+              key={c}
               x1={x}
               y1={CENTER.y - CUT_HALF}
               x2={x}
@@ -201,9 +218,7 @@ export const TokenizeScene: React.FC = () => {
       </svg>
 
       <Pinned>
-
         <SceneTitle text="TOKENIZE & MAP" mode="corner" />
-
       </Pinned>
     </AbsoluteFill>
   );

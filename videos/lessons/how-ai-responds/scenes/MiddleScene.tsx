@@ -10,20 +10,24 @@ import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {ContextTank, Segment, segmentRect} from '../../../shared/components/context/ContextTank';
 import {Pinned} from '../../../shared/components/Stage';
 import {LockedCube} from '../../../shared/components/context/Pieces';
-import {CUBE_HOME, TANK_HOME} from '../layout';
+import {CUBE_HOME, TANK_HOME, TANK_TEXT} from '../layout';
 import {MIDDLE as M, SCENES} from '../timing';
 
-const TALL = {h: 980, y: 550};
+const TALL = {h: 900, y: 560}; // y 110–1010: inside the screen margins and below the title band
 const ROWS = 16;
 const FILL = 0.92;
 const KEY_ROW = 7; // mid-tank
-const FACT = 'Passport must be valid for 6 months after arrival.';
-const QUESTION = 'Any document rules for my trip?';
-const ANSWER = 'Just bring your booking confirmation.';
+const CAPTION = {x: 560, y: 985};
+// Short lines, so each can be read in the time it's on screen.
+const FACT = 'Valid 6 months after arrival.'; // the row itself is labelled PASSPORT RULE
+const QUESTION = 'Any document rules?';
+const ANSWER = 'Just bring your booking.';
 
 // Attention is strongest near the start and end of a long context, weakest in the middle.
 // Illustrative only: the real pattern varies by model, task and position.
-const attention = (i: number) => 0.3 + 0.7 * Math.pow(Math.abs((2 * i) / (ROWS - 1) - 1), 1.6);
+const attention = (i: number) => 0.15 + 0.85 * Math.pow(Math.abs((2 * i) / (ROWS - 1) - 1), 1.6);
+// The six middle rows (rows 6–11 counting from 1) get no beam at all.
+const BEAMLESS = (i: number) => i >= 5 && i <= 10;
 
 export const MiddleScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -76,6 +80,9 @@ export const MiddleScene: React.FC = () => {
         {/* Attention beams: bright to the ends of the context, faint to the middle. */}
         <g opacity={interpolate(frame, [M.attention[0], M.attention[0] + 20], [0, 1], clampOpts) * content}>
           {Array.from({length: ROWS}, (_, i) => {
+            if (BEAMLESS(i)) {
+              return null;
+            }
             const r = segmentRect(geom, (i / ROWS) * FILL, ((i + 1) / ROWS) * FILL);
             const a = attention(i);
             return (
@@ -86,15 +93,16 @@ export const MiddleScene: React.FC = () => {
                 x2={r.x - 4}
                 y2={r.y + r.h / 2}
                 stroke={COLORS.cyan}
-                strokeWidth={1 + 3 * a * focus}
-                opacity={0.06 + 0.5 * Math.pow(a, 2) * focus}
+                strokeWidth={1 + 5 * a * a}
+                strokeLinecap="round"
+                opacity={0.9 * a * a * focus}
               />
             );
           })}
         </g>
         <LockedCube id="md-cube" absFrame={abs} {...CUBE_HOME} glow={thinking * 0.5} />
 
-        <ContextTank id="md-tank" {...tank} opacity={tankIn} segments={segments} />
+        <ContextTank id="md-tank" textSizes={TANK_TEXT} {...tank} opacity={tankIn} segments={segments} />
 
         {/* Taller window, same problem. */}
         <g opacity={presence(frame, M.stretch[0], M.attention[0] - 5, 12, 12)}>
@@ -115,7 +123,6 @@ export const MiddleScene: React.FC = () => {
           width={380}
           text={FACT}
           fontSize={22}
-          label={frame >= M.missed ? 'MISSED' : 'IN THE DOCUMENTS'}
           color={frame >= M.missed ? COLORS.error : COLORS.purple}
           opacity={highlight * (frame >= M.missed ? 1 : lerp(1, 0.4 + 0.6 * keyBright, focus))}
           scale={lerp(0.9, 1, highlight)}
@@ -127,9 +134,8 @@ export const MiddleScene: React.FC = () => {
           width={520}
           text={QUESTION}
           fontSize={26}
-          label="YOUR QUESTION"
           color={COLORS.cyan}
-          opacity={frame < M.question[0] ? 0 : smooth(M.question[0], 8) * interpolate(q, [0.75, 1], [1, 0], clampOpts)}
+          opacity={frame < M.questionIn ? 0 : smooth(M.questionIn, 10) * interpolate(q, [0.75, 1], [1, 0], clampOpts)}
           scale={lerp(1, 0.3, q)}
         />
 
@@ -140,28 +146,32 @@ export const MiddleScene: React.FC = () => {
           text={ANSWER}
           chars={answerChars}
           fontSize={26}
-          label="RESPONSE"
           color={interpolateColors(answerMark, [0, 1], [COLORS.cyan, COLORS.error])}
           opacity={frame < M.answer[0] ? 0 : smooth(M.answer[0], 8)}
           mark="bad"
           markScale={frame >= M.missed ? answerMark : 0}
         />
 
+        {/* The caveat, styled as a takeaway pill rather than a subtitle. */}
         <div
           style={{
             position: 'absolute',
-            left: 0,
-            width: 1120,
-            top: 984,
-            textAlign: 'center',
+            left: CAPTION.x,
+            top: CAPTION.y,
+            transform: `translate(-50%, calc(-50% + ${lerp(12, 0, smooth(M.caption, 14))}px))`,
+            padding: '12px 30px',
+            borderRadius: 32,
+            border: `2px solid ${rgba(COLORS.white, 0.35)}`,
+            background: rgba(COLORS.white, 0.07),
             fontFamily: FONT,
             fontWeight: 500,
-            fontSize: 28,
-            color: rgba(COLORS.white, 0.75),
+            fontSize: 26,
+            color: COLORS.white,
+            whiteSpace: 'nowrap',
             opacity: smooth(M.caption, 14),
           }}
         >
-          Not a fixed zone. It varies by model, task and position.
+          It varies by model and task.
         </div>
         <Pinned>
           <SceneTitle text="LOST IN THE MIDDLE" mode="corner" />

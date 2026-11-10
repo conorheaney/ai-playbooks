@@ -11,15 +11,16 @@ import {lerp} from '../../../shared/lib/math';
 import {clampOpts, presence} from '../../../shared/lib/motion';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {FlowLine, InfoCard, Note} from '../components/Parts';
-import {drawerCenter, MemoryStore, NEW_MEMORY} from '../components/MemoryStore';
+import {drawerCenter, MemoryStore, NEW_MEMORY, STORE} from '../components/MemoryStore';
 import {CAPACITY, CUBE_HOME, TANK_HOME} from '../layout';
 import {MEMORY as M, SCENES} from '../timing';
 
 const STORE_A = {x: 1400, y: 560, scale: 1};
-const STORE_B = {x: 1660, y: 560, scale: 0.8};
+const STORE_B = {x: 1690, y: 560, scale: 0.88}; // large enough that its drawer text stays at 16px
 const PROPOSED = {x: 900, y: 560, w: 300};
 const REQUEST = 'Book my hotel for the next Canberra trip.';
-const BAR = {x: 800, y: 985, w: 880};
+// The new request types above the cube, where the first chat message sat, at 80% so it clears the window.
+const BAR = {x: 640, y: 330, w: 900, scale: 0.8};
 const MSG: [number, number] = [0, 0.05];
 const MEM: [number, number] = [0.05, 0.11];
 const RESPONSE = {x: 740, y: 290, text: 'Parkside Hotel is a 5-minute walk from Parliament House.'};
@@ -114,9 +115,13 @@ export const MemoryScene: React.FC = () => {
           <LockedCube id="gc-m-cube" absFrame={abs} {...CUBE_HOME} glow={generating * (0.35 + 0.3 * Math.sin(frame / 4))} />
           <MemoryStore x={store.x} y={store.y} scale={store.scale} draw={interpolate(frame, [M.store[0], M.store[1]], [0, 1], ease)} newMemory={filing >= 1 ? 1 : 0} open={open} lifted={lift} />
           <Caption x={STORE_A.x} y={STORE_A.y + 220} text="SCOPE: YOU · KEEP 90 DAYS" color={COLORS.purple} size={18} opacity={smooth(M.file[1] - 6, 12) * phase1} />
-          <Caption x={CUBE_HOME.x} y={CUBE_HOME.y + 210} text="THE MODEL CAN'T SAVE ANYTHING ITSELF" color={rgba(COLORS.white, 0.75)} size={18} opacity={smooth(M.notModel, 12) * phase1} />
+          {/* The scene's key correction, as a takeaway under the cube (two lines, so it clears THE APP beside it). */}
+          <g opacity={smooth(M.notModel, 12) * phase1}>
+            <Caption x={CUBE_HOME.x} y={CUBE_HOME.y + 196} text="THE MODEL CAN'T" color={COLORS.white} size={26} />
+            <Caption x={CUBE_HOME.x} y={CUBE_HOME.y + 236} text="SAVE ANYTHING ITSELF" color={COLORS.white} size={26} />
+          </g>
           <AppMarker x={PROPOSED.x - 40} y={PROPOSED.y + 190} opacity={presence(frame, M.appIn, M.later[0] + 10, 12, 10)} frame={frame} />
-          <AppMarker x={STORE_B.x - 60} y={STORE_B.y + 230} opacity={presence(frame, M.retrieve[0] - 6, M.fly[1] + 20, 10, 12)} frame={frame} />
+          <AppMarker x={STORE_B.x - 60} y={STORE_B.y - 230} opacity={presence(frame, M.retrieve[0] - 6, M.fly[1] + 20, 10, 12)} frame={frame} />
 
           {/* The app's check before anything is written. */}
           {frame >= M.check[0] && phase1 > 0 && filing < 0.3 ? (
@@ -142,8 +147,8 @@ export const MemoryScene: React.FC = () => {
           ) : null}
           {ghost > 0 ? (
             <g transform={`translate(${GHOST.x + 236} ${GHOST.y})`} opacity={ghost}>
-              <rect x={0} y={-20} width={128} height={40} rx={10} fill={rgba(COLORS.charcoal, 0.9)} stroke={COLORS.error} strokeWidth={3} />
-              <text x={64} y={1} fill={COLORS.error} fontFamily={FONT} fontWeight={800} fontSize={18} letterSpacing="0.12em" textAnchor="middle" dominantBaseline="central">
+              <rect x={0} y={-22} width={144} height={44} rx={10} fill={rgba(COLORS.charcoal, 0.9)} stroke={COLORS.error} strokeWidth={3} />
+              <text x={72} y={1} fill={COLORS.error} fontFamily={FONT} fontWeight={800} fontSize={20} letterSpacing="0.12em" textAnchor="middle" dominantBaseline="central">
                 IGNORED
               </text>
             </g>
@@ -171,9 +176,10 @@ export const MemoryScene: React.FC = () => {
         {/* ...next week, the app retrieves it into a new context. */}
         {lift > 0 && fly < 1 ? (
           (() => {
-            const startX = drawer3B.x + 40 * store.scale;
-            const startY = drawer3B.y - 50 * lift;
-            const w = lerp(PROPOSED.w * 0.8, memRect.w, fly);
+            // The memory drops out of the bottom drawer until it's clear of the store, then travels into the window.
+            const startX = lerp(drawer3B.x + 40 * store.scale, drawer3B.x, lift);
+            const startY = lerp(drawer3B.y, store.y + (STORE.h * store.scale) / 2 + 52, lift);
+            const w = lerp(330, memRect.w, fly); // wide enough for the memory's full text at 16px
             const h = lerp(70, memRect.h, fly);
             return (
               <div
@@ -186,13 +192,13 @@ export const MemoryScene: React.FC = () => {
                   boxSizing: 'border-box',
                   borderRadius: lerp(16, 4, fly),
                   border: `2px solid ${COLORS.purple}`,
-                  background: fly > 0 ? SEGMENT_STYLE.memory.fill : rgba(COLORS.charcoal, 0.94),
+                  background: fly > 0 ? `linear-gradient(${SEGMENT_STYLE.memory.fill}, ${SEGMENT_STYLE.memory.fill}), ${COLORS.charcoal}` : rgba(COLORS.charcoal, 0.94),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontFamily: FONT,
                   fontWeight: 500,
-                  fontSize: 19,
+                  fontSize: 16,
                   color: rgba(COLORS.white, 1 - Math.min(1, fly * 2.5)),
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
@@ -206,17 +212,19 @@ export const MemoryScene: React.FC = () => {
         ) : null}
 
         {barDrop <= 0 ? (
-          <PromptBar x={BAR.x} y={BAR.y + 40 * (1 - barIn)} width={BAR.w} text={REQUEST} chars={interpolate(frame, [M.bar[0] + 4, M.bar[1]], [0, REQUEST.length], clampOpts)} opacity={barIn} frame={frame} />
+          <div style={{position: 'absolute', inset: 0, transform: `scale(${BAR.scale})`, transformOrigin: `${BAR.x}px ${BAR.y}px`}}>
+            <PromptBar x={BAR.x} y={BAR.y - 30 * (1 - barIn)} width={BAR.w} text={REQUEST} chars={interpolate(frame, [M.bar[0] + 4, M.bar[1]], [0, REQUEST.length], clampOpts)} opacity={barIn} frame={frame} />
+          </div>
         ) : barDrop < 1 ? (
           <div
             style={{
               position: 'absolute',
-              left: lerp(BAR.x - BAR.w / 2, msgRect.x, barDrop),
-              top: lerp(BAR.y - 48, msgRect.y, barDrop),
-              width: lerp(BAR.w, msgRect.w, barDrop),
-              height: lerp(96, msgRect.h, barDrop),
+              left: lerp(BAR.x, msgRect.x + msgRect.w / 2, barDrop) - lerp(BAR.w * BAR.scale, msgRect.w, Math.min(1, barDrop * 2.5)) / 2,
+              top: lerp(BAR.y, msgRect.y + msgRect.h / 2, barDrop) - lerp(96 * BAR.scale, msgRect.h, Math.min(1, barDrop * 2.5)) / 2,
+              width: lerp(BAR.w * BAR.scale, msgRect.w, Math.min(1, barDrop * 2.5)), // shrinks first, so it never sweeps across the cube
+              height: lerp(96 * BAR.scale, msgRect.h, Math.min(1, barDrop * 2.5)),
               boxSizing: 'border-box',
-              borderRadius: lerp(48, 4, barDrop),
+              borderRadius: lerp(48 * BAR.scale, 4, Math.min(1, barDrop * 2.5)),
               border: `2px solid ${COLORS.cyan}`,
               background: SEGMENT_STYLE.message.fill,
             }}
@@ -224,7 +232,7 @@ export const MemoryScene: React.FC = () => {
         ) : null}
 
         <Pill x={RESPONSE.x} y={RESPONSE.y} text={RESPONSE.text} chars={interpolate(frame, [M.response[0] + 4, M.response[1]], [0, RESPONSE.text.length], clampOpts)} color={COLORS.cyan} opacity={smooth(M.response[0], 10)} />
-        <Pill x={GHOST.x} y={GHOST.y} text={GHOST.text} color={rgba(COLORS.white, 0.6)} opacity={ghost * 0.55} dashed />
+        <Pill x={GHOST.x} y={GHOST.y} text={GHOST.text} color={rgba(COLORS.white, 0.6)} opacity={ghost * 0.75} dashed />
         <Note x={700} y={930} text="Used, ignored or misapplied. Memory isn't a guarantee." opacity={smooth(M.caption, 14)} />
 
         <Pinned>
@@ -301,22 +309,20 @@ export const MemoryScene: React.FC = () => {
               position: 'absolute',
               left: 0,
               right: 0,
-              top: 830,
+              top: 790,
               textAlign: 'center',
               transform: `translateY(-50%) scale(${interpolate(frame, [M.titleIn, dur], [1, 1.04], clampOpts) * lerp(0.86, 1, title)})`,
               opacity: Math.min(1, title * 1.3),
               fontFamily: FONT,
               fontWeight: 800,
-              fontSize: 92,
-              lineHeight: 1.05,
+              fontSize: 56,
+              lineHeight: 1.1,
               letterSpacing: '-0.02em',
               color: COLORS.white,
-              textShadow: `0 0 40px ${rgba(COLORS.cyan, 0.45)}`,
+              textShadow: `0 0 28px ${rgba(COLORS.cyan, 0.4)}`,
             }}
           >
-            EVERYTHING ARRIVES
-            <br />
-            THROUGH CONTEXT.
+            EVERYTHING ARRIVES THROUGH CONTEXT.
           </div>
         ) : null}
       </Pinned>

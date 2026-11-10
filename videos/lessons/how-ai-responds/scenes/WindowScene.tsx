@@ -7,11 +7,12 @@ import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {ContextTank, fillTopY, Segment} from '../../../shared/components/context/ContextTank';
 import {Pinned} from '../../../shared/components/Stage';
 import {LockedCube} from '../../../shared/components/context/Pieces';
-import {CAPACITY, CUBE_HOME, INPUT, INPUT_TOP, TANK_HOME} from '../layout';
+import {CAPACITY, CUBE_HOME, INPUT, INPUT_TOP, TANK_HOME, TANK_TEXT} from '../layout';
 import {SCENES, WINDOW as W} from '../timing';
 
 const REASONING_TOP = 0.63;
 const OUTPUT_TOP = 0.74;
+const MESSAGE_NUDGE = 24; // px
 
 export const WindowScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -22,15 +23,22 @@ export const WindowScene: React.FC = () => {
   const fill = interpolate(frame, [W.fillStart, W.fillEnd], [0, INPUT_TOP], ease);
   const drain = interpolate(frame, [W.drain, W.drain + 18], [1, 0], ease);
   const reasoningTop = interpolate(frame, [W.reasoning, W.reasoningEnd], [INPUT_TOP, REASONING_TOP], ease);
-  const outputTop = interpolate(frame, [W.reasoningEnd, W.outputEnd], [REASONING_TOP, OUTPUT_TOP], ease);
+  // Output only starts once reasoning has finished; before then it has zero height above the reasoning.
+  const outputTop = frame < W.reasoningEnd ? reasoningTop : interpolate(frame, [W.reasoningEnd, W.outputEnd], [REASONING_TOP, OUTPUT_TOP], ease);
   const labelsOut = interpolate(frame, [W.drain, W.drain + 14], [1, 0], clampOpts);
 
   // Generated material drains away at the end so Scene 3 starts with input only.
-  const used = fill + (reasoningTop - INPUT_TOP + outputTop - REASONING_TOP) * drain;
+  // Output always sits on top of reasoning, so everything generated spans INPUT_TOP to outputTop.
+  const used = fill + (outputTop - INPUT_TOP) * drain;
 
   const segments: Segment[] = [
     // Each input label appears as the counter passes the top of its slice.
-    ...INPUT.map((s) => ({...s, labelOpacity: interpolate(fill, [s.to - 0.015, s.to], [0, 1], clampOpts)})),
+    // The 2% message slice's label sits a little below it on a short leader, clear of REASONING (HIDDEN) above.
+    ...INPUT.map((s) => ({
+      ...s,
+      labelOpacity: interpolate(fill, [s.to - 0.015, s.to], [0, 1], clampOpts),
+      labelNudge: s.kind === 'message' ? MESSAGE_NUDGE : undefined,
+    })),
     {
       kind: 'reasoning' as const,
       from: INPUT_TOP,
@@ -73,7 +81,7 @@ export const WindowScene: React.FC = () => {
         <LockedCube id="wi-cube" absFrame={abs} {...CUBE_HOME} glow={generating * (0.35 + 0.35 * pulse)} />
 
         <ContextTank
-          id="wi-tank"
+          id="wi-tank" textSizes={TANK_TEXT}
           {...TANK_HOME}
           segments={segments}
           draw={draw}

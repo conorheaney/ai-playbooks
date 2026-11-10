@@ -26,6 +26,7 @@ export type Segment = {
   outlineOpacity?: number;
   text?: string; // small caps text drawn inside the segment
   textOpacity?: number;
+  labelNudge?: number; // moves the right-hand label down by this many px, with a short leader tick back to the slice
 };
 
 type Style = {fill: string; pattern?: 'hatch' | 'ruled' | 'diag' | 'dots' | 'pdots'; ink: string; stroke?: string; dashed?: boolean; label: string};
@@ -69,6 +70,16 @@ const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
 export type Readout = {tokens: number; capacity: number; opacity: number; warn?: boolean; pulse?: number};
 
+// Optional text sizes. Every field defaults to the original size, so callers that leave it out are unchanged.
+export type TankTextSizes = {
+  label?: number; // right-hand segment labels (default 18)
+  labelGap?: number; // minimum spacing between neighbouring labels (default 26)
+  ruler?: number; // ruler % figures (default 16)
+  readoutSub?: number; // "% · EXAMPLE CAPACITY" line (default 15)
+  segment?: number; // text drawn inside a segment (default 16)
+  remaining?: number; // "remaining" region label (default 20)
+};
+
 type ContextTankProps = TankGeom & {
   id: string;
   segments: Segment[];
@@ -79,6 +90,7 @@ type ContextTankProps = TankGeom & {
   labels?: number; // master opacity for the right-hand labels
   readout?: Readout;
   remaining?: {from: number; opacity: number; label: string};
+  textSizes?: TankTextSizes;
 };
 
 export const ContextTank: React.FC<ContextTankProps> = ({
@@ -95,7 +107,9 @@ export const ContextTank: React.FC<ContextTankProps> = ({
   labels = 0,
   readout,
   remaining,
+  textSizes,
 }) => {
+  const sz = {label: 18, labelGap: 26, ruler: 16, readoutSub: 15, segment: 16, remaining: 20, ...textSizes};
   if (opacity <= 0.001) {
     return null;
   }
@@ -105,16 +119,19 @@ export const ContextTank: React.FC<ContextTankProps> = ({
   const outline = roundedRectPath(left, top, w, h, 18);
 
   // Labels sit at each segment's middle, pushed apart so thin neighbours never overlap.
-  const placed: {y: number; text: string; color: string; opacity: number}[] = [];
+  const placed: {y: number; anchor: number; nudge: number; text: string; color: string; opacity: number}[] = [];
   [...segments]
     .filter((s) => (s.labelOpacity ?? 0) > 0.001 && s.to - s.from > 0.0005)
     .sort((a, b) => a.from - b.from)
     .forEach((s) => {
       const r = segmentRect(g, s.from, s.to);
-      const want = r.y + r.h / 2;
+      const nudge = s.labelNudge ?? 0;
+      const want = r.y + r.h / 2 + nudge;
       const prev = placed[placed.length - 1];
       placed.push({
-        y: prev ? Math.min(want, prev.y - 26) : want,
+        y: prev ? Math.min(want, prev.y - sz.labelGap) : want,
+        anchor: r.y + r.h / 2,
+        nudge,
         text: s.label ?? SEGMENT_STYLE[s.kind].label,
         color: SEGMENT_STYLE[s.kind].ink === COLORS.white ? rgba(COLORS.white, 0.85) : SEGMENT_STYLE[s.kind].ink,
         opacity: (s.labelOpacity ?? 0) * (s.opacity ?? 1),
@@ -154,7 +171,7 @@ export const ContextTank: React.FC<ContextTankProps> = ({
               <g key={i}>
                 <line x1={left - (major ? 22 : 14)} x2={left - 6} y1={ty} y2={ty} stroke={rgba(COLORS.white, major ? 0.6 : 0.3)} strokeWidth={2} />
                 {major ? (
-                  <text x={left - 30} y={ty} fill={rgba(COLORS.white, 0.6)} fontFamily={FONT} fontWeight={700} fontSize={16} textAnchor="end" dominantBaseline="central">
+                  <text x={left - 30} y={ty} fill={rgba(COLORS.white, 0.6)} fontFamily={FONT} fontWeight={700} fontSize={sz.ruler} textAnchor="end" dominantBaseline="central">
                     {i * 10}%
                   </text>
                 ) : null}
@@ -179,7 +196,7 @@ export const ContextTank: React.FC<ContextTankProps> = ({
               {st.stroke ? <rect x={r.x + 1} y={r.y + 1} width={r.w - 2} height={Math.max(0, r.h - 2)} rx={4} fill="none" stroke={rgba(st.stroke, 0.7)} strokeWidth={2} strokeDasharray={st.dashed ? '6 5' : undefined} /> : null}
               {s.outline ? <rect x={r.x + 1} y={r.y + 1} width={r.w - 2} height={Math.max(0, r.h - 2)} rx={4} fill="none" stroke={s.outline} strokeWidth={4} opacity={s.outlineOpacity ?? 1} /> : null}
               {s.text && r.h > 14 ? (
-                <text x={r.x + r.w / 2} y={r.y + r.h / 2} fill={COLORS.white} opacity={s.textOpacity ?? 1} fontFamily={FONT} fontWeight={700} fontSize={16} letterSpacing="0.14em" textAnchor="middle" dominantBaseline="central">
+                <text x={r.x + r.w / 2} y={r.y + r.h / 2} fill={COLORS.white} opacity={s.textOpacity ?? 1} fontFamily={FONT} fontWeight={700} fontSize={sz.segment} letterSpacing="0.14em" textAnchor="middle" dominantBaseline="central">
                   {s.text}
                 </text>
               ) : null}
@@ -195,7 +212,7 @@ export const ContextTank: React.FC<ContextTankProps> = ({
             return (
               <>
                 <rect x={r.x + 4} y={r.y + 4} width={r.w - 8} height={Math.max(0, r.h - 8)} rx={10} fill={rgba(COLORS.cyan, 0.05)} stroke={rgba(COLORS.cyan, 0.7)} strokeWidth={2} strokeDasharray="10 8" />
-                <text x={x} y={r.y + r.h / 2} fill={COLORS.cyan} fontFamily={FONT} fontWeight={700} fontSize={20} letterSpacing="0.16em" textAnchor="middle" dominantBaseline="central">
+                <text x={x} y={r.y + r.h / 2} fill={COLORS.cyan} fontFamily={FONT} fontWeight={700} fontSize={sz.remaining} letterSpacing="0.16em" textAnchor="middle" dominantBaseline="central">
                   {remaining.label}
                 </text>
               </>
@@ -208,9 +225,12 @@ export const ContextTank: React.FC<ContextTankProps> = ({
 
       {labels > 0.001
         ? placed.map((l, i) => (
-            <text key={i} x={left + w + 22} y={l.y} fill={l.color} opacity={labels * l.opacity} fontFamily={FONT} fontWeight={700} fontSize={18} letterSpacing="0.14em" dominantBaseline="central">
-              {l.text}
-            </text>
+            <g key={i} opacity={labels * l.opacity}>
+              {l.nudge ? <path d={`M${left + w + 4} ${l.anchor} L${left + w + 16} ${l.y}`} fill="none" stroke={l.color} strokeWidth={2} strokeLinecap="round" /> : null}
+              <text x={left + w + 22} y={l.y} fill={l.color} fontFamily={FONT} fontWeight={700} fontSize={sz.label} letterSpacing="0.14em" dominantBaseline="central">
+                {l.text}
+              </text>
+            </g>
           ))
         : null}
 
@@ -222,7 +242,7 @@ export const ContextTank: React.FC<ContextTankProps> = ({
           <text x={x} y={top - 62} fill={readout.warn ? COLORS.error : COLORS.white} fontFamily={FONT} fontWeight={800} fontSize={26} textAnchor="middle" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
             {fmt(readout.tokens)} / {fmt(readout.capacity)} <tspan fill={readout.pulse ? COLORS.cyan : undefined}>TOKENS</tspan>
           </text>
-          <text x={x} y={top - 28} fill={readout.warn ? COLORS.error : rgba(COLORS.white, 0.55)} fontFamily={FONT} fontWeight={700} fontSize={15} letterSpacing="0.16em" textAnchor="middle" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
+          <text x={x} y={top - 28} fill={readout.warn ? COLORS.error : rgba(COLORS.white, 0.55)} fontFamily={FONT} fontWeight={700} fontSize={sz.readoutSub} letterSpacing="0.16em" textAnchor="middle" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
             {Math.round((readout.tokens / readout.capacity) * 100)}% · {readout.warn ? 'NEAR LIMIT' : 'EXAMPLE CAPACITY'}
           </text>
         </g>

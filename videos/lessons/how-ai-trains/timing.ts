@@ -33,19 +33,24 @@ export const TOTAL_FRAMES = SCENES.release.from + SCENES.release.durationInFrame
 
 export const RAW = {
   titleToCorner: 40,
+  blankModel: 52, // the blank model fades in once the title has mostly left centre
+  blankLabel: 75, // "BLANK MODEL" on "start completely blank"
   counterIn: 10,
   counterStart: 15,
-  counterEnd: 200, // lands on 1.00 TB as the voiceover says "learn"
+  counterEnd: 200, // lands on 45 TB as the voiceover says "learn"
 } as const;
 
 // Synced to the Scene 2 VO: "broken into pieces" ~1.5 s, "tokens" ~2.6 s, "then mapped" 3.9 s, "where similar meanings" 6.7 s.
+// The third cut (between the sub-word pieces "sprawl" and "ed") shares the second cut's frame.
 export const TOKEN = {
-  cuts: [45, 58],
+  cuts: [45, 58, 58],
   split: 72,
   morph: 118,
+  dimensions: 135, // "multi-dimensional" (~4.5 s): faint note that real models use thousands
   kittenIn: 201,
   carIn: 211,
   carFly: 225,
+  contrast: 250, // "close = similar" / "far = different" once "car" has flown off
 } as const;
 
 // Synced to the Scene 3 VO: "It guesses" 3.3 s, "gets it wrong" 4.6 s, "and adjusts…" 5.6 s, ends 9.66 s.
@@ -72,7 +77,8 @@ export const FINETUNE = {
   rambleReject: 156,
   partOut: 185,
   partB: 195,
-  examples: [222, 240, 258, 276, 292, 306, 318], // each card takes EXAMPLE_TRAVEL frames to reach the model
+  // The first card is held to be read (EXAMPLE_HOLD); the rest stream in as a montage (EXAMPLE_TRAVEL each).
+  examples: [222, 250, 262, 274, 286, 298, 310],
   examplesEnd: 350,
   humansOut: 338,
   question2: 352,
@@ -82,31 +88,39 @@ export const FINETUNE = {
   answerEnd: 400,
   answerOk: 403,
 } as const;
-export const EXAMPLE_TRAVEL = 32;
+export const EXAMPLE_TRAVEL = 20;
+export const EXAMPLE_HOLD = {reach: 10, hold: 15, travel: 15};
+// Frame (scene-local) at which example card i lands in the model.
+export const exampleArrive = (i: number) =>
+  FINETUNE.examples[i] + (i === 0 ? EXAMPLE_HOLD.reach + EXAMPLE_HOLD.hold + EXAMPLE_HOLD.travel : EXAMPLE_TRAVEL);
 
-// Scene 5: RLHF. A person compares two answers; a reward model learns their preferences.
+// Scene 5: RLHF. A person compares two answers; many people's preferences flow into the model.
 export const FEEDBACK = {
   question: 10,
   cards: 25,
   rater: 45,
   pick: 75,
-  toReward: 100,
+  toReward: 100, // the preferred answer flies into the model
   rewardIn: 122,
-  streamStart: 128,
+  streamStart: 128, // more people join; preference dots stream into the model
   streamEnd: 170,
-  signal: 175,
+  signal: 175, // "LEARNS THEIR PREFERENCES"
   signalEnd: 198,
   contentOut: 222,
 } as const;
 
 // Scene 6: reinforcement learning on checkable problems. Each cycle: attempt -> automatic check -> reward.
+// The attempt launches `lead` frames after the problem appears and takes `travel` frames to reach the checker.
+// Fast cycles launch almost at once and travel quickly, so each verdict holds about 7 frames before the
+// checker clears for the next problem (it never shows a verdict beside a different attempt).
 export const REINFORCE = {
   arcs: 20,
   cycles: [
-    {start: 60, travel: 26},
-    {start: 125, travel: 26},
-    ...[190, 208, 226, 244, 262, 280, 298, 316].map((start) => ({start, travel: 12})),
+    {start: 60, lead: 5, travel: 26},
+    {start: 125, lead: 5, travel: 26},
+    ...[190, 208, 226, 244, 262, 280, 298, 316].map((start) => ({start, lead: 1, travel: 10})),
   ],
+  montage: 190, // first fast cycle: the "× 1,000s" tag appears
   contentOut: 372,
 } as const;
 
@@ -130,9 +144,9 @@ export const EVALS = {
   fail: 115,
   loopBack: 170,
   loopArrive: 196,
-  run2: 220,
-  pass: 258,
-  approve: 264,
+  run2: 210, // run 2 starts early and fills faster, so the approval stamp (approve + 6) holds about 1 s before the fade
+  pass: 246,
+  approve: 244,
   contentOut: 280,
 } as const;
 
@@ -145,6 +159,7 @@ export const LOCK = {
   chat: 132,
   chatHit: 157,
   caption: 164,
+  chatGone: 200, // the bounced chat has faded out; numbers in its lane return
   contentOut: 262,
 } as const;
 
@@ -158,7 +173,8 @@ export const RELEASE = {
   channels: [95, 105, 115],
   usersStart: 110,
   usersEnd: 260,
-  bubbles: [150, 175, 200, 225],
+  bubbles: [96, 106, 116, 126], // beat 1 ("reaches millions of people"): requests pop up…
+  bubblesOut: 140, // …and clear before beat 2 (monitoring and the next model)
   monitor: 150,
   feedbackStart: 200,
   nextModel: 262,

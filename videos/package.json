@@ -11,11 +11,13 @@
     "render:responds:4k": "remotion render HowAIResponds out/how-ai-responds/how-ai-responds-2160p.mp4 --scale=2",
     "render:context": "remotion render HowAIGetsContext out/how-ai-gets-context/how-ai-gets-context-1080p.mp4",
     "render:context:4k": "remotion render HowAIGetsContext out/how-ai-gets-context/how-ai-gets-context-2160p.mp4 --scale=2",
+    "render:action": "remotion render HowAITakesAction out/how-ai-takes-action/how-ai-takes-action-1080p.mp4",
+    "render:action:4k": "remotion render HowAITakesAction out/how-ai-takes-action/how-ai-takes-action-2160p.mp4 --scale=2",
     "still": "remotion still",
     "sfx": "node scripts/generate-sfx.mjs",
-    "center:trains": "node scripts/measure-centering.mjs HowAITrains lessons/how-ai-trains/centering.ts --fixed=0-230:0 --fixed=2413-2693:0",
-    "center:responds": "node scripts/measure-centering.mjs HowAIResponds lessons/how-ai-responds/centering.ts",
-    "center:context": "node scripts/measure-centering.mjs HowAIGetsContext lessons/how-ai-gets-context/centering.ts",
+    "center:trains": "node scripts/measure-centering.mjs HowAITrains lessons/how-ai-trains/centering.ts --fixed=0-230:0 --fixed=2413-2693:0 --look-ahead=8 --smooth=7 --trim=0.002 --clamp",
+    "center:responds": "node scripts/measure-centering.mjs HowAIResponds lessons/how-ai-responds/centering.ts --fixed=892-996:84 --look-ahead=8 --smooth=7 --trim=0.002 --clamp",
+    "center:context": "node scripts/measure-centering.mjs HowAIGetsContext lessons/how-ai-gets-context/centering.ts --fixed=0-1280:0 --fixed=1580-1860:0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

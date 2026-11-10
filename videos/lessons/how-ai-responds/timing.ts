@@ -6,7 +6,7 @@ const DURATIONS = {
   assemble: 336, // VO 10.37 s (recorded), plus the merge into the window
   window: 300, // VO 9.25 s (recorded)
   tokens: 360, // VO 10.92 s (recorded), plus a hold on the caption
-  settings: 320, // VO 9.8 s (recorded), plus a hold on the stamp
+  settings: 350, // VO 9.8 s (recorded), plus a 2 s hold on the stamp
   middle: 276, // VO 7.4 s (recorded), plus a hold on the caption
   compaction: 330, // VO 9.4 s (recorded), plus the glide home
   stopping: 280, // VO 7.7 s (recorded), plus a hold on the caption
@@ -15,7 +15,7 @@ const DURATIONS = {
 
 export type SceneKey = keyof typeof DURATIONS;
 export const SCENES = buildTimeline(DURATIONS);
-export const TOTAL_FRAMES = timelineLength(SCENES); // 2544 (84.8 s)
+export const TOTAL_FRAMES = timelineLength(SCENES); // 2574 (85.8 s)
 
 // Scene-local frames below.
 
@@ -24,17 +24,20 @@ export const TOTAL_FRAMES = timelineLength(SCENES); // 2544 (84.8 s)
 // "The app assembles a context" 4.0 s, "instructions" 5.8 s, "conversation history" 6.8 s,
 // "documents" 8.0 s, "and tool definitions" 9.0–10.1 s.
 export const ASSEMBLE = {
-  titleToCorner: 40,
+  titleToCorner: 24, // early, so the title is clear of the prompt bar rising at screen centre
   promptIn: 30,
   typeStart: 35,
   typeEnd: 75,
+  barDown: [154, 178], // the centred prompt bar glides down as the system instructions card arrives
   cubeIn: 70,
   lineDraw: 78,
   strike: 92,
   strikeOut: 125,
   appIn: 120,
   cards: [168, 198, 234, 266], // each card starts ~8 frames before its word, so it lands on it
-  merge: 292,
+  textOut: 280, // card and prompt text fades out before anything moves (gone by merge)
+  merge: 292, // slices move one at a time, bottom to top, mergeStagger apart
+  mergeStagger: 4,
   mergeEnd: 326,
   segmentsIn: 320,
   labelsOut: 334,
@@ -70,8 +73,9 @@ export const TOKENS = {
   loopArrow: 196,
   quick: [210, 226], // "berra", "."
   end: 244,
-  caption: 246,
-  sydneyPulses: [262, 300],
+  settle: 242, // "Those scores are patterns": the window clears and the panel slides down beside the cube
+  caption: 274, // ...then the caption rises in
+  sydneyPulses: [282, 300],
   out: 340,
 } as const;
 
@@ -90,6 +94,7 @@ export const SETTINGS = {
     [192, 215],
   ],
   stamp: 272, // on "correct" (~9.1 s)
+  out: 340, // content fades over the last 10 frames, after a 2 s hold on the stamp
 } as const;
 
 // Scene 5: a bigger window, a detail buried in the middle.
@@ -100,6 +105,7 @@ export const MIDDLE = {
   rowsStart: 10,
   highlight: 92, // "Details"
   attention: [105, 150], // "buried in the middle"
+  questionIn: 128, // the question shows and holds before it flies into the model
   question: [150, 172],
   answer: [176, 202],
   missed: 207, // "overlooked"
@@ -117,16 +123,18 @@ export const COMPACT = {
   bubbleTravel: 18, // last of 10 bubbles lands at 68; the warning trips at 90% full (~frame 64, "limit")
   slide: 72,
   appIn: 74, // "the app"
+  appOut: 120, // the gear leaves before the summary card, so the card is the only new thing; the badge stays
   funnel: [78, 100],
   tankB: [82, 104],
   keepCopy: [100, 125], // instructions + tools copied across as they are
   squeeze: [94, 128], // old history squeezed through the funnel on "compact it into a summary"
-  card: 128,
-  cardLand: [150, 166],
-  recentCopy: [146, 164],
-  freed: 150, // "That frees space"
+  aDim: [114, 128], // tank A dims before the card pops, so the card is the only bright thing
+  card: 128, // the summary card pops out, centred between the tanks, and holds until cardLand (~1.1 s)
+  cardLand: [162, 178],
+  recentCopy: [158, 176],
+  freed: 178, // once the summary slice has landed, at the end of "That frees space"
   leaks: [182, 208, 230], // "decisions", "caveats", "sources"
-  leakLife: 56,
+  funnelOut: [272, 290], // the funnel is gone before tank B glides home
   home: 292,
 } as const;
 

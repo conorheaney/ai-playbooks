@@ -16,7 +16,8 @@ const POSE = {x: 640, y: 490, size: 85};
 const CHECKER = {x: 1290, y: 490, w: 300, h: 230};
 const ATTEMPT_ARC = {from: {x: 760, y: 420}, ctrl: {x: 965, y: 240}, to: {x: CHECKER.x - CHECKER.w / 2, y: 420}};
 const REWARD_ARC = {from: {x: CHECKER.x - CHECKER.w / 2, y: 560}, ctrl: {x: 965, y: 720}, to: {x: 760, y: 560}};
-const CHART = {x: 520, y: 810, w: 900, h: 140};
+const CHART = {x: 520, y: 770, w: 900, h: 196};
+const CHIP_INSET = 30; // attempt chips ride just inside the top arc, clear of the ATTEMPT label
 const RESULT_TO_REWARD = 3; // frames between the verdict and the reward setting off
 
 // One row per cycle in REINFORCE.cycles. Verifiable tasks: the checker knows the right answer.
@@ -32,8 +33,10 @@ const TASKS: {problem: string; attempt: string; ok: boolean}[] = [
   {problem: 'fib(10) = ?', attempt: '55', ok: true},
   {problem: '2ⁿ = 64, n = ?', attempt: '6', ok: true},
 ];
-// Success rate before the first cycle, then after each one.
-const RATES = [30, 28, 42, 47, 45, 55, 63, 70, 68, 79, 90];
+// Success rate before the first cycle, then after each one. A missed reward leaves it flat, so the
+// chart's first visible movement is upwards.
+const RATES = [28, 28, 42, 47, 45, 55, 63, 70, 68, 79, 90];
+const FAST_FROM = 2; // cycles from here on are the montage
 
 const bez = (a: {from: Vec2; ctrl: Vec2; to: Vec2}, t: number): Vec2 => ({
   x: (1 - t) * (1 - t) * a.from.x + 2 * (1 - t) * t * a.ctrl.x + t * t * a.to.x,
@@ -54,13 +57,14 @@ export const ReinforceScene: React.FC = () => {
   const arcs = interpolate(frame, [R.arcs, R.arcs + 25], [0, 1], clampOpts);
 
   const timing = R.cycles.map((c) => {
-    const launch = c.start + 5;
+    const launch = c.start + c.lead;
     const verdict = launch + c.travel;
     const rewardArrive = verdict + RESULT_TO_REWARD + c.travel;
     return {...c, launch, verdict, rewardArrive};
   });
   const current = timing.reduce((idx, c, i) => (frame >= c.start ? i : idx), -1);
-  const lastVerdict = timing.reduce((idx, c, i) => (frame >= c.verdict ? i : idx), -1);
+  // The checker only ever shows the current attempt's verdict; until it lands it waits ("…").
+  const verdictShown = current >= 0 && frame >= timing[current].verdict;
   const learned = timing.reduce((n, c) => (frame >= c.rewardArrive ? n + 1 : n), 0);
 
   // Model lights up cyan when a reward lands, dims red-purple when it gets nothing.
@@ -81,6 +85,8 @@ export const ReinforceScene: React.FC = () => {
     linePts.push({x: lerp(a.x, b.x, nextGrow), y: lerp(a.y, b.y, nextGrow)});
   }
   const shownRate = Math.round(lerp(RATES[shownIdx], RATES[Math.min(shownIdx + 1, RATES.length - 1)], nextGrow));
+  const lineEnd = linePts[linePts.length - 1];
+  const montage = current >= FAST_FROM;
 
   return (
     <AbsoluteFill>
@@ -103,23 +109,27 @@ export const ReinforceScene: React.FC = () => {
             <path d={arcPath(ATTEMPT_ARC)} stroke={rgba(COLORS.white, 0.45)} strokeDashoffset={-frame * 1.5} />
             <path d={arcPath(REWARD_ARC)} stroke={rgba(COLORS.cyan, 0.6)} strokeDashoffset={-frame * 1.5} />
           </g>
-          <Caption x={965} y={308} text="ATTEMPT" opacity={arcs} />
-          <Caption x={965} y={694} text="REWARD" opacity={arcs} color={COLORS.cyan} />
+          <Caption x={965} y={298} text="ATTEMPT" opacity={arcs} size={24} />
+          <Caption x={965} y={696} text="REWARD" opacity={arcs} color={COLORS.cyan} size={24} />
 
           {/* Automatic checker. */}
           <g opacity={smooth(R.arcs)}>
             <rect x={CHECKER.x - CHECKER.w / 2} y={CHECKER.y - CHECKER.h / 2} width={CHECKER.w} height={CHECKER.h} rx={22} fill={COLORS.charcoal} stroke={COLORS.cyan} strokeWidth={3} />
             <Gear x={CHECKER.x} y={CHECKER.y - 58} size={54} angle={frame * 3} />
-            <Caption x={CHECKER.x} y={CHECKER.y + CHECKER.h / 2 + 32} text="AUTOMATIC CHECKER" color={COLORS.cyan} />
-            {lastVerdict >= 0 ? (
+            <Caption x={CHECKER.x} y={CHECKER.y + CHECKER.h / 2 + 34} text="AUTOMATIC CHECKER" color={COLORS.cyan} size={24} />
+            {verdictShown ? (
               <g transform={`translate(${CHECKER.x - 40} ${CHECKER.y + 30})`}>
-                <g transform={`scale(${spring({frame: frame - timing[lastVerdict].verdict, fps, config: {damping: 10, stiffness: 200}})})`}>
-                  <Mark ok={TASKS[lastVerdict].ok} />
+                <g transform={`scale(${spring({frame: frame - timing[current].verdict + 1, fps, config: {damping: 14, stiffness: 260}, durationInFrames: 6})})`}>
+                  <Mark ok={TASKS[current].ok} />
                 </g>
-                <text x={44} y={0} fill={TASKS[lastVerdict].ok ? COLORS.cyan : COLORS.error} fontFamily={FONT} fontWeight={800} fontSize={40} dominantBaseline="central">
-                  {TASKS[lastVerdict].ok ? '+1' : '0'}
+                <text x={44} y={0} fill={TASKS[current].ok ? COLORS.cyan : COLORS.error} fontFamily={FONT} fontWeight={800} fontSize={40} dominantBaseline="central">
+                  {TASKS[current].ok ? '+1' : '0'}
                 </text>
               </g>
+            ) : current >= 0 ? (
+              <text x={CHECKER.x} y={CHECKER.y + 30} fill={rgba(COLORS.white, 0.55)} fontFamily={FONT} fontWeight={800} fontSize={44} textAnchor="middle" dominantBaseline="central">
+                …
+              </text>
             ) : null}
           </g>
 
@@ -127,10 +137,29 @@ export const ReinforceScene: React.FC = () => {
           {current >= 0 ? (
             <g opacity={smooth(timing[current].start, 6)}>
               <rect x={POSE.x - 170} y={210} width={340} height={64} rx={16} fill={COLORS.charcoal} stroke={rgba(COLORS.white, 0.5)} strokeWidth={2} />
-              <text x={POSE.x} y={242} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={30} textAnchor="middle" dominantBaseline="central">
+              {/* Montage problems are drawn quieter and smaller: the speed carries the meaning, not the text. */}
+              <text
+                x={POSE.x}
+                y={242}
+                fill={COLORS.white}
+                opacity={montage ? 0.7 : 1}
+                fontFamily={FONT}
+                fontWeight={700}
+                fontSize={montage ? 24 : 30}
+                textAnchor="middle"
+                dominantBaseline="central"
+              >
                 {TASKS[current].problem}
               </text>
-              <Caption x={POSE.x} y={186} text="PRACTICE PROBLEM" size={16} />
+              <Caption x={POSE.x} y={180} text="PRACTICE PROBLEM" size={22} />
+            </g>
+          ) : null}
+          {frame >= R.montage ? (
+            <g opacity={smooth(R.montage, 8)}>
+              <rect x={POSE.x + 186} y={220} width={128} height={44} rx={22} fill={rgba(COLORS.cyan, 0.12)} stroke={rgba(COLORS.cyan, 0.6)} strokeWidth={2} />
+              <text x={POSE.x + 250} y={242} fill={COLORS.cyan} fontFamily={FONT} fontWeight={800} fontSize={24} textAnchor="middle" dominantBaseline="central">
+                × 1,000s
+              </text>
             </g>
           ) : null}
 
@@ -144,7 +173,7 @@ export const ReinforceScene: React.FC = () => {
             return (
               <g key={i}>
                 {ta >= 0 && ta <= 1 ? (
-                  <g transform={`translate(${a.x} ${a.y})`}>
+                  <g transform={`translate(${a.x} ${a.y + CHIP_INSET})`}>
                     <rect x={-70} y={-26} width={140} height={52} rx={26} fill={COLORS.charcoal} stroke={COLORS.white} strokeWidth={2} />
                     <text x={0} y={0} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={24} textAnchor="middle" dominantBaseline="central">
                       {TASKS[i].attempt}
@@ -166,9 +195,10 @@ export const ReinforceScene: React.FC = () => {
           {/* Success rate climbs as rewarded behaviour is reinforced. */}
           <g opacity={smooth(R.arcs + 20)}>
             <line x1={CHART.x} y1={CHART.y + CHART.h} x2={CHART.x + CHART.w} y2={CHART.y + CHART.h} stroke={rgba(COLORS.white, 0.25)} strokeWidth={2} />
-            <Caption x={CHART.x} y={CHART.y - 22} text="SUCCESS RATE" anchor="start" />
+            <Caption x={CHART.x} y={CHART.y - 24} text="SUCCESS RATE" anchor="start" size={24} />
             <polyline points={linePts.map((p) => `${p.x},${p.y}`).join(' ')} fill="none" stroke={COLORS.cyan} strokeWidth={4} strokeLinejoin="round" strokeLinecap="round" filter="url(#rl-glow)" />
-            <text x={CHART.x + CHART.w + 30} y={CHART.y + CHART.h / 2} fill={COLORS.cyan} fontFamily={FONT} fontWeight={800} fontSize={52} dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
+            {/* The rate rides the end of the line. */}
+            <text x={lineEnd.x + 24} y={lineEnd.y} fill={COLORS.cyan} fontFamily={FONT} fontWeight={800} fontSize={52} dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
               {`${shownRate}%`}
             </text>
           </g>

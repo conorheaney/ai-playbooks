@@ -9,7 +9,7 @@ import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {ContextTank} from '../../../shared/components/context/ContextTank';
 import {Pinned} from '../../../shared/components/Stage';
 import {LockedCube, StatusBadge} from '../../../shared/components/context/Pieces';
-import {CAPACITY, COMPACTED, COMPACTED_TOP, CUBE_HOME, TANK_HOME} from '../layout';
+import {CAPACITY, COMPACTED, COMPACTED_TOP, CUBE_HOME, TANK_HOME, TANK_TEXT} from '../layout';
 import {SCENES, STOPPING as S} from '../timing';
 
 const LANE = {x: 1290, w: 1080, h: 110};
@@ -19,6 +19,10 @@ const TEXT_A = 'Pack warm layers. Canberra nights get cold in March.';
 const TEXT_B_KEEP = '{"day": 3, "plan": ';
 const TEXT_B_OPEN = '"Visit Parliament House and the';
 const TEXT_B = TEXT_B_KEEP + TEXT_B_OPEN;
+// The output limit is a token count, not a width: the wall drops right after the last character lane B
+// produced (measured from a render: the text ends at x = 1564), and the lane's unused width is hatched.
+const WALL = {x: 1582, w: 16, h: 160};
+const LANE_RIGHT = LANE.x + LANE.w / 2;
 
 const Cursor: React.FC<{frame: number; show: boolean}> = ({frame, show}) => (
   <span style={{display: 'inline-block', width: 3, height: 38, marginLeft: 4, verticalAlign: 'middle', background: COLORS.cyan, opacity: show && Math.floor(frame / 12) % 2 === 0 ? 1 : 0}} />
@@ -104,9 +108,9 @@ export const StoppingScene: React.FC = () => {
         <LockedCube id="sp-cube" absFrame={abs} {...CUBE_HOME} glow={streaming * (0.3 + 0.3 * Math.sin(frame / 4))} />
         {/* The compacted context from Scene 6 gives way to the lanes. */}
         <ContextTank
-          id="sp-tank"
+          id="sp-tank" textSizes={TANK_TEXT}
           {...TANK_HOME}
-          opacity={interpolate(frame, [0, 14], [1, 0], clampOpts)}
+          opacity={interpolate(frame, [0, 6], [1, 0], clampOpts)}
           segments={COMPACTED}
           readout={{tokens: COMPACTED_TOP * CAPACITY, capacity: CAPACITY, opacity: 1}}
         />
@@ -148,24 +152,56 @@ export const StoppingScene: React.FC = () => {
                 {typedB.slice(TEXT_B_KEEP.length)}
               </span>
               <Cursor frame={frame} show={frame < S.wallHit} />
-              {ghost > 0.01 ? (
-                <span style={{marginLeft: 12, padding: '0 10px', border: `2px dashed ${COLORS.error}`, borderRadius: 8, color: COLORS.error, opacity: 0.85 * ghost}}>
-                  {'"}'}
-                </span>
-              ) : null}
             </div>,
             1,
           )}
-          {/* MAX OUTPUT wall slams down at the lane's right edge. */}
+          {/* The lane's unused width, past the limit, is hatched out once the wall lands. */}
+          {frame >= S.wallHit ? (
+            <div
+              style={{
+                position: 'absolute',
+                left: WALL.x + WALL.w / 2,
+                width: LANE_RIGHT - 2 - (WALL.x + WALL.w / 2),
+                top: LANE_B_Y - LANE.h / 2 + 2,
+                height: LANE.h - 4,
+                borderRadius: '0 20px 20px 0',
+                background: `repeating-linear-gradient(135deg, ${rgba(COLORS.error, 0.22)} 0 4px, transparent 4px 14px)`,
+                opacity: interpolate(frame, [S.wallHit, S.wallHit + 10], [0, 1], clampOpts),
+              }}
+            />
+          ) : null}
+          {/* What's missing: the closing quote and brace, past the limit. */}
+          {ghost > 0.01 ? (
+            <div
+              style={{
+                position: 'absolute',
+                left: WALL.x + WALL.w + 22,
+                top: LANE_B_Y,
+                transform: 'translateY(-50%)',
+                padding: '0 10px',
+                border: `2px dashed ${COLORS.error}`,
+                borderRadius: 8,
+                background: rgba(COLORS.charcoal, 0.9),
+                fontFamily: FONT,
+                fontSize: 30,
+                fontWeight: 500,
+                color: COLORS.error,
+                opacity: 0.9 * ghost,
+              }}
+            >
+              {'"}'}
+            </div>
+          ) : null}
+          {/* MAX OUTPUT wall slams down right after the last token. */}
           {frame >= S.wall ? (
             <>
               <div
                 style={{
                   position: 'absolute',
-                  left: LANE.x + LANE.w / 2 - 10,
-                  top: LANE_B_Y - 80 - (1 - wall) * 260,
-                  width: 16,
-                  height: 160,
+                  left: WALL.x,
+                  top: LANE_B_Y - WALL.h / 2 - (1 - wall) * 260,
+                  width: WALL.w,
+                  height: WALL.h,
                   borderRadius: 6,
                   background: COLORS.error,
                   boxShadow: `0 0 24px ${rgba(COLORS.error, 0.6)}`,
@@ -174,10 +210,10 @@ export const StoppingScene: React.FC = () => {
               <div
                 style={{
                   position: 'absolute',
-                  left: LANE.x + LANE.w / 2 - 260,
-                  width: 260,
+                  left: WALL.x + WALL.w / 2 - 150,
+                  width: 300,
                   top: LANE_B_Y - 118 - (1 - wall) * 260,
-                  textAlign: 'right',
+                  textAlign: 'center',
                   fontFamily: FONT,
                   fontWeight: 700,
                   fontSize: 20,
@@ -194,7 +230,7 @@ export const StoppingScene: React.FC = () => {
         <div
           style={{
             position: 'absolute',
-            left: LANE.x + LANE.w / 2 - 300,
+            left: LANE_RIGHT - 300,
             width: 300,
             top: LANE_B_Y + LANE.h / 2 + 22,
             textAlign: 'right',
@@ -228,6 +264,22 @@ export const StoppingScene: React.FC = () => {
           }}
         >
           Check the finish reason, not just the text.
+        </div>
+        <div
+          style={{
+            position: 'absolute',
+            left: LANE.x - LANE.w / 2,
+            width: LANE.w,
+            top: 936,
+            textAlign: 'center',
+            fontFamily: FONT,
+            fontWeight: 500,
+            fontSize: 22,
+            color: rgba(COLORS.white, 0.6),
+            opacity: smooth(S.caption + 10, 14),
+          }}
+        >
+          Names vary by API, e.g. stop / end_turn, length / max_tokens.
         </div>
         <Pinned>
           <SceneTitle text="STOPPING" mode="corner" />

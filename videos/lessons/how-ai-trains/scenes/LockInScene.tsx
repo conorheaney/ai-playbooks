@@ -32,6 +32,10 @@ const CHAT_W = 330;
 // Bubble centre when its left edge touches the cube (cube half-width ≈ 1.75 × size).
 const CHAT_HIT_X = LOCK_POSE.x + 1.75 * LOCK_POSE.size + CHAT_W / 2 + 10;
 const ICE = '#D8FDFF';
+// Horizontal distance from the cube's centre inside which numbers would overlap it (half-width ≈ 1.75 × size, plus a label).
+const CUBE_CLEAR = 1.75 * LOCK_POSE.size + 100;
+// The chat bubble flies in and bounces back above this line, to the right of the cube.
+const CHAT_LANE_BOTTOM = 540;
 
 // Integral of a spin rate that decays linearly to zero between slowStart and freeze.
 const orbitAngle = (frame: number) => {
@@ -54,7 +58,7 @@ export const LockInScene: React.FC = () => {
   const angle = orbitAngle(frame);
   // Frozen numbers recede as the chat arrives so the bubble and caption read over them.
   const numbersIn = smooth(0, 20);
-  const recede = interpolate(frame, [L.chat - 10, L.chat + 10], [1, 0.3], clampOpts);
+  const recede = interpolate(frame, [L.chat - 10, L.chat + 10, L.chatGone, L.chatGone + 15], [1, 0.3, 0.3, 0.55], clampOpts);
   const numberColor = interpolateColors(frost, [0, 1], [COLORS.purple, ICE]);
 
   // A chat message flies in, bounces off the locked model.
@@ -68,16 +72,38 @@ export const LockInScene: React.FC = () => {
     const a = n.phase + angle;
     return {x: pose.x + Math.cos(a) * ORBIT.rx, y: pose.y + Math.sin(a) * ORBIT.ry + n.lift, depth: Math.sin(a)};
   };
+  // Numbers stay clear of the cube's footprint throughout (spinning or frozen), and clear out of the
+  // chat's path as it arrives, so they never overlap the cube, padlock, emblem or chat bubble.
+  // Crowding is only resolved as the orbit settles; while spinning, numbers just pass each other.
+  const crowdMask = interpolate(frame, [L.slowStart, L.freeze], [0, 1], clampOpts);
+  // The chat's lane clears as it arrives, and fills back in once it has gone, so the frozen layout ends balanced.
+  const chatMask = interpolate(frame, [L.chat - 12, L.chat + 4, L.chatGone, L.chatGone + 15], [0, 1, 1, 0], clampOpts);
+  const chatOut = interpolate(frame, [L.chatGone - 15, L.chatGone], [1, 0], clampOpts);
+  const clearance = (p: {x: number; y: number}) => {
+    const dx = Math.abs(p.x - pose.x);
+    const overCube = interpolate(dx, [CUBE_CLEAR - 50, CUBE_CLEAR], [1, 0], clampOpts);
+    const inChatLane = p.x > pose.x && p.y < CHAT_LANE_BOTTOM ? interpolate(dx, [CUBE_CLEAR - 50, CUBE_CLEAR], [0, 1], clampOpts) : 0;
+    return (1 - overCube) * (1 - chatMask * inChatLane);
+  };
+  // Where two numbers would crowd each other, the farther one clears out.
+  const points = NUMBERS.map(orbitPoint);
+  const crowded = points.map((p, i) =>
+    points.some((q, j) => j !== i && (q.depth > p.depth || (q.depth === p.depth && j < i)) && Math.abs(q.x - p.x) < 90 && Math.abs(q.y - p.y) < 34),
+  );
   const renderNumber = (n: (typeof NUMBERS)[number], i: number) => {
     const p = orbitPoint(n);
     const near = (p.depth + 1) / 2;
+    const clear = clearance(p) * (crowded[i] ? 1 - crowdMask : 1);
+    if (clear <= 0.01) {
+      return null;
+    }
     return (
       <text
         key={i}
         x={p.x}
         y={p.y}
         fill={numberColor}
-        opacity={(0.35 + 0.65 * near) * numbersIn * recede}
+        opacity={(0.35 + 0.65 * near) * numbersIn * recede * clear}
         fontFamily={FONT}
         fontWeight={700}
         fontSize={20 + 14 * near}
@@ -99,9 +125,9 @@ export const LockInScene: React.FC = () => {
         <g opacity={content}>{NUMBERS.map((n, i) => (orbitPoint(n).depth >= 0 ? renderNumber(n, i) : null))}</g>
 
         <g opacity={content}>
-          <Caption x={pose.x} y={pose.y - 300} text={frost > 0.5 ? 'WEIGHTS FROZEN' : 'WEIGHTS'} color={frost > 0.5 ? ICE : COLORS.purple} opacity={numbersIn} />
+          <Caption x={pose.x} y={pose.y - 215} text={frost > 0.5 ? 'WEIGHTS FROZEN' : 'WEIGHTS'} color={frost > 0.5 ? ICE : COLORS.purple} opacity={numbersIn} size={24} />
           {ripple > 0 && ripple < 1 ? (
-            <circle cx={CHAT_HIT_X - CHAT_W / 2} cy={470} r={10 + 70 * ripple} fill="none" stroke={ICE} strokeWidth={3} opacity={1 - ripple} />
+            <circle cx={CHAT_HIT_X - CHAT_W / 2} cy={470} r={10 + 70 * ripple} fill="none" stroke={COLORS.cyan} strokeWidth={4} opacity={1 - ripple} filter="url(#lk-cube-glow)" />
           ) : null}
           <g opacity={smooth(L.tag)} transform={`translate(${pose.x} ${pose.y + 300})`}>
             <rect x={-180} y={-32} width={360} height={64} rx={32} fill={COLORS.charcoal} stroke={ICE} strokeWidth={3} />
@@ -109,7 +135,7 @@ export const LockInScene: React.FC = () => {
               v1.0 · LOCKED
             </text>
           </g>
-          <Caption x={CHAT_HIT_X + 40} y={700} text="CHATS DON’T CHANGE THE WEIGHTS" color={ICE} size={18} opacity={smooth(L.caption)} />
+          <Caption x={pose.x} y={pose.y + 384} text="CHATS DON’T CHANGE THE WEIGHTS" color={ICE} size={28} opacity={smooth(L.caption)} />
         </g>
       </svg>
 
@@ -121,7 +147,7 @@ export const LockInScene: React.FC = () => {
           text={CHAT}
           fontSize={24}
           color={COLORS.white}
-          opacity={frame < L.chat ? 0 : smooth(L.chat, 8) * (1 - 0.5 * chatBack)}
+          opacity={frame < L.chat ? 0 : smooth(L.chat, 8) * (1 - 0.5 * chatBack) * chatOut}
         />
         <Pinned>
           <SceneTitle text="LOCKED IN" mode="corner" />

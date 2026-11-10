@@ -8,18 +8,21 @@ import {ContextTank, SEGMENT_STYLE, segmentRect} from '../../../shared/component
 import {LockedCube} from '../../../shared/components/context/Pieces';
 import {FONT} from '../../../shared/fonts';
 import {lerp} from '../../../shared/lib/math';
+import {centredRow} from '../../../shared/lib/row';
 import {clampOpts, presence} from '../../../shared/lib/motion';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {FlowLine} from '../components/Parts';
-import {CUBE_HOME} from '../layout';
+import {CUBE_HOME, CUBE_W, ROW_GAP} from '../layout';
 import {SCENES, WEIGHTS as W} from '../timing';
 
 const ICE = '#D8FDFF';
-const TANK = {x: 1560, y: 560, w: 300, h: 640};
+const TANK_SIZE = {y: 560, w: 300, h: 640};
 const CARD = {w: 340, h: 110};
-const IMPACT_X = CUBE_HOME.x + 140 + CARD.w / 2 + 10; // card's left edge meets the padlock side
-const REST_X = 1090; // clear of the frozen weight values
 const SLICE = 0.14;
+// The row: the cube (wider while the frozen weights orbit it), the middle where the blocked cards rest, and the
+// context window. The middle keeps its width after the cards drop into the window, so the flow line has room and
+// the cube and window stay well apart; the cube never slides back.
+const ORBIT_EXTRA = 420; // extra width the orbiting weights add to the cube's area
 
 // Information the frozen weights can't contain, in VO order.
 const CARDS = [
@@ -39,6 +42,27 @@ const NUMBERS = RINGS.flatMap((lift, ring) =>
     return {a, lift, value: ((random(`gc-weights-${i}`) - 0.5) * 4).toFixed(2)};
   }),
 );
+// The bounce ✕ sits just outside the cube's right edge (its centre this far right of the cube's centre).
+const MARK_DX = 150;
+// Offsets from the cube's centre, with each value's half-width at its depth's font size. A value is left out if it
+// would touch the cube (whose left side reaches further, at this yaw) or the ✕ beside its right edge, and where two
+// would crowd each other the farther one is left out, so the frozen weights never overlap the cube, the ✕ or each
+// other (the same filter as how-ai-responds Scene 5).
+const CLEAR = {left: 160, right: MARK_DX + 24 + 10};
+const fontSizeAt = (depth: number) => 18 + 12 * ((depth + 1) / 2);
+const OFFSETS = NUMBERS.map((n) => {
+  const depth = Math.sin(n.a);
+  return {dx: Math.cos(n.a) * ORBIT.rx, dy: depth * ORBIT.ry + n.lift, depth, half: n.value.length * 0.3 * fontSizeAt(depth)};
+});
+const clearOfCube = (o: (typeof OFFSETS)[number]) => (o.dx >= 0 ? o.dx - o.half >= CLEAR.right : -o.dx - o.half >= CLEAR.left);
+const SHOWN = OFFSETS.map(
+  (p, i) =>
+    clearOfCube(p) &&
+    !OFFSETS.some(
+      (q, j) =>
+        j !== i && clearOfCube(q) && (q.depth > p.depth || (q.depth === p.depth && j < i)) && Math.abs(q.dx - p.dx) < p.half + q.half + 12 && Math.abs(q.dy - p.dy) < 34,
+    ),
+);
 
 export const WeightsScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -55,18 +79,38 @@ export const WeightsScene: React.FC = () => {
   const toCyan = interpolate(frame, [W.intoTank[0], W.intoTank[0] + 10], [0, 1], clampOpts);
   const landed = (i: number) => interpolate(frame, [W.intoTank[0] + i * 8, W.intoTank[0] + i * 8 + 22], [0, 1], ease);
 
+  // The middle opens as the first card flies in and the window joins as it draws; both close as the scene fades,
+  // so the cube ends centred for Scene 2.
+  const closing = interpolate(frame, [W.out, dur], [1, 0], ease);
+  const middle = interpolate(frame, [W.cards[0] - W.flight - 10, W.cards[0] + 10], [0, 1], ease) * closing;
+  const [cubeX, middleX, tankX] = centredRow(
+    [
+      {w: CUBE_W + ORBIT_EXTRA * frozen, p: 1},
+      {w: CARD.w, p: middle},
+      {w: TANK_SIZE.w, p: tankDraw * closing},
+    ],
+    ROW_GAP,
+  );
+  const cube = {...CUBE_HOME, x: cubeX};
+  const TANK = {...TANK_SIZE, x: tankX};
+  const IMPACT_X = cubeX + 140 + CARD.w / 2 + 10; // card's left edge meets the padlock side
+  const REST_X = middleX;
+
   const renderNumber = (n: (typeof NUMBERS)[number], i: number) => {
+    if (!SHOWN[i]) {
+      return null;
+    }
     const near = (Math.sin(n.a) + 1) / 2;
     return (
       <text
         key={i}
-        x={CUBE_HOME.x + Math.cos(n.a) * ORBIT.rx}
+        x={cubeX + Math.cos(n.a) * ORBIT.rx}
         y={CUBE_HOME.y + Math.sin(n.a) * ORBIT.ry + n.lift}
         fill={ICE}
         opacity={(0.3 + 0.6 * near) * frozen}
         fontFamily={FONT}
         fontWeight={700}
-        fontSize={18 + 12 * near}
+        fontSize={fontSizeAt(Math.sin(n.a))}
         textAnchor="middle"
         dominantBaseline="central"
         style={{fontVariantNumeric: 'tabular-nums'}}
@@ -80,9 +124,9 @@ export const WeightsScene: React.FC = () => {
     <AbsoluteFill>
       <svg width={VIDEO.width} height={VIDEO.height} viewBox={`0 0 ${VIDEO.width} ${VIDEO.height}`}>
         {NUMBERS.map((n, i) => (Math.sin(n.a) < 0 ? renderNumber(n, i) : null))}
-        <LockedCube id="gc-w-cube" absFrame={abs} {...CUBE_HOME} appear={cubeIn} />
+        <LockedCube id="gc-w-cube" absFrame={abs} {...cube} appear={cubeIn} />
         {NUMBERS.map((n, i) => (Math.sin(n.a) >= 0 ? renderNumber(n, i) : null))}
-        <g opacity={cubeIn} transform={`translate(${CUBE_HOME.x} ${CUBE_HOME.y + 200})`}>
+        <g opacity={cubeIn} transform={`translate(${cubeX} ${CUBE_HOME.y + 200})`}>
           <rect x={-150} y={-26} width={300} height={52} rx={26} fill={COLORS.charcoal} stroke={ICE} strokeWidth={3} />
           <text x={0} y={0} fill={ICE} fontFamily={FONT} fontWeight={800} fontSize={24} letterSpacing="0.08em" textAnchor="middle" dominantBaseline="central">
             v1.0 · LOCKED
@@ -96,7 +140,7 @@ export const WeightsScene: React.FC = () => {
             const s = spring({frame: frame - hit, fps, config: {damping: 12, stiffness: 180}});
             const fade = interpolate(frame, [hit + 34, hit + 46], [1, 0], clampOpts);
             return s > 0.01 && fade > 0 ? (
-              <g key={i} transform={`translate(${IMPACT_X - CARD.w / 2 - 8} ${c.y}) scale(${s})`} opacity={fade}>
+              <g key={i} transform={`translate(${cubeX + MARK_DX} ${c.y}) scale(${s})`} opacity={fade}>
                 <Mark ok={false} />
               </g>
             ) : null;
@@ -109,8 +153,8 @@ export const WeightsScene: React.FC = () => {
             opacity={tankDraw > 0 ? 1 : 0}
             segments={CARDS.map((_, i) => ({kind: 'documents' as const, from: i * SLICE, to: (i + 1) * SLICE, opacity: landed(i) >= 1 ? 1 : 0}))}
           />
-          <FlowLine from={{x: TANK.x - TANK.w / 2 - 10, y: TANK.y + 120}} to={{x: CUBE_HOME.x + 150, y: CUBE_HOME.y + 20}} frame={frame} opacity={smooth(W.intoTank[1] - 6, 12)} bend={80} />
-          <Caption x={TANK.x} y={TANK.y + TANK.h / 2 + 44} text="THE ONLY WAY IN" color={COLORS.cyan} size={22} opacity={smooth(W.intoTank[1] - 4, 12)} />
+          <FlowLine from={{x: TANK.x - TANK.w / 2 - 10, y: TANK.y + 120}} to={{x: cubeX + 150, y: CUBE_HOME.y + 20}} frame={frame} opacity={smooth(W.intoTank[1] - 6, 12)} bend={80} />
+          <Caption x={TANK.x} y={TANK.y + TANK.h / 2 + 44} text="THE ONLY WAY IN" color={COLORS.cyan} size={26} opacity={smooth(W.intoTank[1] - 4, 12)} />
         </g>
       </svg>
 
@@ -155,7 +199,7 @@ export const WeightsScene: React.FC = () => {
               }}
             >
               <div style={{opacity: content}}>
-                <div style={{fontSize: 15, fontWeight: 700, letterSpacing: '0.18em', color: toCyan > 0 ? COLORS.cyan : rgba(COLORS.white, 0.75), marginBottom: 8, whiteSpace: 'nowrap'}}>{c.label}</div>
+                <div style={{fontSize: 16, fontWeight: 700, letterSpacing: '0.18em', color: toCyan > 0 ? COLORS.cyan : rgba(COLORS.white, 0.75), marginBottom: 8, whiteSpace: 'nowrap'}}>{c.label}</div>
                 <div style={{fontSize: 24, fontWeight: 500, whiteSpace: 'nowrap'}}>{c.text}</div>
               </div>
             </div>
