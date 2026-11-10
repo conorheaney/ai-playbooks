@@ -26,9 +26,9 @@ const ORBIT_EXTRA = 420; // extra width the orbiting weights add to the cube's a
 
 // Information the frozen weights can't contain, in VO order.
 const CARDS = [
-  {label: 'YOUR FILES', text: 'q3-report.xlsx', y: 400},
-  {label: 'COMPANY RULES', text: 'travel-policy-2025.pdf', y: 540},
-  {label: "TODAY'S NEWS", text: 'Airport strike announced', y: 680},
+  {label: 'YOUR FILES', text: 'batch-records.xlsx', y: 400},
+  {label: 'COMPANY RULES', text: 'supplier-policy-2025.pdf', y: 540},
+  {label: "TODAY'S NEWS", text: 'New guidance released', y: 680},
 ];
 
 // The frozen weights from how-ai-trains, perfectly still around the cube.

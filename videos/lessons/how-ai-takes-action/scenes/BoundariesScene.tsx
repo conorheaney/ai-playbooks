@@ -7,31 +7,33 @@ import {FONT} from '../../../shared/fonts';
 import {clampOpts} from '../../../shared/lib/motion';
 import {COLORS, rgba} from '../../../shared/theme';
 import {Fence, Ring, Runner, Sign} from '../components/Loop';
-import {Badge, Chip, GearMark, Layer, MarkAt, PersonIcon} from '../components/Parts';
+import {Badge, Caveat, Chip, GearMark, Layer, MarkAt, PersonIcon} from '../components/Parts';
 import {ToolTicket} from '../components/Ticket';
 import {PortalCard} from '../components/World';
-import {BOOKING, CX} from '../layout';
+import {CAPTION_Y, CX, ORDER, ORDER_PRICE} from '../layout';
 import {lerp, useBeats} from '../lib';
 import {BOUNDS as B} from '../timing';
-import {HARNESS_CUBE} from './HarnessScene';
+import {HARNESS_CAVEAT, HARNESS_CUBE} from './HarnessScene';
 
 // Phase 1: the fenced loop at the centre of the screen, with a sign at each corner.
 // Phase 2: the fenced loop moves left and shrinks; the gate sits on the centre line; the portal mirrors the fence.
 const Y = 540;
 const LOOP_R = 150;
 const FENCE_SIZE = 470;
-const SIDE = 520; // phase 2: the fence and the portal sit this far either side of the centre line
+const SIDE = 560; // phase 2: the fence and the portal sit this far either side of the centre line
 const SMALL = 0.62;
 const SIGNS = [
   {dx: -1, dy: -1, text: '4 TOOLS ONLY'},
   {dx: 1, dy: -1, text: 'MAX 10 STEPS'},
-  {dx: -1, dy: 1, text: 'CONFIRM BEFORE BOOKING'},
-  {dx: 1, dy: 1, text: 'DONE = BOOKED + REPORTED'},
+  {dx: -1, dy: 1, text: 'CONFIRM BEFORE ORDERING'},
+  {dx: 1, dy: 1, text: 'DONE = ORDERED + REPORTED'},
 ];
-const PORTAL_W = 380;
+const SIGN_INSET = 60; // how far each sign overlaps its corner of the fence
+const PORTAL_W = 460;
 const TICKET_W = 300;
-const TICKET = {start: CX - 200, ghostEnd: CX + 170, bump: CX - TICKET_W / 2 - 26};
-const CONFIRM = {y: 250, w: 540};
+// The ghost stops well short of the portal card (its right edge at CX + 270; the card starts at CX + 330).
+const TICKET = {start: CX - 200, ghostEnd: CX + 120, bump: CX - TICKET_W / 2 - 26};
+const CONFIRM = {y: 250, w: 600};
 export const BOUNDS_CUBE_END = {x: CX - SIDE + LOOP_R * SMALL, y: Y, size: 46 * SMALL};
 
 export const BoundariesScene: React.FC = () => {
@@ -61,7 +63,7 @@ export const BoundariesScene: React.FC = () => {
   const confirm = smooth(B.confirm[0], 14) * fadeOut(B.pass[1], B.pass[1] + 10);
   const approve = pop(B.approve);
   const pass = ramp(B.pass[0], B.pass[1]);
-  const booked = smooth(B.booked, 14);
+  const ordered = smooth(B.ordered, 14);
   const waiting = frame >= B.gate[1] && frame < B.pass[0];
   const portalIn = smooth(B.ticket[0] - 10, 16);
 
@@ -71,11 +73,16 @@ export const BoundariesScene: React.FC = () => {
     ticketX = frame < B.rewind[0] ? lerp(TICKET.start, TICKET.ghostEnd, cross) : lerp(TICKET.ghostEnd, TICKET.start, rewind);
     ticketOpacity = 0.5;
   } else if (frame >= B.gate[0]) {
-    ticketX = pass > 0 ? lerp(TICKET.bump, CX + SIDE - 40, pass) : lerp(TICKET.start, TICKET.bump, bump);
-    ticketOpacity = 1 - pass * pass;
+    // Through the open gate towards the portal; it has faded by the time it reaches the card, so it never covers
+    // the card's text.
+    ticketX = pass > 0 ? lerp(TICKET.bump, CX + SIDE - PORTAL_W / 2 - TICKET_W / 2, pass) : lerp(TICKET.start, TICKET.bump, bump);
+    ticketOpacity = interpolate(pass, [0.5, 0.92], [1, 0], clampOpts);
   }
   const lineColor = redFlash > 0.5 ? COLORS.error : COLORS.purple;
-  const paintOn = paint * fadeOut(B.gate[0], B.gate[0] + 10);
+  // The painted line and its bubble clear before the gate's HARNESS label rises into the same space.
+  const paintOn = paint * fadeOut(B.gate[0] - 6, B.gate[0] + 2);
+  // NOTHING STOPS IT holds through the rewind, until the gate replaces the paint (1.2 s).
+  const nothingStops = interpolate(frame, [B.cross[0] + 6, B.cross[0] + 10, B.gate[0] - 4, B.gate[0] + 4], [0, 1, 1, 0], clampOpts);
   const half = (FENCE_SIZE / 2) * scale;
 
   return (
@@ -104,11 +111,14 @@ export const BoundariesScene: React.FC = () => {
       </Layer>
 
       <AbsoluteFill style={{opacity: out}}>
+        {/* Each sign hangs outward from its corner, so the long bottom pair never meet in the middle. */}
         {SIGNS.map((s, i) => (
-          <Sign key={s.text} x={CX + s.dx * (FENCE_SIZE / 2)} y={Y + s.dy * (FENCE_SIZE / 2)} text={s.text} pop={signs[i]} />
+          <Sign key={s.text} x={CX + s.dx * (FENCE_SIZE / 2 - SIGN_INSET)} y={Y + s.dy * (FENCE_SIZE / 2)} text={s.text} pop={signs[i]} anchor={s.dx < 0 ? 'end' : 'start'} />
         ))}
+        {/* Scene 6's caveat carries across the cut and fades here. */}
+        <Caveat x={CX} y={CAPTION_Y} text={HARNESS_CAVEAT} opacity={fadeOut(6, 20)} />
 
-        <PortalCard x={CX + SIDE} y={Y} w={PORTAL_W} opacity={portalIn} booked={booked} />
+        <PortalCard x={CX + SIDE} y={Y} w={PORTAL_W} opacity={portalIn} ordered={ordered} />
 
         {paintOn > 0.001 ? (
           <div
@@ -129,13 +139,13 @@ export const BoundariesScene: React.FC = () => {
               whiteSpace: 'nowrap',
             }}
           >
-            "Please ask before booking."
+            "Please ask before ordering."
             <div style={{position: 'absolute', left: '50%', bottom: -12, width: 20, height: 20, transform: 'translateX(-50%) rotate(45deg)', background: COLORS.charcoal, borderRight: `2px solid ${lineColor}`, borderBottom: `2px solid ${lineColor}`}} />
           </div>
         ) : null}
 
-        <ToolTicket x={ticketX} y={Y} w={TICKET_W} print={print} opacity={ticketOpacity * (print > 0 ? 1 : 0)} name={BOOKING.name} inputs={[]} dashed={crossing} />
-        <Chip x={CX} y={Y + 150} text="NOTHING STOPS IT" color={COLORS.error} textColor={COLORS.error} size={26} weight={800} opacity={redFlash} />
+        <ToolTicket x={ticketX} y={Y} w={TICKET_W} print={print} opacity={ticketOpacity * (print > 0 ? 1 : 0)} name={ORDER.name} inputs={[]} dashed={crossing} />
+        <Chip x={CX} y={Y + 150} text="NOTHING STOPS IT" color={COLORS.error} textColor={COLORS.error} size={26} weight={800} opacity={nothingStops} />
 
         {confirm > 0.001 ? (
           <div
@@ -161,7 +171,7 @@ export const BoundariesScene: React.FC = () => {
           >
             <div style={{display: 'flex', alignItems: 'center', gap: 14, fontSize: 28, fontWeight: 500, whiteSpace: 'nowrap'}}>
               <PersonIcon size={40} />
-              Book it? $1,175
+              {ORDER_PRICE}
             </div>
             <div
               style={{

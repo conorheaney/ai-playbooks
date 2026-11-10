@@ -424,3 +424,38 @@ What remains is mostly brief shape overlaps during two transitions, short readin
 | 7 | Brighten the "EXAMPLE CAPACITY" line to 70% white | 2 | Low |
 
 **Projected score with items 1–7 done:** about 9.1/10. The lesson is shippable as is, since no remaining issue misleads the viewer. The two tight reading windows (Scene 6 card, Scene 8 caption) are fixed by the voiceover and are better addressed by a re-record than by layout.
+
+## Review 3: Re-review against the 9.5 target (2026-11-10)
+
+**Reviewed against:** the updated `videos/practices.md` (9.5 target, fixed voiceover, text judged by role).
+**Source:** the committed render at frames 0–2574, sampled every 10 frames. Every transition was scrubbed every 2–3 frames, and suspect frames were checked at full resolution. Fixes were then re-rendered and re-checked.
+**Limits:**
+- Sync was checked against the word timings in `timing.ts` and `BLUEPRINT.md`. The audio itself was not listened to.
+- No scene lengths or voiceover beats changed.
+
+### Findings and fixes
+
+| # | Scene | *Abs* frames | Severity | Finding | Fix |
+|---|---|---|---|---|---|
+| 1 | 8 | 2466–2480 | Medium | "ONLY WHAT THE APP ADDS" was fully visible for about 2 frames. It faded in at 234 and out from 248, so the key takeaway had no reading window. | It appears on "only what the app puts in" (local 204) and holds until the scene fades (local 268), about 1.3 s at full opacity. Under the fixed-voiceover rule, this replaces Review 2's suggestion to re-record. |
+| 2 | 6 | 1804–1880 | Medium | The three struck-through details floated with no label, so "decisions, caveats and sources" had no visual beat. | Each detail gets a red tag (DECISION, CAVEAT, SOURCE) on the word that names it. |
+| 3 | 1 | 300–315 | Low | Empty card shells crossed each other and the prompt bar on their way into the window. | Each card first shrinks in place to its slice's size, then the slim slice travels. |
+| 4 | 6 | 1788–1792 | Low | The summary card crossed tank B's outline at about 50% opacity. | It shrinks to the slice's width early in its flight and has faded by 40% of the flight. |
+| 5 | 7 | 2190–2230 | Low → superseded | The caveat was a plain sentence-case subtitle, unlike Scene 5's caveat pill. | First restyled as the pill. Then, at the owner's request (too much text at the end), the caveat, the API-names footnote and the INCOMPLETE label were all removed. The scene now ends on the two finish-reason tags, which carry "The finish reason tells you which". |
+| 6 | 7 | 2062–2066 | Medium | The MAX OUTPUT wall and its label dropped 260 px from above, through lane A's text. | The wall now drops 60 px and fades in, so it never enters lane A. |
+| 7 | 3 | 830–837 | Low | Each token chip arced across the panel's lower rows (" Can" crossed "the"). | Chips drop to a lane between the panel and the response line, travel along it, then drop into their slots. Verified clear of the panel rows and of the tokens already in the line. |
+
+### Scores
+
+| # | Scene | Review 2 | Review 3 | Remaining note |
+|---|---|---|---|---|
+| 1 | Assemble the Context | 8.5 | **9.5** | For about 6 frames, the slim slices still pass over the prompt bar. No text is involved. |
+| 2 | The Context Window | 9 | **9.5** | None. The tank labels are secondary at 22 px and readable. |
+| 3 | One Token at a Time | 9 | **9.5** | Its takeaway is a bold headline above the panel. Other takeaways are spaced capitals under the content, but this one sits where the eye already is. |
+| 4 | Same Prompt, Different Answers | 9 | **9.5** | None. |
+| 5 | Lost in the Middle | 9 | **9.5** | None. |
+| 6 | Compaction | 8.5 | **9.5** | Still the busiest scene, but each beat now has its word. |
+| 7 | Stopping Generation | 9 | **9.5** | None. |
+| 8 | Context Is Temporary | 9 | **9.5** | None. |
+
+**Lesson average: 9.5/10** (was 8.8).

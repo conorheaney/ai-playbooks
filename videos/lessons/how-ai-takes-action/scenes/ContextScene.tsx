@@ -9,7 +9,7 @@ import {COLORS, rgba} from '../../../shared/theme';
 import {Badge, Chip, FlowLine, Layer, Note, Txt} from '../components/Parts';
 import {MiniWindow, Slice, sliceRect} from '../components/MiniWindow';
 import {ReceiptGlyph, TicketGlyph, ToolReceipt} from '../components/Ticket';
-import {CAPTION_Y, CX, DOCK_W, DOCKS, MODEL_CUBE, SEARCH, TICKET_AT} from '../layout';
+import {CAPTION_Y, CX, DOCK_W, DOCKS, MODEL_CUBE, SEARCH} from '../layout';
 import {lerp, useBeats} from '../lib';
 import {CONTEXT as C, TOOLS} from '../timing';
 import {WallWorld} from './ToolsScene';
@@ -21,6 +21,11 @@ const LABEL_Y = 410;
 const RAIL = {top: 368, bottom: 890, band: 20};
 // The receipt waits beside the cube, clear of the exit chips that come later.
 const WAIT = {x: 1330, y: 210};
+// Where the receipt prints once it is back on the model's side: above and left of the gate, clear of the gate's
+// outline and ahead of the cube's path up to the top centre. The glyph comes through the gate on the y = 560 axis
+// (to GLYPH_TURN), then rises to it.
+const RECEIPT_AT = {x: 670, y: 350};
+const GLYPH_TURN = {x: 740, y: 560};
 
 const BASE: Slice[] = [
   {kind: 'instructions', h: 54, label: 'INSTRUCTIONS'},
@@ -34,8 +39,8 @@ const CALLS: Slice[][] = [BASE, [...BASE, REQ, RES], [...BASE, REQ, RES, REQ, RE
 export const ContextScene: React.FC = () => {
   const {frame, abs, dur, smooth, ramp, fadeOut} = useBeats('context');
 
-  // Scene 2's world fades as the film strip takes over.
-  const world = fadeOut(C.relayout[0], C.relayout[1]);
+  // Scene 2's world is gone before the film strip draws in its place.
+  const world = fadeOut(C.relayout[0], C.strip[0]);
   const relayout = ramp(C.relayout[0], C.relayout[1]);
   const cube = {x: lerp(MODEL_CUBE.x, CUBE_TOP.x, relayout), y: lerp(MODEL_CUBE.y, CUBE_TOP.y, relayout), size: lerp(MODEL_CUBE.size, CUBE_TOP.size, relayout)};
   const out = fadeOut(C.out, dur - 2);
@@ -53,10 +58,11 @@ export const ContextScene: React.FC = () => {
   const copy = (call: number, i: number) => ramp(copyStart[call] + 3 + i * 3, copyStart[call] + 15 + i * 3);
   const reqLand = (call: number) => ramp(copyStart[call] + 16, copyStart[call] + 26);
   const resLand = (call: number) => ramp(copyStart[call] + 20, copyStart[call] + 28);
-  // Only the newest frame's new slices carry labels; older labels have done their job.
+  // Only the newest frame's new slices carry labels; older labels have done their job. They fade just before the
+  // next frame's copies start, because the copies slide out from on top of them.
   const labelsFor = (call: number) => {
-    const next = call === 0 ? C.call2[0] + 26 : call === 1 ? C.call3[0] + 26 : 99999; // until the next frame's new slices land
-    return interpolate(frame, [next, next + 12], [1, 0], clampOpts);
+    const next = call === 0 ? C.call2[0] : call === 1 ? C.call3[0] : 99999;
+    return interpolate(frame, [next - 4, next + 2], [1, 0], clampOpts);
   };
 
   const windowSlices = (call: number): Slice[] =>
@@ -79,13 +85,17 @@ export const ContextScene: React.FC = () => {
     return {x: r.x + r.w / 2, y: r.y + r.h / 2};
   };
 
-  // Receipt 1 prints at the hotel search, comes back through the gate, then waits by the cube.
-  const r1Print = ramp(C.receipt[0], C.receipt[0] + 10);
-  const r1Back = ramp(C.receipt[0] + 10, C.receipt[1]);
-  const r1Wait = ramp(C.relayout[0] + 4, C.relayout[1]);
-  const r1 = {
-    x: lerp(lerp(DOCKS.search.x - DOCK_W / 2 - 40, TICKET_AT.x, r1Back), WAIT.x, r1Wait),
-    y: lerp(DOCKS.search.y, WAIT.y, r1Wait),
+  // Receipt 1 comes back through the gate as a glyph (no text crosses the gate's outline), prints at full size on
+  // the model's side, clear of the cube, then waits by the cube while the film strip draws.
+  const r1Glyph = ramp(C.receipt[0], C.receipt[0] + 18);
+  const r1Print = ramp(C.receipt[0] + 14, C.receipt[1] + 2);
+  const r1Wait = ramp(C.receipt[1] + 2, C.receipt[1] + 20);
+  const r1 = {x: lerp(RECEIPT_AT.x, WAIT.x, r1Wait), y: lerp(RECEIPT_AT.y, WAIT.y, r1Wait)};
+  const across = interpolate(r1Glyph, [0, 0.7], [0, 1], clampOpts);
+  const rise = interpolate(r1Glyph, [0.7, 1], [0, 1], clampOpts);
+  const r1GlyphAt = {
+    x: rise > 0 ? lerp(GLYPH_TURN.x, RECEIPT_AT.x, rise) : lerp(DOCKS.search.x - DOCK_W / 2 - 40, GLYPH_TURN.x, across),
+    y: lerp(GLYPH_TURN.y, RECEIPT_AT.y, rise),
   };
 
   // Call 2 asks for another tool: a ticket goes out to the world and a receipt comes back (glyphs only).
@@ -147,10 +157,17 @@ export const ContextScene: React.FC = () => {
         <Chip x={CUBE_TOP.x - 110} y={CUBE_TOP.y} text="ANSWER" anchor="end" dashed={answer < 0.5} color={answer > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.55)} textColor={answer > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.85)} opacity={exits} glow={answer * 0.5} />
         <Chip x={CUBE_TOP.x + 110} y={CUBE_TOP.y} text="ANOTHER TOOL" anchor="start" dashed={another < 0.5} color={another > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.55)} textColor={another > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.85)} opacity={exits} glow={another * (0.5 + 0.4 * Math.sin(frame / 5))} />
         <Note x={CX} y={CAPTION_Y} text="REBUILT FOR EVERY CALL" opacity={smooth(C.call3[1] - 4, 14)} />
+        {/* Scene 2's takeaway carries across the cut and fades here. */}
+        <Note x={CX} y={CAPTION_Y} text="THE MODEL ASKS. THE APP RUNS." opacity={fadeOut(C.relayout[0] - 6, C.relayout[0] + 6)} />
       </AbsoluteFill>
 
-      {/* Receipt 1, at full size while it is the thing to read. */}
-      {resLand(1) < 1 ? (
+      {/* Receipt 1 crossing the gate as a glyph, then at full size while it is the thing to read. */}
+      {r1Glyph > 0 && r1Print < 0.5 ? (
+        <Layer>
+          <ReceiptGlyph x={r1GlyphAt.x} y={r1GlyphAt.y} opacity={Math.min(1, r1Glyph * 6) * (1 - r1Print * 2)} />
+        </Layer>
+      ) : null}
+      {resLand(1) < 1 && r1Print > 0 ? (
         (() => {
           const land = resLand(1);
           const to = slot(1, 4);

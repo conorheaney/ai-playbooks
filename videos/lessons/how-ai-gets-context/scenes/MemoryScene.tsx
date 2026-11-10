@@ -18,13 +18,13 @@ import {MEMORY as M, SCENES} from '../timing';
 const STORE_A = {x: 1400, y: 560, scale: 1};
 const STORE_B = {x: 1690, y: 560, scale: 0.88}; // large enough that its drawer text stays at 16px
 const PROPOSED = {x: 900, y: 560, w: 300};
-const REQUEST = 'Book my hotel for the next Canberra trip.';
+const REQUEST = 'Order flow sensors for the next build.';
 // The new request types above the cube, where the first chat message sat, at 80% so it clears the window.
 const BAR = {x: 640, y: 330, w: 900, scale: 0.8};
 const MSG: [number, number] = [0, 0.05];
 const MEM: [number, number] = [0.05, 0.11];
-const RESPONSE = {x: 740, y: 290, text: 'Parkside Hotel is a 5-minute walk from Parliament House.'};
-const GHOST = {x: 700, y: 810, text: 'The Airport Motel is cheapest.'};
+const RESPONSE = {x: 740, y: 290, text: 'Northfield Sensors is ISO 13485 certified.'};
+const GHOST = {x: 700, y: 810, text: 'Apex Precision is cheapest.'};
 
 // Finale: the four pathways all lead into one context window at true screen centre.
 const FIN = {x: 960, y: 380, w: 180, h: 240};
@@ -78,9 +78,10 @@ export const MemoryScene: React.FC = () => {
   const drawer3A = drawerCenter(STORE_A.x, STORE_A.y, STORE_A.scale, 2);
 
   // Phase 2: next week. The store moves aside and a new request starts.
-  const later = interpolate(frame, [M.later[0] + 5, M.later[1] + 10], [0, 1], ease);
+  // The store slides right first; the window only starts drawing once the store is clear of where it goes.
+  const later = interpolate(frame, [M.later[0], M.later[0] + 16], [0, 1], ease);
   const store = {x: lerp(STORE_A.x, STORE_B.x, later), y: STORE_A.y, scale: lerp(STORE_A.scale, STORE_B.scale, later)};
-  const tankDraw = interpolate(frame, [M.later[0] + 10, M.later[1] + 10], [0, 1], ease);
+  const tankDraw = interpolate(frame, [M.later[0] + 13, M.later[1] + 12], [0, 1], ease);
   const barIn = smooth(M.bar[0], 14);
   const barDrop = interpolate(frame, [M.barDrop[0], M.barDrop[1]], [0, 1], ease);
   const open = interpolate(frame, [M.retrieve[0], M.retrieve[0] + 10], [0, 1], ease) * interpolate(frame, [M.fly[1], M.fly[1] + 12], [1, 0], clampOpts);
@@ -155,7 +156,7 @@ export const MemoryScene: React.FC = () => {
           ) : null}
         </svg>
 
-        <Pill x={560} y={330} text="I always prefer hotels near Parliament House." color={COLORS.cyan} opacity={smooth(M.pill[0], 14) * phase1} />
+        <Pill x={560} y={330} text="I always prefer ISO 13485 certified suppliers." color={COLORS.cyan} opacity={smooth(M.pill[0], 14) * phase1} />
 
         {/* The model proposes a memory... */}
         {propose > 0 && filing < 1 ? (
@@ -202,7 +203,7 @@ export const MemoryScene: React.FC = () => {
                   color: rgba(COLORS.white, 1 - Math.min(1, fly * 2.5)),
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
-                  opacity: Math.min(1, lift * 2),
+                  opacity: interpolate(lift, [0.4, 0.7], [0, 1], clampOpts), // appears once clear of the drawer's own text
                 }}
               >
                 {NEW_MEMORY}
@@ -233,7 +234,7 @@ export const MemoryScene: React.FC = () => {
 
         <Pill x={RESPONSE.x} y={RESPONSE.y} text={RESPONSE.text} chars={interpolate(frame, [M.response[0] + 4, M.response[1]], [0, RESPONSE.text.length], clampOpts)} color={COLORS.cyan} opacity={smooth(M.response[0], 10)} />
         <Pill x={GHOST.x} y={GHOST.y} text={GHOST.text} color={rgba(COLORS.white, 0.6)} opacity={ghost * 0.75} dashed />
-        <Note x={700} y={930} text="Used, ignored or misapplied. Memory isn't a guarantee." opacity={smooth(M.caption, 14)} />
+        <Note x={640} y={930} text="Used, ignored or misapplied. Memory isn't a guarantee." opacity={smooth(M.caption, 14)} />
 
         <Pinned>
           <StatusBadge kind="app" opacity={app} frame={frame} />

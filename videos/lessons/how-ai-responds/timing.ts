@@ -150,7 +150,6 @@ export const STOPPING = {
   incomplete: [138, 158], // "mid-sentence"
   tagA: 190, // "finish reason"
   tagB: 205, // "tells you which"
-  caption: 224,
 } as const;
 
 // Scene 8: the session ends, the weights are untouched, a new request starts almost empty.

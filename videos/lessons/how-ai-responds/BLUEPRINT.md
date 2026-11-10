@@ -70,7 +70,7 @@ Type: Inter, as in `how-ai-trains`. 800 for headlines, 700 for labels, 500 for p
 
 - **The model is the cube from video 1.** `LockedCube` shows the shared `ModelCube` frozen at the angle `how-ai-trains` stopped it at, with ice-white edges, padlock and "AI" emblem. Its home is (520, 540) at size 80. It never changes in this video, which is the point of Scene 8. It glows cyan while it is generating.
 - **The app is shown when it acts.** When the AI product (not the model) does something (assembling context, compacting, adding saved instructions), a purple gear with the label **THE APP** appears, and the top-right badge reads **APP ACTION**. While output streams, the badge reads **STREAMING**.
-- **One running example.** The prompt throughout is "What's the capital of Australia?", asked inside a trip-planning conversation, so every scene builds on the one before.
+- **One running example.** The viewer works at a medical device company. The prompt throughout is "What's the device QMS standard?", asked inside a conversation about preparing for a quality audit, so every scene builds on the one before. The correct answer is ISO 13485; ISO 9001 (the general quality standard) is the plausible-but-wrong pattern used in Scenes 3 and 4. The examples stay non-clinical: no patients, diagnoses or results.
 
 ## Scene 1: Assemble the Context (frames 0–336)
 
@@ -78,15 +78,15 @@ Type: Inter, as in `how-ai-trains`. 800 for headlines, 700 for labels, 500 for p
 |---|---|
 | 0–18 | "CONTEXT" springs from 0.86 to 1.0 scale at dead centre |
 | 24–54 | Title glides to top-left (scale 1 → 0.34), clearing the centre for the prompt bar |
-| 30–75 | Prompt bar (900 × 96) rises 40px into the vertical centre of the screen, where it stays until the first card arrives (y = 560, so the bar and its "YOUR MESSAGE" label are centred together) and types "What's the capital of Australia?" |
+| 30–75 | Prompt bar (900 × 96) rises 40px into the vertical centre of the screen, where it stays until the first card arrives (y = 560, so the bar and its "YOUR MESSAGE" label are centred together) and types "What's the device QMS standard?" |
 | 70–92 | The bar stays centred while the cube arrives beside it; the red ✕ lands in the short gap between them |
 | 70–90 | Locked cube springs in at home; a solid line (white at 60%) draws from the left end of the prompt bar to the model's side |
 | 92 | Red ✕ snaps onto the line on "just your message"; "NOT JUST YOUR MESSAGE" (28px) in red under the bar |
 | 120 | On "The app assembles", the app's tray draws around the message: a dashed purple frame (960 × 640, centred at (1190, 520), 5% purple fill) with a small gear + "THE APP" tab on its top edge; badge: **APP ACTION**. The app reads as the container that gathers everything, rather than as a label floating above the message |
 | 154–178 | As the system instructions card arrives, the bar glides down to its place at (1190, 760), its label moving with it |
-| 168 / 198 / 234 / 266 | Cards (380 × 136) glide 70px in from their side while fading in, always inside the tray, each landing on its word, into a 2 × 2 grid with even 44px gaps centred over the prompt bar: **SYSTEM INSTRUCTIONS** "You are a helpful travel assistant." (top-left), **CONVERSATION HISTORY** "Planning a 5-day trip in March…" (left), **DOCUMENTS** `trip-plan.md` (right), **TOOL DEFINITIONS** `search_web(query)` (right); card labels 18px, body 24px |
+| 168 / 198 / 234 / 266 | Cards (380 × 136) glide 70px in from their side while fading in, always inside the tray, each landing on its word, into a 2 × 2 grid with even 44px gaps centred over the prompt bar: **SYSTEM INSTRUCTIONS** "You are a quality assistant." (top-left), **CONVERSATION HISTORY** "Preparing for the March audit…" (left), **DOCUMENTS** `qms-manual.pdf` (right), **TOOL DEFINITIONS** `search_docs(query)` (right); card labels 18px, body 24px |
 | 280–292 | All card text, the prompt text and the "YOUR MESSAGE" label fade out before anything moves; the tray fades with them |
-| 292–326 | One at a time, 4 frames apart and bottom slice first (instructions, tools, history, documents, then the prompt bar as the message), each shape moves for 18 frames into its slice at the tank's home position, its border and fill becoming the segment style. A card that has started moving rides above the ones still waiting, and the prompt bar stays underneath, so slices stack over it and it rises last from behind |
+| 292–326 | One at a time, 4 frames apart and bottom slice first (instructions, tools, history, documents, then the prompt bar as the message), each shape moves for 18 frames into its slice at the tank's home position, its border and fill becoming the segment style. Each card first shrinks in place to its slice's size (the first 35% of its move), then the slim slice travels, so the moving boxes stay small and clear of each other. A card that has started moving rides above the ones still waiting, and the prompt bar stays underneath, so slices stack over it and it rises last from behind |
 | 320–334 | Hand-off from the HTML cards to the SVG tank segments; badge fades |
 
 ## Scene 2: The Context Window (frames 336–636)
@@ -106,21 +106,23 @@ Type: Inter, as in `how-ai-trains`. 800 for headlines, 700 for labels, 500 for p
 
 Layout: cube at home, tank shrinks to 192 × 456 at (1640, 540), score panel 580 × 340 centred at (1080, 420), response line along y = 860. A faint dashed cyan line (30%) flows from the tank back into the cube while the answer generates: the whole context feeds every step. As each new token starts its flight, the earlier chips dim to 40%, so the newest token always stands out. From frame 256 (abs 892) the centring track holds a fixed 84px shift that centres the cube and panel together, while the response line glides by the opposite amount, so both rows finish centred on screen.
 
-The answer is split into realistic tokens, with "Canberra" as two: `The` · ` capital` · ` of` · ` Australia` · ` is` · ` Can` · `berra` · `.`
+The answer, "The QMS standard is ISO 13485.", is split into realistic tokens, with the number as two (tokenizers split long numbers): `The` · ` QMS` · ` standard` · ` is` · ` ISO` · ` 134` · `85` · `.`
+
+Each chip drops from the cube to a lane 80px above the response line, travels along it, then drops into its slot, so it never passes over the score panel's rows or the tokens already in the line.
 
 | Local frame | Event |
 |---|---|
-| 0–25 | Layout transition; readout fades; the question "What's the capital of Australia?" appears in a prompt box on the response line, then fades out as the first answer token flies in (24–36), leaving the line to the answer |
+| 0–25 | Layout transition; readout fades; the question "What's the device QMS standard?" appears in a prompt box on the response line, then fades out as the first answer token flies in (24–36), leaving the line to the answer |
 | 25–95 | First five tokens, 14 frames each: the panel (at 0.8 scale and 70% opacity, a montage) shows that step's four candidates, the top one is ringed, its chip flies from the cube to the response line, and a cyan dot carries a sliver into the tank |
-| 103–165 | On "It scores the likely next tokens", generation slows. The panel grows to full size with candidates for the next token: ` Can` 0.71, ` Syd` 0.19, ` Mel` 0.06, ` the` 0.03 (shown as the token pieces they would be; rows and bars stagger in 8 frames apart; each score shows its final value at once and only the bar grows) |
-| 166 | Selection ring springs onto ` Can` on "picks one" |
-| 189–205 | ` Can` flies to the response line on "adds it" |
+| 103–165 | On "It scores the likely next tokens", generation slows. The panel grows to full size with candidates for the next token: ` 134` 0.71, ` 900` 0.19 (as in ISO 9001), ` 149` 0.06, ` the` 0.03 (shown as the token pieces they would be; rows and bars stagger in 8 frames apart; each score shows its final value at once and only the bar grows) |
+| 166 | Selection ring springs onto ` 134` on "picks one" |
+| 189–205 | ` 134` flies to the response line on "adds it" |
 | 196–221 | Purple arrow draws from the response line into the tank: "EACH TOKEN BECOMES CONTEXT" (22px) |
-| 210 / 226 | On "and repeats", two quick steps: `berra` and `.`; the panel stays on ` Can` |
+| 210 / 226 | On "and repeats", two quick steps: `85` and `.`; the panel stays on ` 134` |
 | 244 | Dashed `END` chip appears after the full stop |
 | 242–262 | On "Those scores are patterns", the generation scaffolding clears away: the window, the feed line and the purple loop arrow with its caption all fade, and the response line dims to 40%. At the same time the score panel slides down 120px to line up with the cube, and the cube-and-panel row and the response line each glide to true screen centre |
 | 274 | Only once that has settled, "SCORES ARE PATTERNS, NOT FACTS" (48px / 800) rises in just above the panel (top 250) |
-| 282 / 300 | The ` Syd` row pulses error red (the second on "not facts") |
+| 282 / 300 | The ` 900` row pulses error red (the second on "not facts") |
 | 340–358 | Everything except the cube fades |
 
 ## Scene 4: Same Prompt, Different Answers (frames 996–1346)
@@ -130,13 +132,13 @@ The same prompt runs three times at each setting of a **VARIATION** slider (LOW 
 | Local frame | Event |
 |---|---|
 | 0–20 | Slider and lanes appear; the knob sits in the middle |
-| 20–92 | Staggered typing, all correct but worded differently: "Canberra is Australia's capital." · "Australia's capital city is Canberra." · "The capital of Australia is Canberra."; ✓ on each |
+| 20–92 | Staggered typing, all correct but worded differently: "ISO 13485 is the device QMS standard." · "The device QMS standard is ISO 13485." · "The QMS standard is ISO 13485."; ✓ on each |
 | 108–118 | Lanes clear |
 | 120–145 | Knob glides to LOW |
-| 148–186 | All three lanes type the same answer, "The capital of Australia is Canberra."; ✓ ✓ ✓ |
+| 148–186 | All three lanes type the same answer, "The QMS standard is ISO 13485."; ✓ ✓ ✓ |
 | 182–192 | Lanes clear |
 | 192–215 | Knob glides to HIGH |
-| 215–268 | "Canberra is the capital of Australia." ✓ · "Australia's capital? Canberra." ✓ · "The capital of Australia is Sydney." with "Sydney" typed in red |
+| 215–268 | "ISO 13485 covers device quality systems." ✓ · "Device QMS? ISO 13485." ✓ · "The QMS standard is ISO 9001." with "ISO 9001" typed in red |
 | 268 | Red ✕ on run 3; its border turns red |
 | 266–278 | As the stamp lands, the slider dims to 30% and runs 1 and 2 to 35%, leaving run 3 and the stamp as the focus |
 | 272 | On "correct", stamp "FLUENT ≠ CORRECT" (40px) slams in at y = 880 (scale 1.45 → 1, rotated −4°), clear of run 3 even on its first frame. No caption under it, to keep the ending's text to a minimum |
@@ -148,11 +150,11 @@ The same prompt runs three times at each setting of a **VARIATION** slider (LOW 
 |---|---|
 | 0–12 | Empty tank fades in at home |
 | 10–60 | On "A bigger window", the tank stretches to 900px tall (y 110–1010, inside the screen margins) with a **BIGGER WINDOW** double arrow; 16 document rows fill it to 92% |
-| 92–110 | On "Details", row 8 lights purple ("PASSPORT RULE", 18px), with a short callout (22px, no label, since the row names it): "Valid 6 months after arrival." |
-| 105–150 | On "buried in the middle", attention beams fan out from the cube: thick and bright to the top and bottom rows, thinner and fainter towards the middle, and none at all to rows 6–11. Middle rows dim to 15%; the passport row and callout dim with them |
-| 128–172 | The question "Any document rules?" (no label) appears bottom-left at 128 and holds, then flies into the cube (150–172) |
-| 176–202 | The response types (no label): "Just bring your booking." |
-| 207 | On "overlooked": red ✕ on the response; the passport row pulses a red outline and reads **MISSED**; the callout turns red (its text stays the same, so MISSED appears only once) |
+| 92–110 | On "Details", row 8 lights purple ("RECORDS RULE", 18px), with a short callout (22px, no label, since the row names it): "Keep for the device's lifetime." |
+| 105–150 | On "buried in the middle", attention beams fan out from the cube: thick and bright to the top and bottom rows, thinner and fainter towards the middle, and none at all to rows 6–11. Middle rows dim to 15%; the records row and callout dim with them |
+| 128–172 | The question "How long do we keep records?" (no label) appears bottom-left at 128 and holds, then flies into the cube (150–172) |
+| 176–202 | The response types (no label): "Just keep them for a year." |
+| 207 | On "overlooked": red ✕ on the response; the records row pulses a red outline and reads **MISSED**; the callout turns red (its text stays the same, so MISSED appears only once) |
 | 215 | Caption in a dim pill (26px), centred at (560, 985): "It varies by model and task." |
 | 256–276 | Rows, beams and callouts fade; tank shrinks back to its home size |
 
@@ -163,7 +165,7 @@ The old and new contexts sit side by side: tank A moves to x = 780 and tank B si
 | Local frame | Event |
 |---|---|
 | 0–18 | Tank at home fades in a quarter full (instructions, tools, early history) |
-| 14–68 | Ten short conversation turns (a few words each: "Best city for museums?" · "Canberra." · "What about Melbourne?" · "Long drive away." · "Skip Melbourne." · "Hotels near Parliament?" · "Three options…" · "Dates may change." · "Need a visa?" · "Here’s the visa site.") appear as a left-aligned transcript (20px pills, 4 frames apart, left edge x = 640) in evenly spaced rows between the cube and the tank. Each slides right along its own row and shrinks to 60%, fully faded by the time its right edge reaches the tank's edge, so no two ever cross and none is clipped; readout climbs to 94% |
+| 14–68 | Ten short conversation turns (a few words each: "Which SOPs need updating?" · "SOP-12 and SOP-15." · "What about SOP-9?" · "Retired last year." · "Skip SOP-9." · "Audit checklist?" · "Three sections…" · "Date may move." · "Need the standard?" · "Here’s the ISO link.") appear as a left-aligned transcript (20px pills, 4 frames apart, left edge x = 640) in evenly spaced rows between the cube and the tank. Each slides right along its own row and shrinks to 60%, fully faded by the time its right edge reaches the tank's edge, so no two ever cross and none is clipped; readout climbs to 94% |
 | ~64 | On "limit", the outline and readout turn error red at 90%: **NEAR LIMIT** |
 | 72–98 | Tank A and the cube slide aside |
 | 74 | On "the app", gear + "THE APP" above the funnel; badge: **APP ACTION**. The gear fades out by 120 (the badge stays), so the summary card is the only new element when it pops |
@@ -172,11 +174,11 @@ The old and new contexts sit side by side: tank A moves to x = 780 and tank B si
 | 94–128 | On "compact it into a summary", the oldest history (14–82%) lifts out of tank A and squeezes through the funnel |
 | 100–125 | Instructions and tool definitions copy across unchanged |
 | 114–128 | Tank A and its readout dim to 30% before the card pops |
-| 128 | A 440px **SUMMARY** card (18px label, 22px text) pops out of the funnel to centre stage at (1210, 410), midway between the tanks: "Canberra, 5 days in March. Hotel near Parliament."; it holds until 162 (about 1.1 s) |
+| 128 | A 440px **SUMMARY** card (18px label, 22px text) pops out of the funnel to centre stage at (1210, 410), midway between the tanks: "Audit in March. Update SOP-12 and SOP-15."; it holds until 162 (about 1.1 s) |
 | 158–176 | The most recent turns fade into place in tank B (no block crosses the frame, so nothing passes the card) |
-| 162–178 | The summary card shrinks towards its 8% **SUMMARY** slice and cross-fades into it before it crosses tank B's outline; tank B reads 68,000 tokens (34%) |
+| 162–178 | The summary card shrinks to the slice's width early in its flight (the first 30%) and has faded by 40% of it, so it is nearly gone before it crosses tank B's outline; the 8% **SUMMARY** slice fades in under it; tank B reads 68,000 tokens (34%) |
 | 178 | At the end of "That frees space", once the summary has landed, a dashed **SPACE FREED** region outlines 34–100% |
-| 182 / 208 / 230 | On "decisions", "caveats" and "sources", a detail (24px) slips out of the funnel's lower edge and drops into a pile centred under the funnel's opening (x = 1200), each settling 56px above the one before so none falls through another: "Why not Melbourne" (bottom) · "Dates may change" · "Visa site link" (top). Each is readable for about 0.6 s before a red strike-through draws across it; it then dims to 55%, and the struck-through pile stays until the funnel fades |
+| 182 / 208 / 230 | On "decisions", "caveats" and "sources", a detail (24px) slips out of the funnel's lower edge and drops into a pile centred under the funnel's opening (x = 1200), each settling 56px above the one before so none falls through another: "Why skip SOP-9" (bottom) · "Date may move" · "ISO standard link" (top). Each is tagged on its left with the word the narrator uses for it, in red 18px capitals: **DECISION**, **CAVEAT**, **SOURCE**. Each is readable for about 0.6 s before a red strike-through draws across it; it then dims to 55%, and the struck-through pile stays until the funnel fades |
 | 272–290 | The funnel fades out completely |
 | 292–322 | Tank B glides to the home position; tank A fades; the cube returns home |
 
@@ -188,15 +190,13 @@ Two 1080 × 110 lanes centred at x = 1290; top-right badge: **STREAMING**.
 |---|---|
 | 0–6 | The compacted tank from Scene 6 fades away, clear before the lanes are more than faintly visible |
 | 0–15 | Lanes **A** and **B** appear |
-| 8–54 | Lane A streams "Pack warm layers. Canberra nights get cold in March." |
+| 8–54 | Lane A streams "Calibrate monthly. Log each check in the QMS." |
 | 58 | On "natural end", a dashed `END` chip springs on after lane A's text |
-| 14–114 | Lane B streams a structured record: `{"day": 3, "plan": "Visit Parliament House and the` |
-| 110–114 | On "limit", a red **MAX OUTPUT** wall drops right after lane B's last character (x = 1582; the limit is a token count, not a width), and the lane's unused width beyond it is hatched red (lane shakes ±4px for 6 frames); the cursor stops |
-| 138–158 | On "mid-sentence", lane B turns red; the unfinished string gets a wavy red underline; a dashed red `"}` ghost past the wall shows what's missing; **INCOMPLETE** |
+| 14–114 | Lane B streams a structured record, cut off mid-word: `{"step": 3, "action": "Replace the filter, then rec` |
+| 110–114 | On "limit", a red **MAX OUTPUT** wall drops 60px and fades in (so it never passes over lane A) right after lane B's last character (x = 1582; the limit is a token count, not a width), and the lane's unused width beyond it is hatched red (lane shakes ±4px for 6 frames); the cursor stops |
+| 138–158 | On "mid-sentence", lane B turns red; the unfinished string gets a wavy red underline; a dashed red `"}` ghost past the wall shows what's missing (no INCOMPLETE label: the red lane, underline and ghost already say it) |
 | 190 | On "finish reason", a tag under lane A: `FINISH REASON: STOP` cyan ✓ |
-| 205 | On "tells you which", a tag under lane B: `FINISH REASON: LENGTH` red ✕ |
-| 224 | Caption: "Check the finish reason, not just the text." |
-| 234 | Footnote (22px, 60% white): "Names vary by API, e.g. stop / end_turn, length / max_tokens." |
+| 205 | On "tells you which", a tag under lane B: `FINISH REASON: LENGTH` red ✕. The two tags are the scene's conclusion; no caption or footnote is added, so nothing competes with them |
 | 265–280 | Content fades |
 
 ## Scene 8: Context Is Temporary (frames 2232–2574)
@@ -212,10 +212,10 @@ Two 1080 × 110 lanes centred at x = 1290; top-right badge: **STREAMING**.
 | 152–174 | Push back out, to 120px right of home (640, 540), so the cube and the new tank read as one group |
 | 158–178 | On "Each new request", a new, empty tank draws at home |
 | 210 | Gear + "THE APP" at (870, 300), between the cube and the tank and clear of the dropping slice's label; badge: **APP ACTION** |
-| 212–234 | On "only what the app puts in", a **SAVED INSTRUCTIONS** slice (8%) drops in and bounces, with a brief purple glow as it first lands (219); readout 16,000; caption "ONLY WHAT THE APP ADDS" (26px, white) |
+| 212–234 | On "only what the app puts in", a **SAVED INSTRUCTIONS** slice (8%) drops in and bounces, with a brief purple glow as it first lands (219); readout 16,000. The caption "ONLY WHAT THE APP ADDS" (26px, white) appears on "only" (204) and holds until the finale fade, about 1.3 s at full opacity |
 | 250–268 | Finale: everything in the scene (cube, tank, labels, badge, corner title) fades out completely, leaving only the background |
 | 270 | On the empty background, "CONTEXT IS TEMPORARY." (110px) springs in at centre x, y = 450, then scales 1 → 1.06 to the end |
-| 288–326 | Prompt bar types "What's the capital of Australia?" with a blinking cursor, looping back to Scene 1 |
+| 288–326 | Prompt bar types "What's the device QMS standard?" with a blinking cursor, looping back to Scene 1 |
 
 ## Voiceover script
 

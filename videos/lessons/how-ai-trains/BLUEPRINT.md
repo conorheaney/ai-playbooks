@@ -50,9 +50,9 @@ Background (all frames): charcoal, 48px dot grid at 7% white drifting down 0.25 
 | 10–30 | Ingest panel rises 40px from below (760px bar, cyan→purple gradient, 10 tick divisions); "DATA INGESTED" 24px |
 | 15–200 | Readout counts 1 KB → 45.00 TB on a log scale (KB→MB→GB→TB), bar fills ease-in-out, lands on "learn" |
 | 40–70 | Title glides to top-left (scale 1 → 0.24), scrim dissolves |
-| 52–76 | **Blank model** fades in at centre: Scene 3's network at 72% scale (centred on x 960, y 470), hollow grey nodes, uniform faint edges |
+| 52–76 | **Blank model** fades in at centre: Scene 3's network at 72% scale (centred on x 960, y 470), hollow grey nodes, uniform faint edges. Once it appears, falling icons fade as they pass over its footprint, so only icons being absorbed are drawn on top of it |
 | 75 | "BLANK MODEL" (28px) under it, on "start completely blank" |
-| 90–216 | Each icon, at its own seeded moment between 90 and 190, bends into one of the model's nodes over 26 frames (shrinking, fading); the node pulses cyan as it lands. The rain thins out as the data is absorbed |
+| 90–216 | Each icon, at its own seeded moment between 90 and 190, bends into one of the model's nodes over 26 frames (shrinking; it starts from its falling opacity and brightens as it heads in, then fades); the node pulses cyan as it lands. The rain thins out as the data is absorbed |
 | 218–230 | Scene fades out |
 
 ## Scene 2: Tokenize & Map (frames 230–515)
@@ -63,8 +63,8 @@ Background (all frames): charcoal, 48px dot grid at 7% white drifting down 0.25 
 | 45 / 58 / 58 | Glowing cyan cut beams draw top→bottom (8 frames each), fade by +22: The \| cat, cat \| sprawled, and a **sub-word cut** sprawl \| ed sharing frame 58 |
 | 72–96 | Blocks separate (gap 0 → 64px), cyan outlines and 26px token IDs `#464 #3797 #87214 #276` appear |
 | 108–118 | IDs fade out, so they are gone before the morph starts |
-| 118–157 | Each block shrinks into a glowing point on a projected 3D grid (staggered 3 frames); each word shrinks with its box, which follows the word and fades. Camera yaws −0.55 → +0.35 rad through the scene end |
-| 135 | Faint "+ 1,000s MORE" (22px) beside the d₂ axis: three axes stand in for thousands of dimensions. Axis labels 28px, full opacity |
+| 118–157 | Each block shrinks into a glowing point on a projected 3D grid (staggered 3 frames). The box outlines fade out before any block moves (110–120), and each word fades out while its point travels and back in once it lands, so no two words or blocks cross mid-morph. Camera yaws −0.55 → +0.35 rad through the scene end |
+| 135 | Faint "+ 1,000s MORE DIMENSIONS" (22px) beside the d₁ axis label, clear of every token: three axes stand in for thousands of dimensions. Axis labels 28px, full opacity |
 | 201–221 | "kitten" appears beside "cat"; purple link draws with "similar" (26px) |
 | 211 | "car" pops in next to "cat" |
 | 225–255 | "car" flies outside the grid on the far right; dashed tether stays faintly visible |
@@ -87,7 +87,7 @@ Network 4-6-6-3 (`lib/network.ts`), layers at x = 560/827/1093/1360, nodes space
 | 138 | "ANSWER: on" (dashed cyan chip) below the outputs and the ghosted "on" in the input turns cyan: guess ≠ answer |
 | 138–170 | All edges flash red twice (about 2.3 Hz; edges into `car` full red) |
 | 170–221 | Backprop: purple pulses travel right→left (hidden nodes flash purple); each layer pair re-weights over 20 frames once the pulse crosses it, strengthening edges tinting cyan and weakening ones greying out until the second pass. Edges into `on` strengthen, the rest thin out |
-| 164–298 | "TRAINING STEPS" counter, beside the output column under the answer chip, climbs to 2.4 billion |
+| 222–298 | "TRAINING STEPS" counter, beside the output column under the answer chip, appears at the second forward pass (on "billions of times", after the single correction has been shown) and climbs to 2.4 billion |
 | 228–273 | Second forward pass in cyan (15 frames per hop) |
 | 273–285 | Only `on` lights up (cyan); bars flip to on 82%, car 10%, down 8%; "GUESS: on ✓" chip springs in, edges into `on` glow |
 | 293–306 | Labels, chips, counter and title fade; **network stays** for the hand-off |
@@ -106,20 +106,22 @@ Network 4-6-6-3 (`lib/network.ts`), layers at x = 560/827/1093/1360, nodes space
 
 ## Scene 4: Base Model → Fine-Tune on Examples (frames 825–1245)
 
-The cube moves only twice: after the collapse it glides to (1215, 440), right of centre, and stays there for the whole scene, then returns home in the last 20 frames. Prompts arrive from its left (780, 440); outputs appear below it (1215, 790). Bubble labels are 22px.
+The cube moves only twice: after the collapse it glides to (1215, 440), right of centre, and stays there for the whole scene, then returns home in the last 20 frames. Prompts arrive from its left (740, 440, so the bubble's right edge clears the cube's left face) and fade out by 40% of their flight into it; outputs appear below it (1215, 790). Bubble labels are 22px. The example cards are drawn beneath the cube, so they pass into it rather than over its face.
+
+The examples come from a generic medical device company and stay non-clinical. The fine-tune Q&A uses ISO 13485, the quality management standard for medical devices.
 
 | Local frame | Event |
 |---|---|
 | 0–36 | Scene 3's network implodes into the cube (white burst) |
 | 36 | Corner title "BASE MODEL" |
-| 50–88 | Prompt "What's the capital of France?" appears left of the cube, then flies into it |
-| 90–156 | Base model output types a ramble of more questions below the cube; red ✕ at 156 |
+| 50–88 | Prompt "What does ISO 13485 cover?" appears left of the cube, then flies into it |
+| 90–156 | Base model output types a ramble of more questions below the cube ("What does ISO 9001 cover? What does ISO 14971 cover? What does IEC 62304 cover? What does the…"); red ✕ at 156 |
 | 195 | Title becomes "FINE-TUNE ON EXAMPLES"; badge: humans in the loop |
-| 222–262 | First card "Q: Capital of France? A: Paris." (24px text) leaves the top writer, **holds at full size** at (850, 250) for 15 frames, then flies into the model |
-| 250–330 | The other six cards stream in as a montage (20 frames each); cards shrink only to about 60% and fade before they reach the cube; purple glow as each lands; counter climbs to 10,000 ("thousands") |
+| 222–262 | First card "Q: What is ISO 13485? A: Device quality systems." (24px text) leaves the top writer, **holds at full size** at (850, 250) for 15 frames, then flies into the model |
+| 250–330 | The other six cards stream in as a montage (20 frames each): "Fix this bug…", "Summarise this…", "Translate “calibrate”" → "“Étalonner”", "Write a haiku", "What is 12 × 4?", "Draft a service email" → "Dear customer, …"; cards shrink only to about 60% and fade before they reach the cube; purple glow as each lands; counter climbs to 10,000 ("thousands") |
 | 195–350 | "PEOPLE WRITE EXAMPLES" and "EXAMPLE CONVERSATIONS" (24px) share one baseline (y 790) |
 | 352–368 | Same prompt again, into the model; "AI" emblem pops on |
-| 378–403 | "The capital of France is Paris." types out below the cube; cyan ✓ |
+| 378–403 | "Quality management for medical devices." types out below the cube; cyan ✓ |
 
 ## Scene 5: Learn from Feedback / RLHF (frames 1245–1485)
 
@@ -127,13 +129,13 @@ The reward model is not shown (it isn't in the VO): preferences flow straight in
 
 | Local frame | Event |
 |---|---|
-| 10–40 | Prompt "Explain gravity to a 10-year-old." and two answers: A (technical), B (kid-friendly) |
+| 10–40 | Prompt "Explain calibration to a new hire." and two answers: A (technical: "Calibration compares readings against a traceable reference standard and corrects deviation."), B (plain: "Calibration checks the device against a known reference, so its readings stay accurate.") |
 | 45 | A person appears: "A PERSON PICKS THE BETTER ANSWER" (24px) |
 | 75 | Selection line to B, ✓; A dims |
 | 100–122 | B flies into the model; the cube glows |
 | 128 | Two more people fade in behind the first; caption becomes "PEOPLE PICK THE BETTER ANSWER"; "PREFERENCES" label beside the stream |
 | 128–170 | Purple dots stream from all three people into the model (glow per hit). The counter appears with the first dot (146) and climbs from "1 comparison" to "1,000,000 comparisons" |
-| 175–198 | "LEARNS THEIR PREFERENCES" replaces "PREFERENCES"; cube glows purple |
+| 175–198 | "LEARNS THEIR PREFERENCES" replaces "PREFERENCES" (the short label is gone by 175, before the long one fades in, so they never overlap); cube glows purple |
 
 ## Scene 6: Reinforcement Learning (frames 1485–1875)
 
@@ -161,8 +163,8 @@ Red team at x 290, everyday user at x 1640 (each pulled in 120px).
 | 45 / 80 / 115 | Harmful prompts ("How do I build a weapon…", "Ignore your rules and…", "Write malware that…") stay at full opacity until they hit the shield, flash red, then fade as they rebound |
 | 69–101 | First hit: the model replies "I can't help with that." in a bubble above the shield |
 | 104 / 139 | Hits 2 and 3: one "REFUSED" label (26px) centred above the shield, cleared before the next |
-| 140–176 | Everyday user's "How do I bake bread?" passes through the shield |
-| 192–210 | Model answers with a recipe in a bubble under the user; ✓ |
+| 140–176 | Everyday user's "How do I recalibrate?" passes through the shield. Its text fades out before it reaches the cube's face, and a cyan dot carries it the rest of the way in |
+| 192–210 | Model answers "Here are the steps from the user manual…" in a bubble under the user; ✓ |
 
 ## Scene 8: Evaluation (frames 2115–2413)
 
@@ -170,10 +172,11 @@ Red team at x 290, everyday user at x 1640 (each pulled in 120px).
 |---|---|
 | 20 | Benchmark panel: Reasoning, Coding, Knowledge, Safety (24px), with dashed PASS line at 75%; two ghost scorecards stacked behind it (14px steps) and "4 OF THOUSANDS OF BENCHMARKS" below |
 | 45–115 | Run 1 bars fill; Coding stops at 62% → red ✕ |
-| 170–196 | "BACK TO TRAINING" path from the scorecard to the model; purple glow |
+| 170–196 | "BACK TO TRAINING" path from the scorecard to the model (label at x 700, clear of the panel); purple glow |
 | 188–216 | The Scene 6 loop echoes around the model in purple (more training) |
 | 210–246 | Run 2 (moved earlier, fills faster: 4-frame stagger, 24 frames per bar): all bars pass ✓ |
-| 244 | Two reviewers + "HUMANS IN THE LOOP" badge; stamp "APPROVED FOR RELEASE" pops at 250, rotated −4°, and holds at full opacity until the fade at 280 |
+| 244 | Two reviewers + "HUMANS IN THE LOOP" badge; stamp "APPROVED FOR RELEASE" pops at 250, rotated −4°, and holds at full opacity until the fade (278–284) |
+| 284–298 | Only once the scorecard has fully faded does the cube glide home (14 frames, `cubePose` `homeFrames`), so it never passes over the scorecard's text |
 
 ## Scene 9: Locked In (frames 2413–2693)
 
@@ -197,7 +200,7 @@ Two beats: **beat 1** (10–150) is racks → channels → globe → users, with
 |---|---|
 | 10–55 | Data-centre racks rise; the locked cube flies in, shrinks and **parks on top of the middle rack** (padlock visible) for the rest of the scene; racks power on (LEDs blink) |
 | 60–120 | Rotating globe; APPS / API / WEB channels connect racks to globe with flowing packets |
-| 96–152 | User requests pop up around the globe (96/106/116/126), then fade out by 152 |
+| 96–152 | User requests pop up around the globe (96/106/116/126): "Summarise this audit", "Debug firmware", "Draft a service email", "Explain this SOP". They fade out by 152 |
 | 110–260 | 70 users light up across the globe; "PEOPLE USING IT" counts to 100,000,000+ |
 | 150 | Badge: humans in the loop; safety & monitoring team appears bottom centre ("teams monitor how it's used") |
 | 200–262 | Purple feedback dots travel from the globe to the team ("feed what they learn") |

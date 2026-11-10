@@ -77,18 +77,18 @@ All the conventions in `how-ai-responds/BLUEPRINT.md` apply: corner chrome and c
 
 ## Running example
 
-The series' trip continues. The viewer is now booking the Canberra trip from `how-ai-responds`, and asks the AI about **company travel policy**. That works well here because a private policy document can't be in the model's weights, so every pathway has a reason to exist.
+The viewer works at a generic medical device company, as in `how-ai-responds`. They need to order a flow sensor and ask the AI about the company's **supplier policy**. That works well here because a private policy document can't be in the model's weights, so every pathway has a reason to exist. The examples stay non-clinical: no patients, diagnoses or results.
 
 | Item | Text |
 |---|---|
-| Question | "What's our hotel allowance in Canberra?" |
-| Policy source | `travel-policy-2025.pdf`, §3.1 "All bookings go through the travel portal." · §4.2 "Accommodation: up to $250 a night in capital cities." · §4.3 "Taxis: keep receipts over $30." |
-| Outdated source | `travel-policy-2019.pdf` |
-| Conflicting source | An email: "I think the limit's $400 now?" |
-| Hotel list | `hotel-options.md`: Parkside Hotel $235, Lakeview Suites $245, Capital Tower $289 |
-| Memory | "Prefers hotels near Parliament House" (a callback to the Scene 6 summary in `how-ai-responds`) |
+| Question | "What's our lead-time limit for suppliers?" |
+| Policy source | `supplier-policy-2025.pdf`, §3.1 "All orders go through the purchasing portal." · §4.2 "Lead time: up to 30 days for critical parts." · §4.3 "Inspect 1 in 50 parts on arrival." |
+| Outdated source | `supplier-policy-2019.pdf` |
+| Conflicting source | An email: "Is the limit 45 days now?" |
+| Supplier list | `supplier-quotes.md`: Northfield Sensors 25 days, Brookway Parts 29 days, Apex Precision 40 days |
+| Memory | "Prefers ISO 13485 certified suppliers" (ISO 13485, the device quality standard from `how-ai-responds`) |
 
-All amounts, section numbers and hotel names are invented, and the video never presents them as real policy or real businesses.
+All limits, section numbers and supplier names are invented, and the video never presents them as real policy or real businesses. ISO 13485 is real and is described accurately.
 
 ## Scene 1: Beyond the Weights (frames 0–282)
 
@@ -100,7 +100,7 @@ Timed to the recorded take `01-weights.wav` (8.4 s).
 | 14–44 | Title glides up to the top-left corner, clearing the centre for the cube |
 | 26–44 | Locked cube springs in at dead centre (960, 540) with the "v1.0 · LOCKED" tag under it. Row: the cube (its area widened by the orbiting weights), then, once the first card flies in, a middle area where the cards rest, then the window when it draws |
 | 34–66 | On "fixed after training", frozen weight values fade in around the cube, perfectly still (callback to `how-ai-trains` Scene 9). As in `how-ai-responds` Scene 5, values that would touch the cube (or the bounce ✕ beside its right edge) are left out, and where two would crowd each other the farther one is left out (`SHOWN`) |
-| 107 / 138 / 168 | Three cards (340 × 110) fly in from the right toward the cube, each landing on its word: **YOUR FILES** `q3-report.xlsx`, **COMPANY RULES** `travel-policy-2025.pdf`, **TODAY'S NEWS** "Airport strike announced". Each bounces off the padlock with a red ✕ just outside the cube's right edge, clear of the weight values (its border flashes red), and settles in the middle area, one row gap clear of the weight values. Card labels 16px |
+| 107 / 138 / 168 | Three cards (340 × 110) fly in from the right toward the cube, each landing on its word: **YOUR FILES** `batch-records.xlsx`, **COMPANY RULES** `supplier-policy-2025.pdf`, **TODAY'S NEWS** "New guidance released". Each bounces off the padlock with a red ✕ just outside the cube's right edge, clear of the weight values (its border flashes red), and settles in the middle area, one row gap clear of the weight values. Card labels 16px |
 | 184–212 | Weight values fade; an empty context window (300 × 640) draws to the right of the resting cards, and the row re-centres. The middle keeps its width after the cards leave, so the cube and window stay well apart with the flow line between them |
 | 208–238 | On "unless they reach the context", the three cards turn cyan and drop into the window as slices; a dashed cyan line flows from the window into the cube; caption under the window: "THE ONLY WAY IN" (26px, the lesson's thesis) |
 | 264–282 | Cards, window and caption fade; the cube stays |
@@ -114,9 +114,9 @@ Layout: row of the cube and the prompt. The cube starts centred, where Scene 1 l
 | Local frame | Event |
 |---|---|
 | 0–16 | Corner title becomes "THE PROMPT" |
-| 10–50 | Prompt bar (760 × 96) rises into place at vertical centre and types a bare request: "Recommend a hotel." |
-| 58–88 | On "the direction you give", the bar becomes the brief card in place (still 1 row tall); the bare request lifts out of the card into a dim, struck-through **BEFORE** chip ("Recommend a hotel.") that rides just above the card's top edge for the rest of the scene, so the vague and full versions stay side by side; the label **YOUR PROMPT** appears; a dashed cyan line runs from the card to the cube |
-| 102 / 126 / 146 / 172 / 230 | Five modules slide into the card, each on its word. The card grows one row (104 px) per module, equally up and down, so it stays vertically centred and the earlier modules ease up. Each module has a coloured left edge, a short label (16px) and its text (23px): **OBJECTIVE** "Recommend a hotel for the Canberra trip." · **BACKGROUND & SOURCES** "Canberra, 5 days in March. Source: travel-policy-2025.pdf" · **CONSTRAINTS** "Within the policy's nightly limit." · **OUTPUT** "Top 3, as a table." · **CHECKS** "Cite the policy section for each." |
+| 10–50 | Prompt bar (760 × 96) rises into place at vertical centre and types a bare request: "Recommend a supplier." |
+| 58–88 | On "the direction you give", the bar becomes the brief card in place (still 1 row tall); the bare request lifts out of the card into a dim, struck-through **BEFORE** chip ("Recommend a supplier.") that rides just above the card's top edge for the rest of the scene, so the vague and full versions stay side by side; the label **YOUR PROMPT** appears; a dashed cyan line runs from the card to the cube |
+| 102 / 126 / 146 / 172 / 230 | Five modules slide into the card, each on its word. The card grows one row (104 px) per module, equally up and down, so it stays vertically centred and the earlier modules ease up. Each module has a coloured left edge, a short label (16px) and its text (23px): **OBJECTIVE** "Recommend a supplier for the flow sensor." · **BACKGROUND & SOURCES** "500 units by June. Source: supplier-policy-2025.pdf" · **CONSTRAINTS** "Within the policy's lead-time limit." · **OUTPUT** "Top 3, as a table." · **CHECKS** "Cite the policy section for each." |
 | 248 | Takeaway caption (24px, letter-spaced) under the card: "NOT EVERY TASK NEEDS EVERY PIECE" |
 | 292–310 | Card, line and caption fade; the cube stays |
 
@@ -128,15 +128,15 @@ Two lanes compare the same material. Top lane **VAGUE** at y = 365, bottom lane 
 
 | Local frame | Event |
 |---|---|
-| 0–20 | Corner title "VAGUE VS SPECIFIC"; one stack of two documents fades in at screen centre, labelled **SAME DOCUMENTS** with both file names under it: `hotel-options.md` and `travel-policy-2025.pdf` |
+| 0–20 | Corner title "VAGUE VS SPECIFIC"; one stack of two documents fades in at screen centre, labelled **SAME DOCUMENTS** with both file names under it: `supplier-quotes.md` and `supplier-policy-2025.pdf` |
 | 14–42 | On "same documents", a line from the stack forks into both lanes (level at first, curving only once past the stack's captions) |
 | 48–70 | On "vague", the top prompt chip types "Summarise these." |
-| 76–116 | On "specific", the bottom prompt chip types "Compare each hotel with the policy's nightly limit. Table. Cite the section." |
+| 76–116 | On "specific", the bottom prompt chip types "Compare each supplier with the policy's lead-time limit. Table. Cite the section." |
 | 100–120 | The documents' job is done: the stack and its forks fade and leave the row as the results arrive, so the row re-centres on prompts and results |
-| 120–165 | Results build (640 × 320 panels) as the last column of the row, each with a dashed arrow from its prompt. Top: four grey paragraph lines, with three open questions (20px) floating at its right: "Which ones fit the limit?", "Says who?", "Which hotel?". Bottom: a three-row table **HOTEL · $/NIGHT · FITS · SOURCE** (headers 16px, cells 22px) with ✓ / ✓ / ✕ and a `[§4.2]` chip on every row |
+| 120–165 | Results build (640 × 320 panels) as the last column of the row, each with a dashed arrow from its prompt. Top: four grey paragraph lines, with three open questions (20px) floating at its right: "Which ones fit the limit?", "Says who?", "Which supplier?". Bottom: a three-row table **SUPPLIER · LEAD TIME · FITS · SOURCE** (headers 16px, cells 22px) with ✓ / ✓ / ✕ and a `[§4.2]` chip on every row |
 | 172 | On "review", the bottom panel gets a cyan ring and the tag **EASY TO REVIEW**; the top lane's questions pulse |
-| 255 | On "doesn't make it correct", row 2 is tinted red, its price ($245) turns red, and a red **CHECK** callout springs in beside that row, outside the panel, pointing at it: "Price from **hotel-options.md**, not the policy. Is it current?" The table is clear, but its numbers come from a separate source that still needs checking (the example data is unchanged; the callout explains the check without inventing a discrepancy) |
-| 290 | Caption: "Clearer to review. Not guaranteed correct." |
+| 255 | On "doesn't make it correct", row 2 is tinted red, its lead time (29 days, just inside the 30-day limit) turns red, and a red **CHECK** callout springs in beside that row, outside the panel, pointing at it: "Lead time from **supplier-quotes.md**, not the policy. Is it current?" (the file name never breaks across lines) The table is clear, but its numbers come from a separate source that still needs checking (the example data is unchanged; the callout explains the check without inventing a discrepancy) |
+| 290 | Caption, in the series' caveat pill (26px): "Clearer to review. Not guaranteed correct." |
 | 336–354 | Everything fades |
 
 ## Scene 4: Context Engineering (frames 946–1280)
@@ -147,12 +147,12 @@ Layout: a row of LEFT OUT (from ORDER), the cards (a loose pool of seven 340 × 
 
 | Local frame | Event |
 |---|---|
-| 0–30 | Corner title "CONTEXT ENGINEERING"; the window outline and readout draw; the seven cards fade in, unsorted: **YOUR MESSAGE** "Which hotels fit the policy?" (the same name as its slice, and as in `how-ai-responds`), **SYSTEM INSTRUCTIONS** "You are a travel assistant.", **CHAT HISTORY**, `travel-policy-2025.pdf`, `hotel-options.md`, `travel-policy-2019.pdf`, email "Is the limit $400 now?" |
+| 0–30 | Corner title "CONTEXT ENGINEERING"; the window outline and readout draw; the seven cards fade in, unsorted: **YOUR MESSAGE** "Which suppliers fit the policy?" (the same name as its slice, and as in `how-ai-responds`), **SYSTEM INSTRUCTIONS** "You are a quality assistant.", **CHAT HISTORY** "500 flow sensors by June…", `supplier-policy-2025.pdf`, `supplier-quotes.md`, `supplier-policy-2019.pdf`, email "Is the limit 45 days now?" |
 | 36–70 | On "decides what else goes in", the gate draws in purple |
 | 100 | Gear + "THE APP" above the gate (74px above its top, well clear of it); badge: **APP ACTION** |
 | 112–176 | **SELECT** lights: five cards get a cyan outline and a 15% cyan fill one by one; the 2019 policy and the email stay grey. Card labels 16px, card text 21px |
-| 200 | **ORDER** lights: the five selected cards glide into an ordered column in stack order (instructions at the bottom, prompt at the top); the two grey cards move aside into their own LEFT OUT column to the left, vertically centred on the same line as the ordered column (y = 485 and 635, spaced so each card's stamp fits above it) |
-| 212–274 | **FIT** lights and SELECT and ORDER step back to 40%, so the cards crossing the gate don't pass over bright labels. The cards pass through the gate in order and morph into slices, filling the window to 58%; each card fades into its slice as it arrives (no landing box in the window), and the slice's label appears as it lands (the two documents read **POLICY 2025** and **HOTEL OPTIONS**) |
+| 200 | **ORDER** lights: the five selected cards glide into an ordered column in stack order (instructions at the bottom, prompt at the top). Some paths cross, so each card's text dips out mid-move and returns as it lands, and only opaque cards ever pass each other; the two grey cards move aside into their own LEFT OUT column to the left, vertically centred on the same line as the ordered column (y = 485 and 635, spaced so each card's stamp fits above it) |
+| 212–274 | **FIT** lights and SELECT and ORDER step back to 40%, so the cards crossing the gate don't pass over bright labels. The cards pass through the gate in order and morph into slices, filling the window to 58%; each card fades into its slice as it arrives (no landing box in the window), and the slice's label appears as it lands (the two documents read **POLICY 2025** and **SUPPLIER QUOTES**) |
 | 240–254 | A red dashed **LEFT OUT** zone (380 × 308) draws around the two grey cards, labelled above |
 | 248 | On "outdated", the 2019 policy card flashes red with a glow, shakes, is stamped **OUTDATED** on its top edge (above the card's text, never over it) and its filename is struck through in red; it stays in place |
 | 268 | On "conflicting", the email gets the same treatment: red flash, shake, **CONFLICTS WITH POLICY** stamp and a struck-through line |
@@ -169,8 +169,8 @@ Badge: **AHEAD OF TIME**. Layout: a collection of documents at x = 300, drawn at
 | 0–20 | Corner title "RETRIEVAL: PREPARE"; the search index outline draws, with half its slots already holding older, dimmer chunks (each showing its reference) and half empty (dashed) |
 | 8–64 | On "large or changing collections", a stack of document icons builds at x = 260 while a counter (28px) counts up to "1,240 DOCUMENTS"; a new document drops onto the stack (**+ NEW**, 20px) and the oldest slides off (**− OLD**), so the counter ticks up and back |
 | 100 | Badge **AHEAD OF TIME** fades in |
-| 126–166 | On "documents are split into chunks", the top three documents move to x = 740 and each splits into four chunk strips (slice sound per document). `travel-policy-2025.pdf` splits big in the middle (y = 560, four 280 × 44 strips): its chunks are the ones Scene 6 retrieves, so viewers can track them. `expenses-faq.md` and `receipts-guide.pdf` split small above and below it (y = 300 / 820, 120 × 16 strips, no text) as a quick flicker that keeps the beat |
-| 178–216 | On "tagged with their source", the policy's four chunks gain, one by one, a reference chip beside them (`[§3.1]` `[§3.2]` `[§4.2]` `[§4.3]`) and their file and version inside (`travel-policy · 2025`, 18px); the small chunks brighten as they are tagged |
+| 126–166 | On "documents are split into chunks", the top three documents move to x = 740 and each splits into four chunk strips (slice sound per document). `supplier-policy-2025.pdf` splits big in the middle (y = 560, four 280 × 44 strips): its chunks are the ones Scene 6 retrieves, so viewers can track them. `quality-faq.md` and `inspection-guide.pdf` split small above and below it (y = 300 / 820, 120 × 16 strips, no text) as a quick flicker that keeps the beat |
+| 178–216 | On "tagged with their source", the policy's four chunks gain, one by one, a reference chip beside them (`[§3.1]` `[§3.2]` `[§4.2]` `[§4.3]`) and their file and version inside (`supplier-policy · 2025`, 18px); the small chunks brighten as they are tagged |
 | 222–280 | On "added to a search index", the chunks file into the empty slots, one every 4 frames (file sound), and show their reference in bright cyan |
 | 284–300 | The documents and splitter fade; the index stays for Scene 6 |
 
@@ -178,20 +178,20 @@ Badge: **AHEAD OF TIME**. Layout: a collection of documents at x = 300, drawn at
 
 Timed to the recorded take `06-ask.wav` (8.6 s).
 
-Badge: **PER QUESTION**. Layout: the question sits in a search bar centred at the top (960, 160), 860 wide. Below it the index (0.8 scale), the ranking column (300 wide, plus room for its **TOP 2** label) and the context window (320 × 620, y = 650, slice labels to its right) form a centred row with the same 110px gaps as Scenes 1–4. The ranking column joins the row as the candidates lift out, pushing the index and window apart. Scene 6 holds the centring track at 0, since the row centres itself; the window's final place is `ASK_TANK`, where Scene 7 picks it up.
+Badge: **PER QUESTION**. Layout: the question sits in a search bar centred at the top (960, 160), 860 wide. Below it the index (0.8 scale), the ranking column (300 wide) and the context window (320 × 620, y = 650, slice labels to its right) form a centred row with the same 110px gaps as Scenes 1–4. The ranking column joins the row as the candidates lift out, pushing the index and window apart. Scene 6 holds the centring track at 0, since the row centres itself; the window's final place is `ASK_TANK`, where Scene 7 picks it up.
 
 | Local frame | Event |
 |---|---|
 | 0–30 | The index glides to its new place; the badge changes to **PER QUESTION** (Scene 5's badge fades out first) |
 | 14–44 | The window draws beside the index, holding only instructions |
-| 4–40 | On "When you ask a question", the search bar drops in at the top and types "What's our hotel allowance in Canberra?" |
+| 4–40 | On "When you ask a question", the search bar drops in at the top and types "What's our lead-time limit for suppliers?" |
 | 44–60 | A copy of the question shrinks out of the bar and drops into the window as the **YOUR QUESTION** slice; the bar stays as the search query |
 | 52–106 | A dashed flow line runs from the search bar down to the index while it is searched |
 | 60–92 | On "searches the index", a cyan scan line sweeps across the index; eight slots light up as it passes them |
-| 96–140 | On "ranks what it finds", the eight candidates lift out into the ranking column (**RANKED**), each with its chip, a score bar and its score, then sort themselves: §4.2 0.92, §3.1 0.86, §4.3 0.61, then five below 0.5 |
-| 150 | On "only", a dashed cut line drops under the top two: **TOP 2**. The top two are ringed in cyan and held in place, scores readable, until they fly |
-| 168 | The other six dim to 35% and slide 40px back toward the index, with **NOT USED** under them, before the top two leave |
-| 170–206 | On "the best chunks to the context", the top two fly out to the right along their own rows (above the cut, so they never cross the rest of the list or the TOP 2 label), then down inside the window, and become **Retrieved chunk** slices, `RETRIEVED · §4.2` and `RETRIEVED · §3.1`; the question's slice moves up above them; the readout ticks up |
+| 96–140 | On "ranks what it finds", the eight candidates lift out into the ranking column (**RANKED**), each with its chip, a score bar and its score, then sort themselves: §4.2 0.92, §3.1 0.86, §4.3 0.61, then five below 0.5. While sorting, climbing rows swing right (drawn on top) and sinking rows swing left and dim, so rows passing each other sit side by side |
+| 150 | On "only", the six rows below the top two slide down 32px to open a gap, and a dashed cyan cut line draws in it (no label). The top two are ringed in cyan and held in place, scores readable, until they fly |
+| 168 | The other six are greyed out (borders, reference chips, score bars and values turn grey; the rows dim to 70%), with a grey **NOT USED** centred under them, before the top two leave |
+| 170–206 | On "the best chunks to the context", the top two fly out to the right along their own rows (above the cut, so they never cross the rest of the list or the cut line), then down inside the window, and become **Retrieved chunk** slices, `RETRIEVED · §4.2` and `RETRIEVED · §3.1`; the question's slice moves up above them; the readout ticks up |
 | 232 | On "with their sources", the two retrieved slices flash a cyan outline |
 | 262–280 | Index and ranking column fade; the window stays |
 
@@ -204,12 +204,12 @@ Badge: **REVIEW**. Layout: cube at home; answer card 600 × 330 centred at (990,
 | Local frame | Event |
 |---|---|
 | 0–20 | Corner title "CHECK THE SOURCE"; the window from Scene 6 shrinks toward the cube and fades as a dashed line feeds it into the cube; the cube glows |
-| 6–36 | A stream from the cube types the answer card's three claims, each ending with its chip: "Hotel limit: $250 a night. `[§4.2]`" · "Book through the travel portal. `[§3.1]`" · "Breakfast is included. `[§4.3]`" |
+| 6–36 | A stream from the cube types the answer card's three claims, each ending with its chip: "Lead-time limit: 30 days. `[§4.2]`" · "Use the purchasing portal. `[§3.1]`" · "Expedited shipping is free. `[§4.3]`" |
 | 28–44 | The three source cards fade in, showing their chip over placeholder lines (the file name, the same on all three, is left off) |
 | 42–66 | On "traceable", cyan threads draw from each claim to its source card |
-| 72–100 | On "but not automatically true", the first two source cards reveal their text ("Accommodation: up to $250 a night in capital cities." · "All bookings go through the travel portal.") and read **SUPPORTED** (16px); claims 1 and 2 get a cyan ✓. Source text is 21px |
-| 150 | On "A real source", the third card reveals its text: "Taxis: keep receipts over $30." It is a real section of the real document |
-| 196 | On "fail to support", the third thread turns red and frays into dashes; the third card and both its chips turn red and it reads **NOT SUPPORTED**; claim 3 gets a wavy red underline and a red ✕. The mismatched words, "Breakfast" in the claim and "Taxis" in the source, turn red and are briefly highlighted (196–262), so the mismatch is pointed out, not just stated |
+| 72–100 | On "but not automatically true", the first two source cards reveal their text ("Lead time: up to 30 days for critical parts." · "All orders go through the purchasing portal.") and read **SUPPORTED** (16px); claims 1 and 2 get a cyan ✓. Source text is 21px |
+| 150 | On "A real source", the third card reveals its text: "Inspect 1 in 50 parts on arrival." It is a real section of the real document |
+| 196 | On "fail to support", the third thread turns red and frays into dashes; the third card and both its chips turn red and it reads **NOT SUPPORTED**; claim 3 gets a wavy red underline and a red ✕. The mismatched words, "Expedited shipping" in the claim and "Inspect" in the source, turn red and are briefly highlighted (196–262), so the mismatch is pointed out, not just stated |
 | 262 | On "Check it.", takeaway caption (26px, letter-spaced): "A REAL CITATION ISN'T PROOF" |
 | 296–314 | Everything except the cube fades |
 
@@ -219,21 +219,21 @@ Layout: cube at home; the memory store (a purple cabinet 380 × 328 with three d
 
 | Local frame | Event |
 |---|---|
-| 0–16 | Corner title "MEMORY"; the memory store draws, already holding "Home airport: Sydney" and "Prefers aisle seats" (dim); the third drawer is empty |
-| 0–14 | A chat pill appears above the cube: "I always prefer hotels near Parliament House." |
-| 8–30 | A dashed card grows out of the cube to (900, 560): "Prefers hotels near Parliament House", labelled **PROPOSED** |
+| 0–16 | Corner title "MEMORY"; the memory store draws, already holding "Site: Leeds plant" and "Prefers PDF reports" (dim); the third drawer is empty |
+| 0–14 | A chat pill appears above the cube: "I always prefer ISO 13485 certified suppliers." |
+| 8–30 | A dashed card grows out of the cube to (900, 560): "Prefers ISO 13485 certified suppliers", labelled **PROPOSED** |
 | 30 | On "stored by the app", gear + "THE APP" under the card; badge: **APP ACTION** |
 | 38–50 | The app checks the card: a purple ✓ **STORE** |
 | 50–64 | The card goes solid purple (label **MEMORY**) and files into the third drawer; a scope tag (18px) appears under the store: "SCOPE: YOU · KEEP 90 DAYS". Drawer text is 18px at full size, never below 16px |
 | 60 | On "not the model", a takeaway caption (26px, two lines so it clears THE APP) under the cube: "THE MODEL CAN'T / SAVE ANYTHING ITSELF" |
-| 100–120 | On "Later", the chat pill and captions fade; a **NEXT WEEK** divider sweeps across the screen; the store moves to (1690, 560) at 0.88 scale; an empty context window draws at home |
-| 116–150 | A prompt bar above the cube at (640, 330), at 80% so it clears the window and where the first chat message sat, types "Book my hotel for the next Canberra trip." (116–138), then shrinks and drops into the window as a **Your message** slice (140–150) |
-| 144–158 | Gear + "THE APP" above the store; the third drawer slides out; only the Parliament House memory drops out of it, clear below the store before it travels, and the others stay put |
-| 158–186 | On "retrieved into the context", the memory (opaque, so no border shows through it) flies from below the store into the window and becomes a **Memory** slice |
-| 188–218 | The cube glows and a response pill at (740, 290) types: "Parkside Hotel is a 5-minute walk from Parliament House." |
+| 100–120 | On "Later", the chat pill and captions fade; a **NEXT WEEK** divider sweeps across the screen; the store slides to (1690, 560) at 0.88 scale (100–116) first, then an empty context window draws at home (113–132), so the window's outline never crosses the store |
+| 116–150 | A prompt bar above the cube at (640, 330), at 80% so it clears the window and where the first chat message sat, types "Order flow sensors for the next build." (116–138), then shrinks and drops into the window as a **Your message** slice (140–150) |
+| 144–158 | Gear + "THE APP" above the store; the third drawer slides out. Retrieval copies the memory rather than removing it: the stored memory stays in its drawer, dimmed like the others, and a copy drops out below the store, appearing only once it is clear of the drawer's own text |
+| 158–186 | On "retrieved into the context", the copy (opaque, so no border shows through it) flies from below the store into the window and becomes a **Memory** slice |
+| 188–218 | The cube glows and a response pill at (740, 290) types: "Northfield Sensors is ISO 13485 certified." |
 | 220 | On "use it", a cyan ✓ **USED** springs in under the response |
-| 242–268 | On "or ignore it", a dashed ghost response fades in at (700, 810), at 75%: "The Airport Motel is cheapest." with a red **IGNORED** tag (20px) |
-| 262 | Caption at (700, 930): "Used, ignored or misapplied. Memory isn't a guarantee." |
+| 242–268 | On "or ignore it", a dashed ghost response fades in at (700, 810), at 75%: "Apex Precision is cheapest." with a red **IGNORED** tag (20px) |
+| 262 | Caption in the series' caveat pill (26px), centred at (640, 930), clear of the window: "Used, ignored or misapplied. Memory isn't a guarantee." |
 | 300–318 | Finale: everything in the scene (cube, window, store, pills, badge, corner title) fades out completely |
 | 322–352 | On the empty background, a small context window (180 × 240) draws at (960, 380), pinned to true screen centre; four labelled arrows draw in from the edges and point at it: **PROMPT** (left, cyan), **CONTEXT ENGINEERING** (top, purple), **RETRIEVAL** (right, cyan), **MEMORY** (bottom, purple). Each drops a slice of its own style into the window as it lands |
 | 356 | "EVERYTHING ARRIVES THROUGH CONTEXT." (56px, one line) springs in at y = 790, then scales 1 → 1.04 to the end |

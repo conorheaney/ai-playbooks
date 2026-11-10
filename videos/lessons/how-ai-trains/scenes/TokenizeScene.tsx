@@ -89,7 +89,8 @@ export const TokenizeScene: React.FC = () => {
     </text>
   );
 
-  const d2 = P(AXES[1].to);
+  const d1 = P(AXES[0].to);
+  const origin = P(ORIGIN);
 
   return (
     <AbsoluteFill>
@@ -123,8 +124,8 @@ export const TokenizeScene: React.FC = () => {
               </g>
             );
           })}
-          {/* "multi-dimensional": three axes stand in for thousands. */}
-          {label(d2.x - 30, d2.y + 30, '+ 1,000s MORE', 22, 0.6 * dims, COLORS.cyan, 'end')}
+          {/* "multi-dimensional": three axes stand in for thousands. Beside the d₁ label, clear of every token. */}
+          {label(d1.x + (d1.x - origin.x) * 0.07 + 30, d1.y + (d1.y - origin.y) * 0.07, '+ 1,000s MORE DIMENSIONS', 22, 0.6 * dims, COLORS.cyan, 'start')}
         </g>
 
         {/* "car" starts beside "cat", then flies to the far corner of the space. */}
@@ -167,8 +168,10 @@ export const TokenizeScene: React.FC = () => {
           const textX = m > 0 ? labelPos.x : lerp(flush, box.x, split);
           const w = t.w * s;
           const h = BOX_H * s;
-          // Boxes are gone by the morph's midpoint, so the in-between is just words travelling to their points.
-          const boxOut = Math.max(0, 1 - 2 * m);
+          // Box outlines are gone before any block moves, and each word fades out while its point travels
+          // and back in once it has landed, so no two words or blocks cross mid-morph.
+          const boxOut = interpolate(frame, [TOKEN.morph - 8, TOKEN.morph + 2], [1, 0], clampOpts);
+          const wordOpacity = interpolate(m, [0, 0.25, 0.75, 1], [1, 0, 0, 1], clampOpts);
           return (
             <g key={t.text} opacity={sentenceIn} transform={`translate(0 ${(1 - sentenceIn) * 30})`}>
               <rect
@@ -182,7 +185,7 @@ export const TokenizeScene: React.FC = () => {
                 strokeOpacity={split * boxOut}
                 strokeWidth={3}
               />
-              {label(textX, labelPos.y, t.text, WORD_SIZE * s, 1)}
+              {label(textX, labelPos.y, t.text, WORD_SIZE * s, wordOpacity)}
               {label(box.x, box.y + BOX_H / 2 + 36, `#${t.id}`, ID_SIZE, split * idsOut, COLORS.cyan)}
               <circle
                 cx={pos.x}

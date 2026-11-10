@@ -84,7 +84,8 @@ export const WeightsScene: React.FC = () => {
       durationInFrames: 20,
     });
 
-  const updates = interpolate(frame, [WEIGHTS.backprop, WEIGHTS.labelsOut + 5], [0, UPDATE_TOTAL], {...clampOpts, easing: Easing.in(Easing.quad)});
+  // Counting starts at the second forward pass ("billions of times"), after the single correction has been shown.
+  const updates = interpolate(frame, [WEIGHTS.forward2, WEIGHTS.labelsOut + 5], [0, UPDATE_TOTAL], {...clampOpts, easing: Easing.in(Easing.quad)});
 
   // Forward arrivals flash cyan, backward ones purple. At the output only the chosen word lights up:
   // "car" goes red on the first pass, "on" cyan on the second.
@@ -269,7 +270,7 @@ export const WeightsScene: React.FC = () => {
         </g>
 
         {/* "Billions of times": the guess, check, adjust loop repeats; counted beside the output it improves. */}
-        <g opacity={Math.min(labelsOpacity, interpolate(frame, [WEIGHTS.backprop - 6, WEIGHTS.backprop], [0, 1], clampOpts))}>
+        <g opacity={Math.min(labelsOpacity, interpolate(frame, [WEIGHTS.forward2 - 6, WEIGHTS.forward2], [0, 1], clampOpts))}>
           {text(COUNTER.x, COUNTER.y, 'TRAINING STEPS', 24, HEADER)}
           <text x={COUNTER.x} y={COUNTER.y + 44} fill={COLORS.purple} fontFamily={FONT} fontWeight={800} fontSize={44} textAnchor="middle" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
             {Math.round(updates).toLocaleString('en-US')}

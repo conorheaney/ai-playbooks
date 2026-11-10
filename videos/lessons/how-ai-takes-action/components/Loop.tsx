@@ -175,15 +175,17 @@ export const Fence: React.FC<{cx: number; cy: number; w: number; h: number; draw
   );
 };
 
-// A sign plate planted on the fence.
-export const Sign: React.FC<{x: number; y: number; text: string; pop: number; color?: string}> = ({x, y, text, pop, color = COLORS.purple}) =>
+// A sign plate planted on the fence. `anchor` says which end of the plate sits at x: 'end' hangs it to the left,
+// 'start' to the right; it pops from that end.
+export const Sign: React.FC<{x: number; y: number; text: string; pop: number; color?: string; anchor?: 'start' | 'middle' | 'end'}> = ({x, y, text, pop, color = COLORS.purple, anchor = 'middle'}) =>
   pop > 0.01 ? (
     <div
       style={{
         position: 'absolute',
         left: x,
         top: y,
-        transform: `translate(-50%, -50%) scale(${pop})`,
+        transform: `translate(${anchor === 'start' ? '0%' : anchor === 'end' ? '-100%' : '-50%'}, -50%) scale(${pop})`,
+        transformOrigin: anchor === 'start' ? '0 50%' : anchor === 'end' ? '100% 50%' : '50% 50%',
         padding: '8px 20px',
         borderRadius: 10,
         border: `3px solid ${color}`,

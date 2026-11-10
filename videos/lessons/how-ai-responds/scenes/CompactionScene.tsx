@@ -25,16 +25,16 @@ const OLD_TOP = 0.82; // history below this is compacted; above it is the most r
 const STEP = 0.069; // each turn's share of the window
 // A few words each: they stream past quickly, so they read as a conversation rather than as text to read.
 const TURNS = [
-  'Best city for museums?',
-  'Canberra.',
-  'What about Melbourne?',
-  'Long drive away.',
-  'Skip Melbourne.',
-  'Hotels near Parliament?',
-  'Three options…',
-  'Dates may change.',
-  'Need a visa?',
-  'Here’s the visa site.',
+  'Which SOPs need updating?',
+  'SOP-12 and SOP-15.',
+  'What about SOP-9?',
+  'Retired last year.',
+  'Skip SOP-9.',
+  'Audit checklist?',
+  'Three sections…',
+  'Date may move.',
+  'Need the standard?',
+  'Here’s the ISO link.',
 ];
 // Turns appear as a left-aligned transcript in evenly spaced rows between the cube and the window, then
 // each slides straight right along its own row and shrinks, so no two turns ever cross or overlap. Each
@@ -43,8 +43,10 @@ const TURN_ROWS = {left: 640, top: 250, gap: 60, font: 20, endScale: 0.6};
 const TURN_HALF = TURNS.map((t) => (textWidth(t, TURN_ROWS.font) + 44) / 2);
 // The summary card: popped out of the funnel, centred between the two tanks, readable on its own.
 const CARD = {x: 1210, y: 410, w: 440, font: 22};
-const SUMMARY = 'Canberra, 5 days in March. Hotel near Parliament.';
-const LOST = ['Why not Melbourne', 'Dates may change', 'Visa site link'];
+const SUMMARY = 'Audit in March. Update SOP-12 and SOP-15.';
+const LOST = ['Why skip SOP-9', 'Date may move', 'ISO standard link'];
+// Each lost detail is tagged with the word the narrator uses for it: "decisions, caveats and sources".
+const LOST_KIND = ['DECISION', 'CAVEAT', 'SOURCE'];
 // The lost details pile up centred under the funnel's opening, the first at the bottom.
 const PILE = {x: 1200, bottom: 760, step: 56, font: 24};
 
@@ -193,6 +195,9 @@ export const CompactionScene: React.FC = () => {
               <text x={px} y={py} fill={COLORS.white} fontFamily={FONT} fontWeight={500} fontSize={PILE.font} textAnchor="middle" dominantBaseline="central">
                 {text}
               </text>
+              <text x={px - w / 2 - 18} y={py} fill={COLORS.error} fontFamily={FONT} fontWeight={700} fontSize={18} letterSpacing="0.14em" textAnchor="end" dominantBaseline="central">
+                {LOST_KIND[i]}
+              </text>
               {strike > 0 ? <line x1={px - w / 2 - 4} x2={px - w / 2 - 4 + (w + 8) * strike} y1={py + 1} y2={py + 1} stroke={COLORS.error} strokeWidth={3} strokeLinecap="round" /> : null}
             </g>
           );
@@ -247,8 +252,10 @@ export const CompactionScene: React.FC = () => {
           label="SUMMARY"
           labelSize={18}
           color={COLORS.white}
-          scale={lerp(0.4, 1, cardPop) * lerp(1, sumRect.w / CARD.w, cardLand)}
-          opacity={interpolate(cardLand, [0.3, 0.65], [1, 0], clampOpts)} // gone before it crosses tank B's outline; the slice fades in under it
+          // It shrinks to the slice's width early in its flight and is nearly gone before it crosses tank B's
+          // outline; the slice fades in under it.
+          scale={lerp(0.4, 1, cardPop) * lerp(1, sumRect.w / CARD.w, interpolate(cardLand, [0, 0.3], [0, 1], clampOpts))}
+          opacity={interpolate(cardLand, [0.1, 0.4], [1, 0], clampOpts)}
         />
       ) : null}
 

@@ -3,7 +3,6 @@ import {AbsoluteFill, interpolate, random, spring, useCurrentFrame, useVideoConf
 import {Mark} from '../../../shared/components/Bubble';
 import {SceneTitle} from '../../../shared/components/SceneTitle';
 import {FONT} from '../../../shared/fonts';
-import {lerp} from '../../../shared/lib/math';
 import {clampOpts, presence} from '../../../shared/lib/motion';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {ContextTank} from '../../../shared/components/context/ContextTank';
@@ -15,9 +14,9 @@ import {SCENES, STOPPING as S} from '../timing';
 const LANE = {x: 1290, w: 1080, h: 110};
 const LANE_A_Y = 400;
 const LANE_B_Y = 640;
-const TEXT_A = 'Pack warm layers. Canberra nights get cold in March.';
-const TEXT_B_KEEP = '{"day": 3, "plan": ';
-const TEXT_B_OPEN = '"Visit Parliament House and the';
+const TEXT_A = 'Calibrate monthly. Log each check in the QMS.';
+const TEXT_B_KEEP = '{"step": 3, "action": ';
+const TEXT_B_OPEN = '"Replace the filter, then rec';
 const TEXT_B = TEXT_B_KEEP + TEXT_B_OPEN;
 // The output limit is a token count, not a width: the wall drops right after the last character lane B
 // produced (measured from a render: the text ends at x = 1564), and the lane's unused width is hatched.
@@ -192,14 +191,15 @@ export const StoppingScene: React.FC = () => {
               {'"}'}
             </div>
           ) : null}
-          {/* MAX OUTPUT wall slams down right after the last token. */}
+          {/* MAX OUTPUT wall slams down right after the last token: a short drop that fades in, so it never passes over lane A. */}
           {frame >= S.wall ? (
             <>
               <div
                 style={{
                   position: 'absolute',
                   left: WALL.x,
-                  top: LANE_B_Y - WALL.h / 2 - (1 - wall) * 260,
+                  top: LANE_B_Y - WALL.h / 2 - (1 - wall) * 60,
+                  opacity: interpolate(wall, [0, 0.4], [0, 1], clampOpts),
                   width: WALL.w,
                   height: WALL.h,
                   borderRadius: 6,
@@ -212,7 +212,8 @@ export const StoppingScene: React.FC = () => {
                   position: 'absolute',
                   left: WALL.x + WALL.w / 2 - 150,
                   width: 300,
-                  top: LANE_B_Y - 118 - (1 - wall) * 260,
+                  top: LANE_B_Y - 118 - (1 - wall) * 60,
+                  opacity: interpolate(wall, [0, 0.4], [0, 1], clampOpts),
                   textAlign: 'center',
                   fontFamily: FONT,
                   fontWeight: 700,
@@ -227,60 +228,10 @@ export const StoppingScene: React.FC = () => {
           ) : null}
         </div>
 
-        <div
-          style={{
-            position: 'absolute',
-            left: LANE_RIGHT - 300,
-            width: 300,
-            top: LANE_B_Y + LANE.h / 2 + 22,
-            textAlign: 'right',
-            fontFamily: FONT,
-            fontWeight: 700,
-            fontSize: 20,
-            letterSpacing: '0.16em',
-            color: COLORS.error,
-            opacity: smooth(S.incomplete[1] - 6, 10),
-          }}
-        >
-          INCOMPLETE
-        </div>
-
+        {/* The scene's conclusion: one finish-reason tag per lane, on "The finish reason tells you which". Nothing else
+            is added at the end; the red lane, wavy underline and missing "} already show that lane B is incomplete. */}
         <Tag text="FINISH REASON: STOP" ok x={LANE.x - LANE.w / 2} y={LANE_A_Y + LANE.h / 2 + 16} appear={smooth(S.tagA, 12)} />
         <Tag text="FINISH REASON: LENGTH" ok={false} x={LANE.x - LANE.w / 2} y={LANE_B_Y + LANE.h / 2 + 16} appear={smooth(S.tagB, 12)} />
-
-        <div
-          style={{
-            position: 'absolute',
-            left: LANE.x - LANE.w / 2,
-            width: LANE.w,
-            top: 880,
-            textAlign: 'center',
-            fontFamily: FONT,
-            fontWeight: 500,
-            fontSize: 32,
-            color: COLORS.white,
-            opacity: smooth(S.caption, 14),
-            transform: `translateY(${lerp(16, 0, smooth(S.caption, 14))}px)`,
-          }}
-        >
-          Check the finish reason, not just the text.
-        </div>
-        <div
-          style={{
-            position: 'absolute',
-            left: LANE.x - LANE.w / 2,
-            width: LANE.w,
-            top: 936,
-            textAlign: 'center',
-            fontFamily: FONT,
-            fontWeight: 500,
-            fontSize: 22,
-            color: rgba(COLORS.white, 0.6),
-            opacity: smooth(S.caption + 10, 14),
-          }}
-        >
-          Names vary by API, e.g. stop / end_turn, length / max_tokens.
-        </div>
         <Pinned>
           <SceneTitle text="STOPPING" mode="corner" />
         </Pinned>

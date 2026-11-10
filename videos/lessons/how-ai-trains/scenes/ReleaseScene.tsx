@@ -32,10 +32,10 @@ const ARC_FROM = {x: RACKS.x + 1.5 * RACKS.w + RACKS.gap + 10, y: RACKS.y};
 // Users' feedback travels from the globe to the monitoring team, arcing above the next-model cube.
 const FEEDBACK_ARC = {from: {x: GLOBE.x - 150, y: GLOBE.y + GLOBE.r - 50}, ctrl: {x: 1020, y: 760}, to: {x: TEAM.x[2] + 30, y: TEAM.y - 30}};
 const BUBBLES = [
-  {x: 1660, y: 250, text: 'Help me write a poem'},
-  {x: 1720, y: 650, text: 'Debug this code'},
-  {x: 1080, y: 230, text: 'Plan my trip to Japan'},
-  {x: 1730, y: 900, text: 'Explain my tax bill'},
+  {x: 1660, y: 250, text: 'Summarise this audit'},
+  {x: 1720, y: 650, text: 'Debug firmware'},
+  {x: 1080, y: 230, text: 'Draft a service email'},
+  {x: 1730, y: 900, text: 'Explain this SOP'},
 ];
 
 const r = seeded('release');

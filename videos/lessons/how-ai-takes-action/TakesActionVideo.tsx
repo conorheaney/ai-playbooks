@@ -38,7 +38,7 @@ const SCENE_LIST = [
   ['9 · When tools fail', 'failure', FailureScene],
 ] as const;
 
-// The cube and the travel portal carry across cuts, so scenes fade their own content rather than the whole frame.
+// The cube, the purchasing portal and some takeaway captions carry across cuts, so scenes fade their own content rather than the whole frame.
 export const TakesActionVideo: React.FC<VideoProps> = ({sfx, voiceover, center = true}) => {
   const frame = useCurrentFrame();
   return (

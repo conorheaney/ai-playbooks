@@ -22,11 +22,11 @@ const STAMP = {y: 880, from: 1.45};
 
 // What the three runs say at each knob position. Only the last phase has a fluent mistake.
 const TEXTS = [
-  ["Canberra is Australia's capital.", "Australia's capital city is Canberra.", 'The capital of Australia is Canberra.'],
-  ['The capital of Australia is Canberra.', 'The capital of Australia is Canberra.', 'The capital of Australia is Canberra.'],
-  ['Canberra is the capital of Australia.', "Australia's capital? Canberra.", 'The capital of Australia is Sydney.'],
+  ['ISO 13485 is the device QMS standard.', 'The device QMS standard is ISO 13485.', 'The QMS standard is ISO 13485.'],
+  ['The QMS standard is ISO 13485.', 'The QMS standard is ISO 13485.', 'The QMS standard is ISO 13485.'],
+  ['ISO 13485 covers device quality systems.', 'Device QMS? ISO 13485.', 'The QMS standard is ISO 9001.'],
 ];
-const WRONG = {phase: 2, lane: 2, word: 'Sydney'};
+const WRONG = {phase: 2, lane: 2, word: 'ISO 9001'};
 
 // Typed text where an optional wrong word turns red as it appears.
 const Typed: React.FC<{text: string; chars: number; wrong?: string}> = ({text, chars, wrong}) => {

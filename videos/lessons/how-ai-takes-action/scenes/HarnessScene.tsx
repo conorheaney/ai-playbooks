@@ -7,7 +7,7 @@ import {FONT} from '../../../shared/fonts';
 import {clampOpts} from '../../../shared/lib/motion';
 import {COLORS, rgba} from '../../../shared/theme';
 import {Ring} from '../components/Loop';
-import {GearMark, Layer, Note, Txt} from '../components/Parts';
+import {Caveat, GearMark, Layer, Txt} from '../components/Parts';
 import {CAPTION_Y, CX} from '../layout';
 import {TicketGlyph} from '../components/Ticket';
 import {lerp, useBeats} from '../lib';
@@ -26,8 +26,9 @@ const MODULES = [
   {x: CX + 360, y: 720, label: 'RUNS TOOLS', icon: 'tools'},
   {x: CX - 360, y: 720, label: 'ENFORCES LIMITS', icon: 'limits'},
 ] as const;
-const TAPE = {y: 830, left: 420, right: 1620};
-const TRACE = ['12:01  search_hotels ✓', '12:01  read_policy ✓', '12:02  check_availability ✓'];
+const TAPE = {y: 830, left: 460, right: 1620}; // starts clear of the RECORDS label
+export const HARNESS_CAVEAT = 'Many products call all of this "the agent".';
+const TRACE =['12:01  search_suppliers ✓', '12:01  read_policy ✓', '12:02  check_stock ✓'];
 
 // Live mini demos inside each module's icon box (64 × 64).
 const ModuleIcon: React.FC<{kind: (typeof MODULES)[number]['icon']; frame: number}> = ({kind, frame}) => {
@@ -108,6 +109,12 @@ export const HarnessScene: React.FC = () => {
   return (
     <AbsoluteFill>
       <Layer>
+        {/* The gear opens out into the harness frame. The frame is drawn first, so as its edge sweeps down it passes
+            behind the emblem rather than across the ring. */}
+        {bloom > 0.001 ? (
+          <rect x={box.x - box.w / 2} y={box.y - box.h / 2} width={box.w} height={box.h} rx={lerp(35, 40, bloom)} fill={rgba(COLORS.purple, 0.05)} stroke={COLORS.purple} strokeWidth={4} opacity={out} />
+        ) : null}
+
         {/* The emblem: a rail through a loop, the cube at its heart. */}
         <g opacity={out}>
           <line x1={HARNESS_CUBE.x - railHalf} x2={HARNESS_CUBE.x + railHalf} y1={HARNESS_CUBE.y} y2={HARNESS_CUBE.y} stroke={rgba(COLORS.white, 0.55)} strokeWidth={5} strokeLinecap="round" />
@@ -119,11 +126,7 @@ export const HarnessScene: React.FC = () => {
           ))}
         </g>
 
-        {/* The gear opens out into the harness frame. */}
         <g opacity={out}>
-          {bloom > 0.001 ? (
-            <rect x={box.x - box.w / 2} y={box.y - box.h / 2} width={box.w} height={box.h} rx={lerp(35, 40, bloom)} fill={rgba(COLORS.purple, 0.05)} stroke={COLORS.purple} strokeWidth={4} />
-          ) : null}
           {/* The port where tool requests leave the frame. */}
           {port > 0.01 ? (
             <g opacity={port}>
@@ -134,7 +137,8 @@ export const HarnessScene: React.FC = () => {
           ) : null}
           {/* Tab on the frame's top-left edge. */}
           {bloom > 0.6 ? (
-            <g opacity={interpolate(bloom, [0.6, 1], [0, 1], clampOpts)}>
+            // The tab turns opaque quickly, so the frame's top edge never shows through its label.
+            <g opacity={interpolate(bloom, [0.6, 0.68], [0, 1], clampOpts)}>
               <rect x={FRAME.x - FRAME.w / 2 + 40} y={FRAME.y - FRAME.h / 2 - 26} width={250} height={52} rx={14} fill={COLORS.charcoal} stroke={COLORS.purple} strokeWidth={3} />
             </g>
           ) : null}
@@ -146,7 +150,7 @@ export const HarnessScene: React.FC = () => {
               <path key={i} d={`M${from.x} ${from.y}L${toward.x} ${toward.y}`} stroke={COLORS.purple} strokeWidth={3} strokeDasharray="6 8" strokeDashoffset={-frame} opacity={mods[i] * 0.8} />
             ) : null;
           })}
-          <GearMark x={GEAR_AT.x} y={GEAR_AT.y} frame={frame} opacity={gear * Math.max(0, 1 - bloom * 2)} label="THE APP" labelAt="above" size={64 * lerp(1, 1.6, bloom)} spin={2 + 10 * bloom} />
+          <GearMark x={GEAR_AT.x} y={GEAR_AT.y} frame={frame} opacity={gear * Math.max(0, 1 - bloom * 5)} label="THE APP" labelAt="above" size={64 * lerp(1, 1.6, bloom)} spin={2 + 10 * bloom} />
         </g>
       </Layer>
 
@@ -156,8 +160,9 @@ export const HarnessScene: React.FC = () => {
 
       <AbsoluteFill style={{opacity: out}}>
         {/* The tab's label: THE APP becomes HARNESS. */}
-        <Txt x={FRAME.x - FRAME.w / 2 + 165} y={FRAME.y - FRAME.h / 2} text="THE APP" size={28} weight={800} color={COLORS.purple} opacity={interpolate(bloom, [0.6, 1], [0, 1], clampOpts) * (1 - rename)} />
-        <Txt x={FRAME.x - FRAME.w / 2 + 165} y={FRAME.y - FRAME.h / 2} text="HARNESS" size={28} weight={800} color={COLORS.purple} opacity={rename} scale={lerp(0.9, 1, rename)} />
+        {/* One label at a time: THE APP fades out before HARNESS fades in, so the two never overlap. */}
+        <Txt x={FRAME.x - FRAME.w / 2 + 165} y={FRAME.y - FRAME.h / 2} text="THE APP" size={28} weight={800} color={COLORS.purple} opacity={interpolate(bloom, [0.6, 1], [0, 1], clampOpts) * interpolate(rename, [0, 0.45], [1, 0], clampOpts)} />
+        <Txt x={FRAME.x - FRAME.w / 2 + 165} y={FRAME.y - FRAME.h / 2} text="HARNESS" size={28} weight={800} color={COLORS.purple} opacity={interpolate(rename, [0.55, 1], [0, 1], clampOpts)} scale={lerp(0.9, 1, rename)} />
 
         {MODULES.map((m, i) =>
           mods[i] > 0.001 ? (
@@ -217,8 +222,10 @@ export const HarnessScene: React.FC = () => {
           </>
         ) : null}
 
-        <Note x={CX} y={CAPTION_Y} text='Many products call all of this "the agent".' size={26} color={rgba(COLORS.white, 0.7)} opacity={smooth(H.footnote, 14)} />
       </AbsoluteFill>
+
+      {/* A caveat, not a takeaway: the series' caveat pill. It holds through the cut and Scene 7 fades it. */}
+      <Caveat x={CX} y={CAPTION_Y} text={HARNESS_CAVEAT} opacity={smooth(H.footnote, 14)} />
 
       <Pinned>
         <SceneTitle text="THE HARNESS" mode="corner" />

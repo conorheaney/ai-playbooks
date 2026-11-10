@@ -12,7 +12,7 @@ export const TANK_TEXT: TankTextSizes = {label: 20, labelGap: 28, ruler: 18, rea
 // Illustrative only; the readout always says EXAMPLE CAPACITY.
 export const CAPACITY = 200_000;
 
-export const PROMPT = "What's the capital of Australia?";
+export const PROMPT = "What's the device QMS standard?";
 
 // The assembled input from Scene 1, bottom to top (fractions of the window).
 export const INPUT: Segment[] = [

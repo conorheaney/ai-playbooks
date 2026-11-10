@@ -41,13 +41,13 @@ type Item = {
 
 // The pool, top to bottom as it first appears (unsorted).
 const ITEMS: Item[] = [
-  {label: 'YOUR MESSAGE', text: 'Which hotels fit the policy?', pool: {x: 430, y: 250}, keep: {stack: 4, kind: 'message', slice: [0.54, 0.58], tankLabel: 'YOUR MESSAGE'}},
-  {label: 'DOCUMENT', text: 'travel-policy-2019.pdf', pool: {x: 370, y: 350}, reject: {reason: 'OUTDATED', at: E.outdated, y: 485}},
-  {label: 'SYSTEM INSTRUCTIONS', text: 'You are a travel assistant.', pool: {x: 420, y: 450}, keep: {stack: 0, kind: 'instructions', slice: [0, 0.06], tankLabel: 'SYSTEM INSTRUCTIONS'}},
-  {label: 'EMAIL', text: '"Is the limit $400 now?"', pool: {x: 380, y: 550}, reject: {reason: 'CONFLICTS WITH POLICY', at: E.conflicting, y: 635}},
-  {label: 'CHAT HISTORY', text: 'Canberra, 5 days in March…', pool: {x: 440, y: 650}, keep: {stack: 1, kind: 'history', slice: [0.06, 0.2], tankLabel: 'CONVERSATION HISTORY'}},
-  {label: 'DOCUMENT', text: 'hotel-options.md', pool: {x: 360, y: 750}, keep: {stack: 3, kind: 'documents', slice: [0.36, 0.54], tankLabel: 'HOTEL OPTIONS'}},
-  {label: 'DOCUMENT', text: 'travel-policy-2025.pdf', pool: {x: 410, y: 850}, keep: {stack: 2, kind: 'documents', slice: [0.2, 0.36], tankLabel: 'POLICY 2025'}},
+  {label: 'YOUR MESSAGE', text: 'Which suppliers fit the policy?', pool: {x: 430, y: 250}, keep: {stack: 4, kind: 'message', slice: [0.54, 0.58], tankLabel: 'YOUR MESSAGE'}},
+  {label: 'DOCUMENT', text: 'supplier-policy-2019.pdf', pool: {x: 370, y: 350}, reject: {reason: 'OUTDATED', at: E.outdated, y: 485}},
+  {label: 'SYSTEM INSTRUCTIONS', text: 'You are a quality assistant.', pool: {x: 420, y: 450}, keep: {stack: 0, kind: 'instructions', slice: [0, 0.06], tankLabel: 'SYSTEM INSTRUCTIONS'}},
+  {label: 'EMAIL', text: '"Is the limit 45 days now?"', pool: {x: 380, y: 550}, reject: {reason: 'CONFLICTS WITH POLICY', at: E.conflicting, y: 635}},
+  {label: 'CHAT HISTORY', text: '500 flow sensors by June…', pool: {x: 440, y: 650}, keep: {stack: 1, kind: 'history', slice: [0.06, 0.2], tankLabel: 'CONVERSATION HISTORY'}},
+  {label: 'DOCUMENT', text: 'supplier-quotes.md', pool: {x: 360, y: 750}, keep: {stack: 3, kind: 'documents', slice: [0.36, 0.54], tankLabel: 'SUPPLIER QUOTES'}},
+  {label: 'DOCUMENT', text: 'supplier-policy-2025.pdf', pool: {x: 410, y: 850}, keep: {stack: 2, kind: 'documents', slice: [0.2, 0.36], tankLabel: 'POLICY 2025'}},
 ];
 
 const orderedY = (stack: number) => 360 + (4 - stack) * 100;
@@ -74,6 +74,9 @@ export const EngineeringScene: React.FC = () => {
   const tankDraw = interpolate(frame, [E.pool[0], E.pool[1]], [0, 1], ease);
   const gateDraw = interpolate(frame, [E.gate[0], E.gate[1]], [0, 1], ease);
   const order = interpolate(frame, [E.order, E.order + 16], [0, 1], ease);
+  // Cards reorder in about half a second, and some paths cross; their text dips out mid-move and returns as
+  // they land, so only opaque cards ever pass each other, never text over text.
+  const orderDip = 1 - Math.sin(Math.PI * order);
   const app = presence(frame, E.appIn, dur, 12, 18);
   const stopLit = [presence(frame, E.select, E.order + 4, 6, 8), presence(frame, E.order, E.fit + 4, 6, 8), presence(frame, E.fit, E.fit + 60, 6, 12)];
   // During FIT the other two stops step back, so the cards passing the gate don't cross bright labels.
@@ -221,7 +224,7 @@ export const EngineeringScene: React.FC = () => {
               transform: `translateX(${(1 - appear) * -30}px)`,
             }}
           >
-            <div style={{opacity: content}}>
+            <div style={{opacity: content * orderDip}}>
               <div style={{fontSize: 16, fontWeight: 700, letterSpacing: '0.18em', color: border === COLORS.cyan ? COLORS.cyan : rgba(COLORS.white, 0.7), marginBottom: 6, whiteSpace: 'nowrap'}}>{it.label}</div>
               <div style={{fontSize: 21, fontWeight: 500, whiteSpace: 'nowrap'}}>
                 <span style={{position: 'relative', display: 'inline-block'}}>

@@ -9,10 +9,10 @@ import {COLORS, rgba} from '../../../shared/theme';
 import {Arrow, Chip, GearMark, Layer, MarkAt} from '../components/Parts';
 import {ReceiptGlyph, TicketGlyph} from '../components/Ticket';
 import {Dock} from '../components/World';
-import {CX} from '../layout';
+import {CX, PORTAL_NAME} from '../layout';
 import {lerp, useBeats} from '../lib';
 import {FAILURE as F} from '../timing';
-import {COORD} from './DelegationScene';
+import {COORD, RESULT_CHIP, TASK_Y} from './DelegationScene';
 
 // A centred column of five failures. Each has a red glyph showing where it went wrong: in the request (ticket)
 // or in what came back (receipt).
@@ -31,32 +31,38 @@ const ROWS: {label: string; glyph: 'ticket' | 'receipt' | 'double'}[] = [
 // The two answers, mirrored about the centre line.
 const CARD = {y: 540, w: 460, h: 170, dx: 280};
 const TAG_Y = CARD.y + CARD.h / 2 + 50;
-const REPORT_TEXT = 'Booked twice. One needs cancelling.';
+const REPORT_TEXT = 'Ordered twice. One needs cancelling.';
 
 // Finale, pinned to true screen centre: the whole diagram is centred (the dock is wider than the cube, so the
 // gate sits a little left of centre, halfway along the arrows).
-const FIN = {y: 440, cube: 545, dock: 1265, dockW: 380, top: 404, bottom: 486};
+const FIN = {y: 440, cube: 520, dock: 1250, dockW: 460, top: 404, bottom: 486};
 const ARROW = {from: FIN.cube + 100, to: FIN.dock - FIN.dockW / 2 - 20};
 const GATE_X = (ARROW.from + ARROW.to) / 2;
 
-const FailGlyph: React.FC<{kind: 'ticket' | 'receipt' | 'double'; x: number; y: number}> = ({kind, x, y}) =>
-  kind === 'ticket' ? (
-    <TicketGlyph x={x} y={y} color={COLORS.error} />
+// Cyan while it is just a tool call; red once its failure is named.
+const FailGlyph: React.FC<{kind: 'ticket' | 'receipt' | 'double'; x: number; y: number; failed: boolean}> = ({kind, x, y, failed}) => {
+  const color = failed ? COLORS.error : COLORS.cyan;
+  return kind === 'ticket' ? (
+    <TicketGlyph x={x} y={y} color={color} />
   ) : kind === 'receipt' ? (
-    <ReceiptGlyph x={x} y={y} color={COLORS.error} />
+    <ReceiptGlyph x={x} y={y} color={color} />
   ) : (
     <>
-      <ReceiptGlyph x={x - 8} y={y - 6} color={COLORS.error} opacity={0.6} />
-      <ReceiptGlyph x={x + 8} y={y + 6} color={COLORS.error} />
+      <ReceiptGlyph x={x - 8} y={y - 6} color={color} opacity={0.6} />
+      <ReceiptGlyph x={x + 8} y={y + 6} color={color} />
     </>
   );
+};
 
 export const FailureScene: React.FC = () => {
   const {frame, abs, dur, smooth, ramp, pop, fadeOut} = useBeats('failure');
 
-  const coordOut = fadeOut(0, 14);
-  const focus = ramp(F.focus[0], F.focus[1]);
-  const cards = smooth(F.focus[0] + 10, 16);
+  const coordOut = fadeOut(4, 18);
+  // "A good agent": the other rows clear first, then DUPLICATE ACTION rises, then the two cards fade in below it,
+  // so nothing moves through text that is still on screen.
+  const rowsOut = ramp(F.focus[0], F.focus[0] + 10);
+  const focus = ramp(F.focus[0] + 8, F.focus[1] + 4);
+  const cards = smooth(F.focus[1] - 4, 16);
   const typed = interpolate(frame, [F.report[0], F.report[1]], [0, REPORT_TEXT.length], clampOpts);
   const reported = Math.min(1, pop(F.report[1] + 2));
   const hide = Math.min(1, pop(F.hide));
@@ -66,23 +72,29 @@ export const FailureScene: React.FC = () => {
   const cycle = ((((frame - F.diagram) % 48) + 48) % 48) / 48;
 
   const rowY = (i: number) => (i === KEPT ? lerp(ROW_Y[i], KEPT_Y, focus) : ROW_Y[i]);
-  const rowOpacity = (i: number) => Math.min(1, pop(F.rows[i])) * (i === KEPT ? 1 : 1 - focus);
+  const rowOpacity = (i: number) => Math.min(1, pop(F.rows[i])) * (i === KEPT ? 1 : 1 - rowsOut);
+  // On "Tool calls", the five calls appear as plain cyan glyphs; each turns red as its failure is named.
+  const callOpacity = (i: number) => smooth(F.calls + i * 3, 12) * (i === KEPT ? 1 : 1 - rowsOut);
 
   return (
     <AbsoluteFill>
       <Layer>
         <LockedCube id="ta-x-coord" absFrame={abs} {...COORD} appear={coordOut} />
       </Layer>
+      {/* Scene 8's combined result leaves with the coordinating cube. */}
+      <Chip x={COORD.x} y={TASK_Y} text={RESULT_CHIP} size={26} color={COLORS.cyan} textColor={COLORS.cyan} opacity={coordOut} glow={0.6 * coordOut} />
 
       <AbsoluteFill style={{opacity: 1 - finale}}>
         <Layer>
-          {ROWS.map((r, i) =>
-            rowOpacity(i) > 0.01 ? (
-              <g key={r.label} opacity={rowOpacity(i)}>
-                <FailGlyph kind={r.glyph} x={GLYPH_X} y={rowY(i)} />
+          {ROWS.map((r, i) => {
+            const failed = frame >= F.rows[i];
+            const o = failed ? Math.max(rowOpacity(i), callOpacity(i) * 0.7) : callOpacity(i) * 0.7;
+            return o > 0.01 ? (
+              <g key={r.label} opacity={o}>
+                <FailGlyph kind={r.glyph} x={GLYPH_X} y={rowY(i)} failed={failed} />
               </g>
-            ) : null,
-          )}
+            ) : null;
+          })}
         </Layer>
         {ROWS.map((r, i) => (
           <Chip key={r.label} x={LABEL_X} y={rowY(i)} anchor="start" text={r.label} size={28} weight={800} color={COLORS.error} textColor={COLORS.error} opacity={rowOpacity(i)} />
@@ -183,7 +195,7 @@ export const FailureScene: React.FC = () => {
               <TicketGlyph x={lerp(ARROW.from + 20, ARROW.to - 30, cycle)} y={FIN.top} opacity={Math.sin(Math.PI * cycle)} />
               <ReceiptGlyph x={lerp(ARROW.to - 30, ARROW.from + 20, (cycle + 0.5) % 1)} y={FIN.bottom} opacity={Math.sin(Math.PI * ((cycle + 0.5) % 1))} />
             </Layer>
-            <Dock x={FIN.dock} y={FIN.y} w={FIN.dockW} name="TRAVEL PORTAL" icon="portal" opacity={diagram} />
+            <Dock x={FIN.dock} y={FIN.y} w={FIN.dockW} name={PORTAL_NAME} icon="portal" opacity={diagram} />
           </>
         ) : null}
         {frame >= F.titleIn ? (

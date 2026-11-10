@@ -21,15 +21,16 @@ const SLIVER_TRAVEL = 12;
 const QUESTION_W = textWidth(PROMPT, 38) + 100;
 const DIMMED = 0.4; // earlier tokens once a newer one is on its way
 
-// Realistic tokens: "Canberra" is two. Scores are illustrative.
+// Realistic tokens: "13485" is two ("134" + "85"). Scores are illustrative. The runner-up " 900" (ISO 9001,
+// the general quality standard) is the plausible-but-wrong pattern shown in red.
 const STEPS: {tok: string; cands: [string, number][]}[] = [
-  {tok: 'The', cands: [['The', 0.62], ['A', 0.21], ['Canberra', 0.09], ['It', 0.04]]},
-  {tok: ' capital', cands: [[' capital', 0.81], [' Australian', 0.08], [' city', 0.06], [' answer', 0.03]]},
-  {tok: ' of', cands: [[' of', 0.93], [' city', 0.04], [' is', 0.02], [' for', 0.01]]},
-  {tok: ' Australia', cands: [[' Australia', 0.96], [' the', 0.02], [' AU', 0.01], [' this', 0.01]]},
-  {tok: ' is', cands: [[' is', 0.95], [' city', 0.03], [',', 0.01], [' was', 0.01]]},
-  {tok: ' Can', cands: [[' Can', 0.71], [' Syd', 0.19], [' Mel', 0.06], [' the', 0.03]]},
-  {tok: 'berra', cands: [['berra', 0.98]]},
+  {tok: 'The', cands: [['The', 0.62], ['ISO', 0.21], ['It', 0.09], ['A', 0.04]]},
+  {tok: ' QMS', cands: [[' QMS', 0.81], [' standard', 0.08], [' device', 0.06], [' answer', 0.03]]},
+  {tok: ' standard', cands: [[' standard', 0.93], [' for', 0.04], [' is', 0.02], [' here', 0.01]]},
+  {tok: ' is', cands: [[' is', 0.95], [' for', 0.03], [',', 0.01], [' was', 0.01]]},
+  {tok: ' ISO', cands: [[' ISO', 0.96], [' IEC', 0.02], [' EN', 0.01], [' the', 0.01]]},
+  {tok: ' 134', cands: [[' 134', 0.71], [' 900', 0.19], [' 149', 0.06], [' the', 0.03]]},
+  {tok: '85', cands: [['85', 0.98]]},
   {tok: '.', cands: [['.', 0.91]]},
 ];
 const FOCUS = 5; // the step shown in full
@@ -75,7 +76,7 @@ export const TokensScene: React.FC = () => {
   const level =
     INPUT_TOP + BEATS.reduce((sum, b) => sum + SLIVER * interpolate(frame, [b.land + SLIVER_TRAVEL - 4, b.land + SLIVER_TRAVEL], [0, 1], clampOpts), 0);
 
-  // The panel follows the quick steps, then stays on " Can" for the rest of the scene.
+  // The panel follows the quick steps, then stays on " 134" for the rest of the scene.
   const panelStep = BEATS.reduce((cur, b, i) => (i <= FOCUS && frame >= b.start ? i : cur), 0);
   const panelIn = presence(frame, T.fastStart, T.out + 18, 10, 18);
   const panelScale = interpolate(frame, [T.focus - 5, T.focus + 11], [0.8, 1], {...clampOpts, easing: Easing.out(Easing.cubic)});
@@ -179,8 +180,11 @@ export const TokensScene: React.FC = () => {
               return null;
             }
             const t = interpolate(frame, [b.fly, b.land], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.quad)});
-            const x = lerp(CUBE_HOME.x + 120, SLOTS[i], t);
-            const y = lerp(CUBE_HOME.y, LINE_Y, t) - 90 * Math.sin(Math.PI * t);
+            // Down to a lane between the scores panel and the response line, across along it, then into its slot,
+            // so the chip never passes over the panel's rows or the tokens already in the line.
+            const LANE_Y = LINE_Y - 80;
+            const x = lerp(CUBE_HOME.x + 120, SLOTS[i], interpolate(t, [0.15, 0.8], [0, 1], {...clampOpts, easing: Easing.inOut(Easing.quad)}));
+            const y = lerp(CUBE_HOME.y, LANE_Y, interpolate(t, [0, 0.4], [0, 1], {...clampOpts, easing: Easing.out(Easing.quad)})) + 80 * interpolate(t, [0.8, 1], [0, 1], clampOpts);
             const sliver = interpolate(frame, [b.land, b.land + SLIVER_TRAVEL], [0, 1], clampOpts);
             const tankTop = {x: tank.x, y: fillTopY(tank, level)};
             return (

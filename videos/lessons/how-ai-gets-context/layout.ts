@@ -1,8 +1,8 @@
 import {centredRow} from '../../shared/lib/row';
 
 // Home positions and the running example's text, shared across scenes.
-// The trip from how-ai-responds continues: the viewer is booking Canberra and asks about company travel policy.
-// Amounts, section numbers and hotel names are illustrative.
+// The running example: the viewer works at a medical device company, ordering a flow sensor under the
+// company's supplier policy. Limits, section numbers and supplier names are illustrative.
 
 // The model cube's and the context window's resting places, as in how-ai-responds.
 export const CUBE_HOME = {x: 520, y: 540, size: 80};
@@ -17,13 +17,13 @@ export const TANK_HOME = {x: 1300, y: 560, w: 320, h: 760};
 // Illustrative only; the readout always says EXAMPLE CAPACITY.
 export const CAPACITY = 200_000;
 
-export const QUESTION = "What's our hotel allowance in Canberra?";
+export const QUESTION = "What's our lead-time limit for suppliers?";
 
 // The policy sections the answer cites in Scenes 6 and 7.
 export const POLICY = {
-  s31: {ref: '§3.1', text: 'All bookings go through the travel portal.'},
-  s42: {ref: '§4.2', text: 'Accommodation: up to $250 a night in capital cities.'},
-  s43: {ref: '§4.3', text: 'Taxis: keep receipts over $30.'},
+  s31: {ref: '§3.1', text: 'All orders go through the purchasing portal.'},
+  s42: {ref: '§4.2', text: 'Lead time: up to 30 days for critical parts.'},
+  s43: {ref: '§4.3', text: 'Inspect 1 in 50 parts on arrival.'},
 } as const;
 
 // The search index: 6 × 4 slots. Scene 5 files the twelve new chunks into the empty slots;
@@ -32,9 +32,9 @@ export const INDEX = {x: 1340, y: 560, w: 520, h: 480, cols: 6, rows: 4} as cons
 
 // The three documents Scene 5 splits, four chunks each, in order.
 export const NEW_DOCS = [
-  {name: 'travel-policy-2025.pdf', source: 'travel-policy · 2025', refs: ['§3.1', '§3.2', '§4.2', '§4.3']},
-  {name: 'expenses-faq.md', source: 'expenses-faq · 2025', refs: ['Q1', 'Q2', 'Q3', 'Q4']},
-  {name: 'receipts-guide.pdf', source: 'receipts-guide · 2024', refs: ['p.1', 'p.2', 'p.3', 'p.4']},
+  {name: 'supplier-policy-2025.pdf', source: 'supplier-policy · 2025', refs: ['§3.1', '§3.2', '§4.2', '§4.3']},
+  {name: 'quality-faq.md', source: 'quality-faq · 2025', refs: ['Q1', 'Q2', 'Q3', 'Q4']},
+  {name: 'inspection-guide.pdf', source: 'inspection-guide · 2024', refs: ['p.1', 'p.2', 'p.3', 'p.4']},
 ] as const;
 
 // Slots already holding older chunks; the rest receive the new ones, in slot order.

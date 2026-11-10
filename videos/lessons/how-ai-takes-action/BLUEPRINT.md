@@ -7,7 +7,7 @@ Source material: `00-ai-concepts.md` §5 **Agentic Systems**: the chapter introd
 1920×1080 authoring space · 30 fps · 3075 frames (1:42.5), ending in a 3 s fade to black · 4K master via `--scale=2`.
 Every visual is SVG or live text, so nothing is rasterised before the final render.
 
-**Status: built, awaiting voiceover.** Every scene is implemented and renders; no takes are recorded yet. All nine scenes were rebuilt after a first pass rated 60% for spacing, alignment, focus and on-screen text (see [Layout rules and text budget](#layout-rules-and-text-budget)). Scene lengths are estimated from the script at about 2.7 words per second, the pace of the recorded takes in lessons 2 and 3, plus about a second of hold, so every frame number below is an estimate. Re-time each scene to its recorded take (see [Voiceover script](#voiceover-script)).
+**Status: built, awaiting voiceover.** Every scene is implemented and renders; no takes are recorded yet. All nine scenes were rebuilt after a first pass rated 60% for spacing, alignment, focus and on-screen text (see [Layout rules and text budget](#layout-rules-and-text-budget)). They were then moved onto the series' new medical-device running example and reviewed against the 9.5 target (see `REVIEW_LESSON4.md`). Scene lengths are estimated from the script at about 2.7 words per second, the pace of the recorded takes in lessons 2 and 3, plus about a second of hold, so every frame number below is an estimate. Re-time each scene to its recorded take (see [Voiceover script](#voiceover-script)).
 
 ## Run
 
@@ -26,12 +26,12 @@ npm run sfx                 # regenerate the shared public/sfx/*.wav
 | `timing.ts` | Scene lengths and every beat (scene-local frames); scenes and the cue sheet both read it |
 | `layout.ts` | The running example's text (tools, inputs, results), the wall, gate and dock positions, and Scene 4's ring |
 | `lib.ts` | `useBeats` (per-scene spring and easing helpers) and small geometry helpers |
-| `components/Parts.tsx` | `Layer` (full-frame SVG), `Txt`, `Chip`, `MarkAt`, `PersonIcon`, `GearMark` (the purple gear with any label), `Badge`, `Note`, `FlowLine` and `Arrow` |
+| `components/Parts.tsx` | `Layer` (full-frame SVG), `Txt`, `Chip`, `MarkAt`, `PersonIcon`, `GearMark` (the purple gear with any label), `Badge`, `Note` (the series' takeaway caption), `Caveat` (the series' caveat pill), `FlowLine` and `Arrow` |
 | `components/Ticket.tsx` | `ToolTicket` (the model's request), `ToolReceipt` (the observed result), and text-free `TicketGlyph` / `ReceiptGlyph` for diagrams |
 | `components/Wall.tsx` | `WallLine`, `GatePanel` (with the gear on its top edge) and `CheckLights` |
-| `components/World.tsx` | `Dock` (a system in the world, with a scan line while it runs) and `PortalCard` (NOT BOOKED / BOOKED) |
+| `components/World.tsx` | `Dock` (a system in the world, with a scan line while it runs) and `PortalCard` (NOT ORDERED / ORDERED) |
 | `components/MiniWindow.tsx` | A context window with fixed-height slices, including the two new slice kinds |
-| `components/Loop.tsx` | `Ring`, `Runner`, `StateCard`, `Struck`, `Fence` and `Sign` |
+| `components/Loop.tsx` | `Ring`, `Runner`, `StateCard`, `Struck`, `Fence` and `Sign` (which can hang left or right of its anchor) |
 | `centering.ts` | The centring track: empty, because every layout is designed around screen centre (see below) |
 | `scenes/*.tsx` | One file per scene. Scene 5's rails and Scene 6's harness frame are drawn in their scene files |
 | `audio.tsx` | Voiceover slots and the SFX cue sheet |
@@ -69,7 +69,7 @@ Type: Inter, as before. 800 for headlines, 700 for labels, 500 for ticket, recei
 All three earlier lesson reviews found text too small to read, and the lesson 3 review also found too many objects on screen at once. A first build of this lesson was rated 60% for spacing, alignment, focus and on-screen text, so every scene was rebuilt to these rules. They are written into `layout.ts`:
 
 - **Symmetric about screen centre.** Every composition is mirrored about x = 960, so it stays centred without a centring track. Rows of areas are laid out with `centredRow` (`shared/lib/row.ts`) and a uniform `ROW_GAP` of 100 px. Paired elements sit the same distance either side of the centre line:
-  - the cube and the docks either side of the wall (Scene 2);
+  - the model side and the world side of the wall (Scene 2): the docks are wider than the tool list, so their outer edge mirrors the tool list's (x = 190 and 1730) rather than their centre mirroring the cube's;
   - PICK A STEP and SEE THE RESULT either side of the ring (Scene 4);
   - DONE and ASK FOR HELP either side of the top station (Scene 4);
   - the four job modules in the harness (Scene 6);
@@ -77,7 +77,9 @@ All three earlier lesson reviews found text too small to read, and the lesson 3 
   - the three subagent columns (Scene 8);
   - the two answer cards (Scene 9).
 - **One content band.** Content sits between y = 180 and y = 880. Each scene's takeaway caption sits at `CAPTION_Y` (y = 950), the same place every time.
-- **Shared grids.** Elements that compare line up on the same grid. In Scene 5 the workflow's stations and the agent's path share the same three columns (x = 560, 960 and 1360). In Scene 2 the cube, the ticket, the gate and the hotel-search dock share one horizontal axis.
+- **Captions match lessons 1–3.** A takeaway is a spaced uppercase caption (`Note`: 26 px / 700, 0.16em letter-spacing, white), and a caveat is the series' rounded caveat pill (`Caveat`: 26 px / 500, white 7% fill, 35% white border). A takeaway that lands late in a scene holds through the cut and fades in the next scene, so it gets a full reading window.
+- **Shared grids.** Elements that compare line up on the same grid. In Scene 5 the workflow's stations and the agent's path share the same three columns (x = 560, 960 and 1360). In Scene 2 the cube, the ticket, the gate and the supplier-search dock share one horizontal axis.
+- **No text crosses an outline.** A ticket or receipt that passes through the gate does so as a glyph, a status that changes swaps out one label before the next appears, and labels that a moving piece would cover fade first.
 - **No informative text under 24 px, and no scaled-down text.** Body text is 24 px; labels and captions are 26–28 px. A ticket or receipt that has to travel small becomes a text-free glyph (`TicketGlyph`, `ReceiptGlyph`) instead of a shrunken card.
 - **Minimal text, removed once it has done its job:**
   - the prompt bar leaves once the answer is written (Scene 1);
@@ -120,7 +122,7 @@ This lesson adds:
 
   | Piece | Look |
   |---|---|
-  | `ToolTicket` | 280–300 wide, charcoal fill, cyan outline, perforated left edge. Header **TOOL REQUEST** 24 px / 700, tool name 28 px / 700 in cyan, and at most two `key: value` inputs at 24 px / 500. Always shown at full size |
+  | `ToolTicket` | 300–320 wide, charcoal fill, cyan outline, perforated left edge. Header **TOOL REQUEST** 24 px / 700, tool name 28 px / 700 in cyan, and at most two `key: value` inputs at 24 px / 500. Always shown at full size |
   | `ToolReceipt` | 300 wide, cyan at 12% fill, zigzag bottom edge, a thin barcode strip down the left. Header **RESULT** 24 px / 700, rows at 24 px / 500. Always shown at full size |
   | `TicketGlyph` / `ReceiptGlyph` | The same papers with no text, about 60 × 44. Used whenever a ticket or receipt travels small, and in red in Scene 9 |
 
@@ -137,45 +139,47 @@ This lesson adds:
 
 ## Running example
 
-The Canberra trip continues. In lesson 3 the viewer asked about the hotel allowance and the app remembered that they prefer hotels near Parliament House. Now they ask the AI to **book** the hotel. A model can describe a booking but can't make one, so the task needs tools.
+The flow-sensor order from lesson 3 continues. The viewer works at a generic medical device company and needs **500 flow sensors by June**. In lesson 3 they asked about the supplier policy (`supplier-policy-2025.pdf`: §3.1 "All orders go through the purchasing portal.", §4.2 "Lead time: up to 30 days for critical parts.") and the supplier quotes (`supplier-quotes.md`: Northfield Sensors 25 days, Brookway Parts 29 days, Apex Precision 40 days), and the app remembered that they prefer ISO 13485 certified suppliers. Now they ask the AI to **place the order**. A model can describe placing a purchase order but can't place one, so the task needs tools. The examples stay non-clinical: no patients, diagnoses or results.
 
 | Item | Text |
 |---|---|
-| Request | "Book my hotel for the Canberra trip." |
-| Goal (Scene 4's state card) | "Book a hotel within policy" |
-| Dates | 12–17 March (5 nights) |
+| Request | "Order 500 flow sensors by June." |
+| The model's description (Scene 1) | "I'd order 500 from Northfield Sensors on the purchasing portal." |
+| Goal (Scene 4's state card) | "Order sensors within policy" |
+| Order (portal card) | "500 flow sensors · by June", **NOT ORDERED**, then **ORDERED** ✓ PO-20417 |
+| Confirmation (Scene 7) | "Place order? £9,750" (500 × £19.50) with **APPROVE** |
 
 The agent has four tools, which reach three systems:
 
 | Tool | System (dock) | Example input | Example result |
 |---|---|---|---|
-| `search_hotels` | HOTEL SEARCH | city: Canberra · dates: 12–17 Mar | Parkside · $235 / Capital Tower · $289 |
-| `read_policy` | READ FILE | (glyph only on screen) | "$250 limit" (Scene 5) |
-| `check_availability` | TRAVEL PORTAL | (named on a chip in Scene 4) | "Parkside is free" |
-| `book_hotel` | TRAVEL PORTAL | (name only; the price is on the confirmation card) | BOOKED · ref PK-0412 |
+| `search_suppliers` | SUPPLIER SEARCH | part: flow sensor · qty: 500 | Northfield · 25 days / Apex · 40 days |
+| `read_policy` | READ FILE | (glyph only on screen) | "Lead-time limit: 30 days" (§4.2), so Apex is struck out |
+| `check_stock` | PURCHASING PORTAL | (named on a chip in Scene 4) | "Northfield: 500 in stock" |
+| `place_order` | PURCHASING PORTAL | (name only; the price is on the confirmation card) | ORDERED · PO-20417 |
 
-Two tools reaching one system (the travel portal) quietly sets up the next lesson, where one integration exposes several tools. The delegation scene adds three subtasks: **FLIGHTS**, **TRANSFER** and **EXPENSES**.
+Apex Precision, the supplier over the 30-day limit in lesson 3, is the option the agent rejects. Two tools reaching one system (the purchasing portal, which §3.1 says every order goes through) quietly sets up the next lesson, where one integration exposes several tools. The delegation scene splits "PREPARE THE ORDER" into three subtasks, **QUOTES**, **QUALITY CHECK** and **PAPERWORK**, which combine into an **ORDER PACK**.
 
-As in lesson 3, all amounts, section numbers, hotel names and booking references are invented, and the video never presents them as real policy, real businesses or real bookings.
+As in lesson 3, all supplier names, prices, lead times, section numbers and PO references are invented, and the video never presents them as real policy, real businesses or real orders.
 
 ## Scene 1: Words Aren't Actions (frames 0–336)
 
 **Teaches:** a model on its own only produces text. Describing an action is not doing it.
 
-Layout: one centred row (`centredRow`, 100 px gaps) of the cube (size 80), the response card (520 wide) and the travel portal card (380 wide), all on y = 560. The prompt bar sits above the row at (960, 290).
+Layout: one centred row (`centredRow`, 100 px gaps) of the cube (size 80), the response card (520 wide) and the purchasing portal card (460 wide), all on y = 560. The prompt bar sits above the row at (960, 290).
 
 | Local frame | Event |
 |---|---|
 | 0–18 | "WORDS AREN'T ACTIONS" springs from 0.86 to 1.0 scale at dead centre |
 | 14–44 | Title glides to the top-left corner |
 | 20–44 | The cube springs in |
-| 24–50 | The prompt bar drops in and types "Book my hotel for the Canberra trip." |
-| 52–140 | On "writes text", the cube glows and the response card types (30 px, no label): "I'd book Parkside Hotel for 12–17 March on the travel portal." |
-| 137 | On "hotel", the **TRAVEL PORTAL** card fades in: "Parkside Hotel · 12–17 Mar" and **NOT BOOKED** |
+| 24–50 | The prompt bar drops in and types "Order 500 flow sensors by June." |
+| 52–140 | On "writes text", the cube glows and the response card types (30 px, no label): "I'd order 500 from Northfield Sensors on the purchasing portal." |
+| 137 | On "order" (in "placing an order"), the **PURCHASING PORTAL** card fades in: "500 flow sensors · by June" and **NOT ORDERED** |
 | 150–168 | The prompt bar fades out: it has done its job |
-| 159–190 | On "can't book one", the response's words drift towards the portal and fade before reaching it. The status chip pulses once but stays **NOT BOOKED** |
-| 184 | Caption at y = 950: "DESCRIBING ISN'T DOING" |
-| 200–222 | On "An agentic system", the response card and caption fade |
+| 159–190 | On "can't place one", the response's words drift towards the portal and vanish at the response card's own edge (the card clips them), so they never reach the portal. The status chip pulses once but stays **NOT ORDERED** |
+| 184 | Takeaway caption at y = 950: "DESCRIBING ISN'T DOING". It holds until 250 (2.2 s) |
+| 200–222 | On "An agentic system", the response card fades |
 | 222–255 | A dashed cyan loop draws between the cube and the portal, mirrored about the row: out along a top arc, back along a bottom arc |
 | 255 | On "act", a ticket glyph rides the top arc to the portal and a receipt glyph rides the bottom arc back |
 | 266 / 277 / 288 | On "step by step", three numbered step dots (26 px) pop along the top arc |
@@ -185,23 +189,24 @@ Layout: one centred row (`centredRow`, 100 px gaps) of the cube (size 80), the r
 
 **Teaches:** the model writes a structured request. The app checks it and runs the tool, and the model never reaches the tool itself.
 
-Layout: the wall at x = 960 (y 200–880), with a 260 × 340 gate panel centred at y = 560. The cube (370 → 360, size 70) and the docks (x = 1560, 380 × 120) mirror each other about the wall. The cube, the ticket (at x = 645), the gate and the **HOTEL SEARCH** dock share the y = 560 axis. The **TOOLS** list (340 wide) sits above the cube at y = 285. **READ FILE** and **TRAVEL PORTAL** sit 160 px above and below **HOTEL SEARCH**.
+Layout: the wall at x = 960 (y 200–880), with a 260 × 340 gate panel centred at y = 560. The cube (370 → 360, size 70) and the tool list sit left of the wall; the docks (x = 1500, 460 × 120, wide enough for PURCHASING PORTAL at 26 px) sit right of it, their outer edge (x = 1730) mirroring the tool list's (x = 190). The cube, the ticket (at x = 645), the gate and the **SUPPLIER SEARCH** dock share the y = 560 axis. The **TOOLS** list (340 wide) sits above the cube at y = 285. **READ FILE** and **PURCHASING PORTAL** sit 160 px above and below **SUPPLIER SEARCH**. The wall has a gap behind the gate's "THE APP" label, so the dashed line never runs through it.
 
 | Local frame | Event |
 |---|---|
 | 0–16 | Corner title becomes "TOOL CALLING" |
-| 0–30 | The cube glides into place. The portal card shrinks towards its dock and fades out, and the dock fades in after it, so the two never overlap |
+| 0–30 | The cube glides into place. The portal card shrinks towards its dock and has faded out by frame 18; the dock fades in from 20, so the two never overlap |
 | 8–40 | The wall draws top to bottom, with its gate panel |
 | 19 | On "app", the gear + "THE APP" on top of the gate; badge: **APP ACTION** |
-| 30–60 | On "lists the tools", the **READ FILE** and **HOTEL SEARCH** docks fade in, and the **TOOLS** list fades in: `read_policy` · `search_hotels` · `check_availability` · `book_hotel` |
-| 93–126 | On "replies with a request", the cube glows and a ticket (280 wide) prints beside it |
-| 150 | On "tool name", the ticket shows `search_hotels`, and the same name lights cyan in the tools list |
-| 181–187 | On "inputs", two inputs pop in: "city: Canberra" · "dates: 12–17 Mar" |
-| 200–220 | The ticket slides to the gate and becomes a ticket glyph inside it. The tools list dims to 25% (200–220) |
+| 30–60 | On "lists the tools", the **READ FILE** and **SUPPLIER SEARCH** docks fade in, and the **TOOLS** list fades in: `read_policy` · `search_suppliers` · `check_stock` · `place_order` |
+| 93–126 | On "replies with a request", the cube glows and a ticket (320 wide, so `search_suppliers` fits at 28 px) prints beside it |
+| 150 | On "tool name", the ticket shows `search_suppliers`, and the same name lights cyan in the tools list |
+| 181–187 | On "inputs", two inputs pop in: "part: flow sensor" · "qty: 500" |
+| 200–220 | The ticket turns into a ticket glyph where it stands (200–207), clear of the gate, and the glyph slides into the gate (207–220), so no ticket text crosses the gate's outline. The tools list dims to 25% (200–220) |
 | 222–238 | On "checks it", three check lights pop down the gate panel, 8 frames apart: **TOOL EXISTS** ✓ · **INPUTS VALID** ✓ · **ALLOWED** ✓ |
-| 255–275 | On "runs the tool", the glyph runs along a dashed line to the **HOTEL SEARCH** dock, which glows while its scan line sweeps |
-| 277–295 | On "tool itself", a dashed line from the cube stops at the wall (y = 820) with a red ✕. Caption: "THE MODEL ASKS. THE APP RUNS." |
-| 296–312 | The check lights, ✕ and caption fade. The wall, gate and docks carry into Scene 3 |
+| 255 | On "runs the tool", the takeaway caption fades in: "THE MODEL ASKS. THE APP RUNS." It holds through the cut and fades in Scene 3 (2.7 s in all) |
+| 255–275 | The glyph runs along a dashed line to the **SUPPLIER SEARCH** dock, which glows while its scan line sweeps |
+| 277–295 | On "tool itself", a dashed line runs down from the cube and across towards the tools, and stops at the wall (y = 820) with a red ✕ |
+| 296–312 | The check lights and ✕ fade. The wall, gate, docks and caption carry into Scene 3 |
 
 ## Scene 3: Back Into Context (frames 648–948)
 
@@ -211,14 +216,17 @@ Layout: the cube rises to (960, 200), size 46. Below it, film frames (280 × 420
 
 | Local frame | Event |
 |---|---|
-| 0–24 | On "The result", the hotel search prints a receipt at full size: "Parkside · $235" · "Capital Tower · $289". It comes back through the gate to the model side |
-| 20–50 | The wall, gate and docks fade. The cube rises to the top centre and the receipt waits beside it |
-| 30–60 | **CALL 1** draws at centre with its three slices labelled in-slice: **INSTRUCTIONS**, **TOOLS**, **YOUR MESSAGE** |
-| 57–90 | On "into the context", **CALL 2** joins the row and the strip re-centres. CALL 1's slices copy across (unlabelled), then a ticket glyph drops from the cube into a **REQUEST** slice and the receipt lands as a **RESULT** slice |
-| 89–101 | CALL 1's slice labels fade: CALL 2's new slices now carry the labels |
+| 0–18 | On "The result", a receipt glyph leaves the supplier search, comes back through the gate along the y = 560 axis (as in Scene 2, only glyphs cross the gate), then rises to (670, 350) |
+| 14–26 | The receipt prints at full size at (670, 350), above and left of the gate, clear of its outline and ahead of the cube's path: **RESULT** "Northfield · 25 days" · "Apex · 40 days" |
+| 14–26 | Scene 2's caption "THE MODEL ASKS. THE APP RUNS." fades |
+| 20–34 | The wall, gate and docks fade, and are gone before the film strip draws in their place. The cube rises to the top centre (20–50) |
+| 26–44 | The receipt moves up to wait beside the cube, ahead of the cube's own path |
+| 34–60 | **CALL 1** draws at centre with its three slices labelled in-slice: **INSTRUCTIONS**, **TOOLS**, **YOUR MESSAGE** |
+| 59–65 | CALL 1's slice labels fade as CALL 2's copies start to slide out from on top of them |
+| 57–90 | On "into the context", **CALL 2** joins the row and the strip re-centres. CALL 1's slices copy across (unlabelled), then a ticket glyph drops from the cube into a **REQUEST** slice and the receipt lands as a **RESULT** slice; both are labelled |
 | 96–129 | On "the model is called again", a dashed line runs from CALL 2 to the cube and the cube glows. A ticket glyph leaves to the right; a receipt glyph comes back and waits |
-| 156–190 | On "whole context rebuilt", **CALL 3** joins and the strip re-centres. CALL 2's slices copy across, and the new request and result land, labelled. CALL 2's labels fade |
-| 186 | Caption: "REBUILT FOR EVERY CALL" |
+| 156–190 | On "whole context rebuilt", **CALL 3** joins and the strip re-centres. CALL 2's labels fade first (158–164), then its slices copy across, and the new request and result land, labelled |
+| 186 | Takeaway caption: "REBUILT FOR EVERY CALL" |
 | 195 | Exit chips fade in, dashed, either side of the cube: **ANSWER** (left) and **ANOTHER TOOL** (right) |
 | 217 | On "answers", **ANSWER** lights cyan |
 | 239–265 | On "requests another tool", **ANOTHER TOOL** lights and a dashed **CALL 4?** frame joins the row, which re-centres to four frames |
@@ -233,13 +241,13 @@ Layout: a ring (radius 270) centred at (960, 570) with four stations. The cube (
 | Local frame | Event |
 |---|---|
 | 0–24 | Corner title "THE AGENT LOOP". The cube glides from the top centre to the right station |
-| 8–60 | On "An agent is a decision loop", the ring draws clockwise and each station pops as the line passes it |
-| 30–50 | The state card fades in: **GOAL** "Book a hotel within policy" |
-| 48–80 | Two fast recap laps (dim runner) replay Scenes 2 and 3. Each adds a row: "Parkside, Capital Tower" ✓, then "Limit: $250 a night" ✓. The badge counts **STEP 2**, then **STEP 3** |
-| 82–137 | On "check the goal and current state", the runner slows at the top and the card flashes. On "state", "Capital Tower" strikes through in red |
-| 148–181 | On "pick a next step", the runner reaches the cube, which glows; a chip names the step, `check_availability`, below **PICK A STEP** |
+| 8–60 | On "An agent is a decision loop", the ring draws clockwise and each station pops as the line passes it. The **GOAL & STATE** label waits until the cube has glided past it (16–24) |
+| 30–50 | The state card fades in: **GOAL** "Order sensors within policy" |
+| 48–80 | Two fast recap laps (dim runner) replay Scenes 2 and 3. Each adds a row: "Northfield, Apex" ✓, then "Lead-time limit: 30 days" ✓. The badge counts **STEP 2**, then **STEP 3** |
+| 82–137 | On "check the goal and current state", the runner slows at the top and the card flashes. On "state", "Apex" (40 days, over the limit) strikes through in red |
+| 148–181 | On "pick a next step", the runner reaches the cube, which glows; a chip names the step, `check_stock`, below **PICK A STEP** |
 | 181–192 | The chip fades and a ticket glyph rides the ring down to the gear, which turns |
-| 192–225 | On "see the result", a receipt glyph pops at the left station and flies into the card. On "repeat" it becomes the row "Parkside is free" ✓; the badge ticks to **STEP 4** |
+| 192–225 | On "see the result", a receipt glyph pops at the left station and flies into the card. On "repeat" it becomes the row "Northfield: 500 in stock" ✓; the badge ticks to **STEP 4** |
 | 244–266 | On "until it's done", a ramp draws up and right from the top station to **DONE**, which lights cyan |
 | 280–299 | On "needs help", the mirror ramp draws up and left to **ASK FOR HELP** (with the person icon), which lights white |
 | 300–324 | Everything except the cube fades |
@@ -253,13 +261,13 @@ Layout: two lanes on one centred grid. The rails run from x = 360 to 1560, and b
 | Local frame | Event |
 |---|---|
 | 0–14 | Corner title "WORKFLOW VS AGENT". The cube fades out |
-| 19–74 | On "A workflow follows steps designed in advance", the whole route draws as dashed purple blueprint lines, then inks in as rails, before anything moves. Stops: **SEARCH**, **CHECK LIMIT**, **BOOK CHEAPEST**, plus an unlabelled pre-set side route. Tag: "route set in advance" |
+| 19–74 | On "A workflow follows steps designed in advance", the whole route draws as dashed purple blueprint lines, then inks in as rails, before anything moves. Stops: **SEARCH**, **CHECK LIMIT**, **ORDER CHEAPEST**, plus an unlabelled pre-set side route. Tag: "route set in advance" |
 | 74–96 | A cyan shuttle runs the rails at constant speed |
 | 93–110 | On "An agent", the agent lane fades in: three nodes on the same columns, plus two dim alternative nodes between them. Tag: "next step depends on results" |
-| 104–181 | On "picks each step from what it finds", each node lights only after the last result. Its label appears under it, and the path draws to it. One result chip at a time shows above the latest node: "Capital Tower $289?", then "$250 limit", then "Parkside is free". The path runs **SEARCH** → **READ POLICY** → **CHECK AVAILABILITY**; the alternatives stay dim |
-| 200–230 | On "Many systems", the agent lane fades. The workflow glides to y = 540 and relabels: **TRIP REQUEST** · **FIND A HOTEL** · **SEND ITINERARY** |
+| 104–181 | On "picks each step from what it finds", each node lights only after the last result. Its label appears under it, and the path draws to it. One result chip at a time shows under the latest node's label (y = 860), clear of the dashed routes to the dim alternatives above the lane: "Apex: 40 days?", then "30-day limit", then "Northfield in stock". The path runs **SEARCH** → **READ POLICY** → **CHECK STOCK**; the alternatives stay dim |
+| 200–230 | On "Many systems", the agent lane fades. The workflow glides to y = 540 and relabels: **PART REQUEST** · **FIND A SUPPLIER** · **SEND FOR SIGN-OFF** |
 | 244–270 | On "bounded agent", the middle stop opens into a small ring (radius 90) inside a dashed purple fence, labelled **BOUNDED AGENT** |
-| 266–304 | On "inside a workflow", the shuttle runs into the ring, does two laps, and continues to **SEND ITINERARY** |
+| 266–304 | On "inside a workflow", the shuttle runs into the ring, does two laps, and continues to **SEND FOR SIGN-OFF** |
 
 ## Scene 6: The Harness (frames 1584–1932)
 
@@ -271,15 +279,15 @@ Layout: the harness frame (1400 × 660) is centred at (960, 540) with a tab on i
 |---|---|
 | 0–40 | On "Both run", Scene 5's rail and bounded loop shrink into an emblem around the cube, keeping the same centre |
 | 44 | On "harness", the purple gear pops in above the cube, labelled **THE APP** |
-| 60–100 | The gear opens out into the harness frame; its label fades early. On "software around the model", the tab reads **THE APP**, then crossfades to **HARNESS** |
+| 60–100 | The gear opens out into the harness frame; its label fades early. The frame is drawn beneath the emblem, so its edge sweeps behind the ring, not across it. On "software around the model", the tab reads **THE APP**, which fades out (82–90) before **HARNESS** fades in (92–100), so the two never overlap |
 | 145 | On "builds each request": **BUILDS EACH REQUEST** (icon: a window filling slice by slice) |
 | 178 | On "keeps state": **KEEPS STATE** (icon: a card ticking its rows) |
 | 200 | On "runs tools": **RUNS TOOLS** (icon: a ticket passing a gate); a port opens in the frame's right edge |
 | 244 | On "its own access", a key drops onto **RUNS TOOLS** and a second line reads **WITH ITS OWN ACCESS** (purple) |
 | 266 | On "enforces limits": **ENFORCES LIMITS** (icon: a gauge with a red zone) |
-| 299–331 | On "records what happened", the trace tape scrolls in: **RECORDS** · "12:01 search_hotels ✓ · 12:01 read_policy ✓ · 12:02 check_availability ✓" |
-| 318 | Caption at y = 950: 'Many products call all of this "the agent".' |
-| 330–348 | Everything except the cube fades |
+| 280 | After the last module, the caveat pill at y = 950: 'Many products call all of this "the agent".' It holds through the cut and fades in Scene 7 (2.9 s in all) |
+| 299–331 | On "records what happened", the trace tape (starting at x = 460, clear of its label) scrolls in: **RECORDS** · "12:01 search_suppliers ✓ · 12:01 read_policy ✓ · 12:02 check_stock ✓" |
+| 330–348 | Everything except the cube and the caveat fades |
 
 ## Scene 7: Boundaries (frames 1932–2268)
 
@@ -287,26 +295,27 @@ Layout: the harness frame (1400 × 660) is centred at (960, 540) with a tab on i
 
 Layout, in two phases:
 
-1. **Signs** (0–200): the fenced loop (radius 150, fence 470 × 470) at the centre of the screen, with a sign on each corner.
-2. **Gate** (from 186): the fenced loop slides left and shrinks to 0.62. The painted line, then the gate, sit on the centre line (x = 960). The **TRAVEL PORTAL** card mirrors the fence at x = 960 + 520.
+1. **Signs** (0–200): the fenced loop (radius 150, fence 470 × 470) at the centre of the screen, with a sign on each corner. Each sign overlaps its corner by 60 px and hangs outward (left signs to the left, right signs to the right), so the two long bottom signs never meet in the middle.
+2. **Gate** (from 186): the fenced loop slides left and shrinks to 0.62. The painted line, then the gate, sit on the centre line (x = 960). The **PURCHASING PORTAL** card (460 wide) mirrors the fence at x = 960 + 560.
 
 Badge: **AGENT LOOP · STEP 5 / 10**.
 
 | Local frame | Event |
 |---|---|
-| 0–20 | Corner title "BOUNDARIES". The loop draws at the centre and the cube takes its right station |
+| 0–20 | Corner title "BOUNDARIES". The loop draws at the centre and the cube takes its right station. Scene 6's caveat pill fades (6–20) |
 | 30–50 | On "boundaries", the fence draws around the loop |
-| 60 / 93 / 126 / 170 | One sign per boundary pops on the fence's corners, on its word: **4 TOOLS ONLY** · **MAX 10 STEPS** · **CONFIRM BEFORE BOOKING** · **DONE = BOOKED + REPORTED** |
+| 60 / 93 / 126 / 170 | One sign per boundary pops on the fence's corners, on its word: **4 TOOLS ONLY** · **MAX 10 STEPS** · **CONFIRM BEFORE ORDERING** · **DONE = ORDERED + REPORTED** |
 | 186–198 | The signs fade; the fenced loop slides left and shrinks; the portal fades in on the right |
-| 202–216 | The cube prints a ticket, `book_hotel` (300 wide, no inputs), outside the fence |
-| 204–216 | On "Instructions alone", a dashed purple line is painted on the centre line, with a speech bubble above it: "Please ask before booking." |
-| 218–238 | On "won't hold them", the ticket (ghosted) slides over the painted line without slowing. The line turns red and **NOTHING STOPS IT** appears below. The ghost stops short of the portal |
+| 202–216 | The cube prints a ticket, `place_order` (300 wide, no inputs), outside the fence |
+| 204–216 | On "Instructions alone", a dashed purple line is painted on the centre line, with a speech bubble above it: "Please ask before ordering." |
+| 218–238 | On "won't hold them", the ticket (ghosted) slides over the painted line without slowing. The line turns red and **NOTHING STOPS IT** appears below; it holds until the gate replaces the paint (1.2 s). The ghost stops 60 px short of the portal card |
 | 238–252 | Everything rewinds to the line |
+| 248–256 | The painted line and its bubble clear, before the gate's **HARNESS** label rises into the same space |
 | 254–270 | On "The harness enforces them", the paint becomes a solid purple gate with the gear on top (**HARNESS**). The ticket bumps into it and stops. Badge: **WAITING FOR YOU** |
-| 275–290 | A confirmation card drops above the gate: the person icon, "Book it? $1,175" and **APPROVE** |
-| 290–308 | **APPROVE** presses (✓), the gate lowers and the ticket passes to the portal |
-| 306–320 | The portal flips from **NOT BOOKED** to **BOOKED** ✓ with "ref PK-0412", which pays off Scene 1 |
-| 320–336 | Everything except the cube fades |
+| 275–290 | A confirmation card (600 wide) drops above the gate: the person icon, "Place order? £9,750" and **APPROVE** |
+| 290–302 | **APPROVE** presses (✓), the gate lowers and the ticket passes towards the portal, fading before it reaches the card |
+| 300–314 | The portal flips from **NOT ORDERED** to **ORDERED** ✓ with "PO-20417", which pays off Scene 1. **NOT ORDERED** clears before **ORDERED** appears, so the two never overlap |
+| 324–336 | Everything except the cube fades |
 
 ## Scene 8: Delegation (frames 2268–2580)
 
@@ -316,15 +325,15 @@ Layout: the coordinating cube is at the top centre (960, 210). Three mirrored co
 
 | Local frame | Event |
 |---|---|
-| 0–20 | Corner title "DELEGATION". The cube rises to the top centre; a chip reads "PREPARE THE TRIP" |
-| 52–80 | On "hand subtasks", the chip splits into three that slide to their columns: **FLIGHTS** · **TRANSFER** · **EXPENSES** |
+| 0–20 | Corner title "DELEGATION". The cube rises to the top centre; a chip reads "PREPARE THE ORDER" |
+| 52–80 | On "hand subtasks", the chip splits into three that slide to their columns: **QUOTES** · **QUALITY CHECK** · **PAPERWORK**. The parent chip clears at once, and the three only fade in once they have moved apart, so no two chips overlap |
 | 85–100 | On "subagents", a small cube pops into each column, with a bracket and **SUBAGENTS** under the row |
 | 129–150 | On "its own context", each gets a small, nearly empty context window |
 | 171–197 | On "isolate", **SUBAGENTS** fades and dashed partitions drop between the columns |
 | 203–250 | On "speed up", all three glow with a runner circling each, and **IN PARALLEL** replaces the label. A receipt glyph with a ✓ rises under each column |
 | 252–290 | On "cost", the **COST** meter fills from 30% to 90% |
-| 270–300 | On "coordination", the subagents dim, purple threads draw from each result up to the coordinating cube, and they merge into **TRIP PLAN** |
-| 300–312 | Everything fades |
+| 270–300 | On "coordination", the subagents dim to 20% and their subtask chips clear (the threads run up through them), purple threads draw from each result up to the coordinating cube, and they merge into **ORDER PACK** |
+| 300–312 | Everything fades except the coordinating cube and **ORDER PACK**, which carry into Scene 9 and fade there (1.1 s in all) |
 
 ## Scene 9: When Tools Fail (frames 2580–3075)
 
@@ -334,13 +343,14 @@ Layout: a centred column of five failures (rows at y = 320–760, 110 px apart).
 
 | Local frame | Event |
 |---|---|
-| 0–16 | Corner title "WHEN TOOLS FAIL". The coordinating cube fades |
-| 60 / 82 / 104 / 126 / 148 | One row per word: **WRONG TOOL** (ticket) · **WRONG INPUT** (ticket) · **CHANGED STATE** (receipt) · **DUPLICATE ACTION** (two receipts) · **MISREAD RESULT** (receipt) |
-| 178–200 | On "A good agent", every row except **DUPLICATE ACTION** fades; that row glides to the top centre (y = 260). The two cards fade in: a dashed ghost card, "All done! ✓" (left), and a cyan report card (right) |
-| 211–240 | On "reports what happened", the report types: "Booked twice. One needs cancelling." **REPORTED** ✓ pops under it |
+| 0–18 | Corner title "WHEN TOOLS FAIL". The coordinating cube and Scene 8's **ORDER PACK** fade (4–18) |
+| 16–28 | On "Tool calls", the five calls appear as plain cyan glyphs in the column (tickets and receipts, 3 frames apart, at 70%), so the opening isn't an empty frame |
+| 60 / 82 / 104 / 126 / 148 | On "can fail", one row per word: each glyph turns red and its label pops: **WRONG TOOL** (ticket) · **WRONG INPUT** (ticket) · **CHANGED STATE** (receipt) · **DUPLICATE ACTION** (two receipts) · **MISREAD RESULT** (receipt) |
+| 178–204 | On "A good agent", every row except **DUPLICATE ACTION** fades first (178–188); then that row glides to the top centre (y = 260, 186–204); then the two cards fade in (196–212): a dashed ghost card, "All done! ✓" (left), and a cyan report card (right). Nothing moves through text that is still on screen |
+| 211–240 | On "reports what happened", the report types: "Ordered twice. One needs cancelling." **REPORTED** ✓ pops under it |
 | 252 | On "instead of hiding it", the ghost card turns red with a ✕, and **HIDES THE FAILURE** pops under it |
 | 300–318 | Finale: everything in the scene fades out completely |
-| 322–346 | On the empty background, pinned to true screen centre, a diagram builds: the cube, the purple gate with the gear (**HARNESS**), and the **TRAVEL PORTAL** dock. A ticket glyph travels out along the top arrow and a receipt glyph back along the bottom one, on a loop |
+| 322–346 | On the empty background, pinned to true screen centre, a diagram builds: the cube (x = 520), the purple gate with the gear (**HARNESS**), and the **PURCHASING PORTAL** dock (x = 1250, 460 wide), centred as a group. A ticket glyph travels out along the top arrow and a receipt glyph back along the bottom one, on a loop |
 | 360 | "THE MODEL PROPOSES. THE HARNESS ACTS." (56 px, one line) springs in at y = 760, then scales from 1 to 1.04 |
 | 405–495 | The whole frame fades to black over 3 s |
 
@@ -348,7 +358,7 @@ Layout: a centred column of five failures (rows at y = 320–760, 110 px apart).
 
 | # | File | Line | Words / scene length (estimated) |
 |---|---|---|---|
-| 1 | `01-words.wav` | "A model alone only writes text. It can describe booking a hotel, but can't book one. An agentic system lets it act, step by step." | 25 / 11.2 s |
+| 1 | `01-words.wav` | "A model alone only writes text. It can describe placing an order, but can't place one. An agentic system lets it act, step by step." | 25 / 11.2 s |
 | 2 | `02-tools.wav` | "The app lists the tools. The model replies with a request: a tool name and inputs. The app checks it, then runs the tool itself." | 25 / 10.4 s |
 | 3 | `03-context.wav` | "The result goes into the context, and the model is called again, with the whole context rebuilt, until it answers or requests another tool." | 24 / 10 s |
 | 4 | `04-loop.wav` | "An agent is a decision loop: check the goal and current state, pick a next step, see the result, repeat. Until it's done, or needs help." | 26 / 10.8 s |
@@ -362,7 +372,7 @@ Layout: a centred column of five failures (rows at y = 320–760, 110 px apart).
 
 The same lines with emotion tags, ready to paste:
 
-1. `[calm, matter-of-fact]` A model alone only writes text. `[slight emphasis]` It can describe booking a hotel… `[pause]` but can't book one. `[warmly, building]` An agentic system lets it act, step by step.
+1. `[calm, matter-of-fact]` A model alone only writes text. `[slight emphasis]` It can describe placing an order… `[pause]` but can't place one. `[warmly, building]` An agentic system lets it act, step by step.
 2. `[clear, explanatory]` The app lists the tools. `[methodical]` The model replies with a request: a tool name and inputs. `[firm]` The app checks it, then runs the tool itself.
 3. `[steady]` The result goes into the context, and the model is called again, `[emphasis]` with the whole context rebuilt, `[lightly]` until it answers or requests another tool.
 4. `[engaged]` An agent is a decision loop: `[rhythmic, listing]` check the goal and current state, pick a next step, see the result, repeat. `[pause]` `[thoughtful]` Until it's done… or needs help.
@@ -405,7 +415,7 @@ Scene 9's five failure rows are read as a quick list. If the take puts them clos
   | slice | The task splitting into subtasks |
   | tick-up | Step and model-call counters |
   | power-up | The gear opening into the harness |
-  | rating-ding | **BOOKED**, **APPROVE** and **REPORTED** |
+  | rating-ding | **ORDERED**, **APPROVE** and **REPORTED** |
   | error-buzzer | Red ✕s and **NOTHING STOPS IT** |
   | chime | The finale title |
   | synth-swell | The finale diagram |
@@ -419,7 +429,7 @@ Use `videos/practices.md` as usual. These points are the ones most likely to go 
 - **The model never crosses the wall or touches a tool.** It only ever produces tickets. Check every frame of Scenes 2, 3 and 7.
 - **The app or harness is the only thing that runs a tool, holds a key or writes to the portal.**
 - **The film strip reads as separate calls, not one growing tank.** Check that each frame's copy-across is visible.
-- **Scene 7's painted line says "could", not "will".** The ghost ticket crosses it, but no booking is ever shown without approval.
+- **Scene 7's painted line says "could", not "will".** The ghost ticket crosses it, but no order is ever shown without approval.
 - **Every red state has its correct counterpart on screen:** the dim notes in Scene 9 and the report card.
 - **The layout rules hold**: symmetric about the centre line, captions at y = 950, nothing under 24 px, and labels gone once they have done their job. Check the mid-transition frames of the film strip, the harness bloom and the Scene 7 phase change.
 
@@ -427,7 +437,7 @@ Use `videos/practices.md` as usual. These points are the ones most likely to go 
 
 These topics from §5 are left out to keep the video near 100 seconds. Most belong in the second agentic video:
 
-- **Integrations and MCP** (one connection exposing several tools, resources and prompt templates), **skills** (progressive disclosure, what a skill can't do), **permissions** (available versus allowed versus confirmed) and **capabilities** (the layered sum). These are the second agentic video. The two tools on one travel portal in this lesson set it up.
+- **Integrations and MCP** (one connection exposing several tools, resources and prompt templates), **skills** (progressive disclosure, what a skill can't do), **permissions** (available versus allowed versus confirmed) and **capabilities** (the layered sum). These are the second agentic video. The two tools on one purchasing portal in this lesson set it up.
 - **The same model seeming cautious in one harness and autonomous in another.** This fits the second video's capability scene, where harness behaviour is one layer.
 - **Client-side versus provider-side tools**, and web search versus web fetch: too fine-grained for this level.
 - **The tool category table** (search, files, commands, data, external services) and its operating-system analogues. The four example tools stand in for it.

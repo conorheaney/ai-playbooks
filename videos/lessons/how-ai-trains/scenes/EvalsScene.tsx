@@ -46,9 +46,11 @@ export const EvalsScene: React.FC = () => {
   const smooth = (start: number, duration = 15) => spring({frame: frame - start, fps, config: {damping: 200}, durationInFrames: duration});
   const pop = (start: number) => (frame >= start ? spring({frame: frame - start, fps, config: {damping: 10, stiffness: 180}}) : 0);
 
-  const pose = cubePose(frame, fps, dur, POSE);
-  // Fades quickly, so the cube's glide home (last 20 frames) doesn't pass over a lingering scorecard.
-  const content = interpolate(frame, [E.contentOut, E.contentOut + 8], [1, 0], clampOpts);
+  // The cube glides home in the last 14 frames, only once the scorecard has fully faded, so it never
+  // passes over the scorecard's text. The stamp still holds for about 1 s before the fade.
+  const HOME_FRAMES = 14;
+  const pose = cubePose(frame, fps, dur, POSE, {homeFrames: HOME_FRAMES});
+  const content = interpolate(frame, [dur - HOME_FRAMES - 6, dur - HOME_FRAMES], [1, 0], clampOpts);
   // The humans-in-the-loop badge arrives with the reviewers.
   const badge = interpolate(frame, [E.approve, E.approve + 10, dur - 12, dur], [0, 1, 1, 0], clampOpts);
   const secondRun = frame >= E.run2 - 6;
@@ -134,7 +136,7 @@ export const EvalsScene: React.FC = () => {
                 strokeWidth={3}
                 fill="none"
               />
-              <Caption x={790} y={712} text="BACK TO TRAINING" color={COLORS.purple} size={24} />
+              <Caption x={700} y={712} text="BACK TO TRAINING" color={COLORS.purple} size={24} />
               {loopT > 0 && loopT < 1 ? <circle cx={loopDot.x} cy={loopDot.y} r={12} fill={COLORS.purple} filter="url(#ev-glow)" /> : null}
             </g>
           ) : null}

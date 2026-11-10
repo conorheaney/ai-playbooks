@@ -40,6 +40,8 @@ export const GatePanel: React.FC<{opacity: number; frame: number; gear: number; 
         strokeWidth={3}
       />
       <circle cx={GATE.x} cy={GATE.y - GATE.h / 2} r={38} fill={COLORS.charcoal} opacity={gear} />
+      {/* A gap in the wall behind the label, so the dashed line never runs through its text. */}
+      <rect x={GATE.x - 84} y={GATE.y - GATE.h / 2 - 72} width={168} height={38} rx={8} fill={COLORS.charcoal} opacity={gear} />
       <GearMark x={GATE.x} y={GATE.y - GATE.h / 2} frame={frame} opacity={gear} label={label} labelAt="above" size={56} />
     </g>
   ) : null;

@@ -19,19 +19,20 @@ const AG_Y = 760;
 const MERGED_Y = 540;
 const HEADER_DY = -78;
 const LABEL_DY = 46;
+const RESULT_DY = 100; // result chips sit under the agent's node labels
 const TAG_DX = 220; // both lane tags start at the same x, clear of the longer header
-const STOPS_A = ['SEARCH', 'CHECK LIMIT', 'BOOK CHEAPEST'];
-const STOPS_B = ['TRIP REQUEST', 'FIND A HOTEL', 'SEND ITINERARY'];
+const STOPS_A = ['SEARCH', 'CHECK LIMIT', 'ORDER CHEAPEST'];
+const STOPS_B = ['PART REQUEST', 'FIND A SUPPLIER', 'SEND FOR SIGN-OFF'];
 const BRANCH = {x: 1160, y: WF_Y - 80}; // a pre-set side route, drawn with the rest of the plan
 export const BOUNDED = {x: CX, y: MERGED_Y, r: 90};
 
 // The agent's path runs through the same three columns; the dim nodes are routes it could have taken.
-const PATH_LABELS = ['SEARCH', 'READ POLICY', 'CHECK AVAILABILITY'];
+const PATH_LABELS = ['SEARCH', 'READ POLICY', 'CHECK STOCK'];
 const ALTERNATIVES = [
   {x: 760, y: AG_Y - 70},
   {x: 1160, y: AG_Y - 70},
 ];
-const RESULTS = ['Capital Tower $289?', '$250 limit', 'Parkside is free'];
+const RESULTS = ['Apex: 40 days?', '30-day limit', 'Northfield in stock'];
 
 const Shuttle: React.FC<{x: number; y: number; opacity?: number}> = ({x, y, opacity = 1}) =>
   opacity > 0.001 ? (
@@ -160,7 +161,8 @@ export const WorkflowScene: React.FC = () => {
           <Txt key={x} x={x} y={AG_Y + LABEL_DY} text={PATH_LABELS[k]} size={24} opacity={Math.min(1, nodeLit(k))} />
         ))}
         {RESULTS.map((r, k) => (
-          <Chip key={r} x={COLS[k]} y={AG_Y - 60} text={r} size={24} weight={500} color={COLORS.cyan} fill={rgba(COLORS.cyan, 0.12)} opacity={resultOn(k)} />
+          // Under the node's label, clear of the dashed routes to the dim alternatives above the lane.
+          <Chip key={r} x={COLS[k]} y={AG_Y + RESULT_DY} text={r} size={24} weight={500} color={COLORS.cyan} fill={rgba(COLORS.cyan, 0.12)} opacity={resultOn(k)} />
         ))}
       </div>
 

@@ -212,8 +212,8 @@ export const Badge: React.FC<{kind: BadgeKind; opacity: number; frame: number; s
   );
 };
 
-// Sentence-case caption under the main content.
-export const Note: React.FC<{x: number; y: number; text: string; opacity: number; color?: string; size?: number}> = ({x, y, text, opacity, color = rgba(COLORS.white, 0.9), size = 28}) =>
+// Takeaway caption under the main content: spaced uppercase, as in lessons 1–3 (shared Caption, 26 px / 0.16em).
+export const Note: React.FC<{x: number; y: number; text: string; opacity: number; color?: string; size?: number}> = ({x, y, text, opacity, color = COLORS.white, size = 26}) =>
   opacity > 0.001 ? (
     <div
       style={{
@@ -225,8 +225,33 @@ export const Note: React.FC<{x: number; y: number; text: string; opacity: number
         fontFamily: FONT,
         fontWeight: 700,
         fontSize: size,
-        letterSpacing: '0.06em',
+        letterSpacing: '0.16em',
         color,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {text}
+    </div>
+  ) : null;
+
+// Sentence-case caveat in the series' caveat pill (as in how-ai-responds and how-ai-gets-context).
+export const Caveat: React.FC<{x: number; y: number; text: string; opacity: number; size?: number}> = ({x, y, text, opacity, size = 26}) =>
+  opacity > 0.001 ? (
+    <div
+      style={{
+        position: 'absolute',
+        left: x,
+        top: y,
+        transform: `translate(-50%, -50%) translateY(${(1 - opacity) * 12}px)`,
+        opacity,
+        padding: '12px 30px',
+        borderRadius: 32,
+        border: `2px solid ${rgba(COLORS.white, 0.35)}`,
+        background: rgba(COLORS.white, 0.07),
+        fontFamily: FONT,
+        fontWeight: 500,
+        fontSize: size,
+        color: COLORS.white,
         whiteSpace: 'nowrap',
       }}
     >

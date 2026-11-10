@@ -1,5 +1,6 @@
 import React from 'react';
-import {AbsoluteFill} from 'remotion';
+import {AbsoluteFill, interpolate} from 'remotion';
+import {clampOpts} from '../../../shared/lib/motion';
 import {SceneTitle} from '../../../shared/components/SceneTitle';
 import {Pinned} from '../../../shared/components/Stage';
 import {LockedCube} from '../../../shared/components/context/Pieces';
@@ -15,9 +16,10 @@ import {BOUNDS_CUBE_END} from './BoundariesScene';
 
 // The coordinating agent at the top centre; three subagents in mirrored columns below it.
 export const COORD = {x: CX, y: 210, size: 46};
-const TASK_Y = 335;
+export const TASK_Y = 335;
+export const RESULT_CHIP = 'ORDER PACK';
 const COLS = [CX - 400, CX, CX + 400];
-const SUBTASKS = ['FLIGHTS', 'TRANSFER', 'EXPENSES'];
+const SUBTASKS = ['QUOTES', 'QUALITY CHECK', 'PAPERWORK'];
 const CHIP_Y = 450;
 const SUB_Y = 600;
 const SUB_DX = 55; // mini cube to the left of each column's centre, its own context window to the right
@@ -44,7 +46,10 @@ export const DelegationScene: React.FC = () => {
   const cost = smooth(D.cost[0] - 6, 10);
   const costFill = lerp(0.3, 0.9, lin(D.cost[0], D.cost[1]));
   const coordinate = ramp(D.coordinate[0], D.coordinate[1]);
-  const dim = lerp(1, 0.3, ramp(D.coordinate[0] - 10, D.coordinate[0]));
+  // The subagents step back as their results are combined; their chips clear entirely, because the threads to the
+  // coordinating agent run up through them.
+  const dim = lerp(1, 0.2, ramp(D.coordinate[0] - 10, D.coordinate[0]));
+  const chipsOn = 1 - ramp(D.coordinate[0] - 10, D.coordinate[0]);
   const plan = pop(D.coordinate[1] - 4);
 
   return (
@@ -86,9 +91,11 @@ export const DelegationScene: React.FC = () => {
       </Layer>
 
       <AbsoluteFill style={{opacity: out}}>
-        <Chip x={COORD.x} y={TASK_Y} text="PREPARE THE TRIP" size={26} color={COLORS.white} opacity={task * (1 - split)} />
+        {/* The task clears at once as it splits, and the subtasks only appear once they have moved apart, so no two
+            chips ever sit on top of each other. */}
+        <Chip x={COORD.x} y={TASK_Y} text="PREPARE THE ORDER" size={26} color={COLORS.white} opacity={task * interpolate(split, [0, 0.2], [1, 0], clampOpts)} />
         {SUBTASKS.map((s, i) => (
-          <Chip key={s} x={lerp(COORD.x, COLS[i], split)} y={lerp(TASK_Y, CHIP_Y, split)} text={s} size={26} color={COLORS.white} opacity={(split > 0 ? Math.min(1, split * 3) : 0) * dim} />
+          <Chip key={s} x={lerp(COORD.x, COLS[i], split)} y={lerp(TASK_Y, CHIP_Y, split)} text={s} size={26} color={COLORS.white} opacity={interpolate(split, [0.55, 0.85], [0, 1], clampOpts) * chipsOn} />
         ))}
         <Txt x={CX} y={GROUP_LABEL_Y} text="SUBAGENTS" size={26} opacity={subLabel} />
         <Txt x={CX} y={GROUP_LABEL_Y} text="IN PARALLEL" size={26} color={COLORS.cyan} opacity={parallelLabel} />
@@ -96,8 +103,10 @@ export const DelegationScene: React.FC = () => {
           <MarkAt key={i} x={x + 40} y={RESULT_Y - 26} ok size={34} scale={results[i] * dim} />
         ))}
         <Txt x={COST.labelX} y={COST.y} text="COST" size={26} anchor="end" opacity={cost} />
-        <Chip x={COORD.x} y={TASK_Y} text="TRIP PLAN" size={26} color={COLORS.cyan} textColor={COLORS.cyan} scale={Math.min(1, plan)} opacity={plan > 0.01 ? 1 : 0} glow={plan * 0.6} />
       </AbsoluteFill>
+
+      {/* The combined result stays with the coordinating cube through the cut; Scene 9 fades both together. */}
+      <Chip x={COORD.x} y={TASK_Y} text={RESULT_CHIP} size={26} color={COLORS.cyan} textColor={COLORS.cyan} scale={Math.min(1, plan)} opacity={plan > 0.01 ? 1 : 0} glow={plan * 0.6} />
 
       <Pinned>
         <SceneTitle text="DELEGATION" mode="corner" />

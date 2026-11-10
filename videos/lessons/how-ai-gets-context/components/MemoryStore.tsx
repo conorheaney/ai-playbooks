@@ -9,8 +9,8 @@ const PAD = 20;
 export const STORE = {w: 380, h: PAD * 2 + DRAWER_H * 3 + DRAWER_GAP * 2};
 
 // What the store already holds, by drawer. The last drawer receives the new memory.
-export const STORED = ['Home airport: Sydney', 'Prefers aisle seats'];
-export const NEW_MEMORY = 'Prefers hotels near Parliament House';
+export const STORED = ['Site: Leeds plant', 'Prefers PDF reports'];
+export const NEW_MEMORY = 'Prefers ISO 13485 certified suppliers';
 
 // Centre of drawer i for a store centred on (x, y) at the given scale.
 export const drawerCenter = (x: number, y: number, scale: number, i: number) => ({
@@ -27,7 +27,7 @@ export const MemoryStore: React.FC<{
   opacity?: number;
   newMemory?: number; // 0..1 the new memory showing in the last drawer
   open?: number; // 0..1 the last drawer pulled out
-  lifted?: number; // 0..1 the new memory lifted out of its drawer (hidden here)
+  lifted?: number; // 0..1 a copy of the new memory lifted out; the stored one stays, dimmed like the others
 }> = ({x, y, scale = 1, draw = 1, opacity = 1, newMemory = 0, open = 0, lifted = 0}) => {
   if (opacity <= 0.001) {
     return null;
@@ -46,7 +46,8 @@ export const MemoryStore: React.FC<{
           const c = drawerCenter(x, y, scale, i);
           const isNew = i === texts.length - 1;
           const dx = isNew ? 40 * scale * open : 0;
-          const textOpacity = isNew ? newMemory * (1 - lifted) : 0.55;
+          // Retrieval copies a memory into the context; it doesn't remove it from the store.
+          const textOpacity = isNew ? newMemory * (1 - 0.45 * lifted) : 0.55;
           return (
             <g key={i} transform={`translate(${dx} 0)`}>
               <rect x={left + 16 * scale} y={c.y - (DRAWER_H * scale) / 2} width={w - 32 * scale} height={DRAWER_H * scale} rx={10 * scale} fill={rgba(COLORS.charcoal, 0.95)} stroke={rgba(COLORS.purple, isNew && open > 0 ? 1 : 0.6)} strokeWidth={2} />

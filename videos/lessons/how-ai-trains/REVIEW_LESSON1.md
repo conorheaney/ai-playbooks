@@ -574,3 +574,42 @@ The remaining issues are mostly brief overlaps during transitions.
 | 9 | Apply the 24 px caption floor to lessons 2 and 3 | — | Follow-up |
 
 **Projected score with items 1–8 done:** about 8.9/10. The lesson is shippable as is, since no remaining issue misleads the viewer.
+
+## Review 3: Re-review against the 9.5 target (2026-11-10)
+
+**Reviewed against:** the updated `videos/practices.md` (9.5 target, fixed voiceover, text judged by role).
+**Source:** the committed render at frames 0–3093, sampled every 10 frames. Every transition was scrubbed every 2–3 frames, and suspect frames were checked at full resolution. Fixes were then re-rendered and the same frames re-checked.
+**Limits:**
+- Sync was checked against the word timings in `timing.ts` and `BLUEPRINT.md`. The audio itself was not listened to.
+- No scene lengths or voiceover beats changed.
+
+### Findings and fixes
+
+| # | Scene | *Abs* frames | Severity | Finding | Fix |
+|---|---|---|---|---|---|
+| 1 | 2 | 350–366 | Medium | The morph still collided. Box outlines overlapped mid-shrink, and "ed" passed over "cat" and "sprawl". | Box outlines fade out before any block moves. Each word fades out while its point travels and fades back in once it lands. |
+| 2 | 2 | 365–370 | Low | "+ 1,000s MORE" was ambiguous. Once renamed, it touched "The" as it faded in. | The label is now "+ 1,000s MORE DIMENSIONS", placed beside the d₁ label, clear of every token. |
+| 3 | 3 | 685–740 | Low | TRAINING STEPS started counting during the first correction, before "billions of times", so it read as "one correction = millions of steps". | The counter appears and starts counting at the second forward pass (local 228). |
+| 4 | 4 | 1085–1145, 905, 1200 | Low | Montage cards were drawn over the cube's face, and both prompts slid into its left face. | Cards are drawn beneath the cube, so they pass into it. The prompts start 40 px further left and fade out by 40% of their flight. |
+| 5 | 5 | 1420–1428 | Low | "PREFERENCES" and "LEARNS THEIR PREFERENCES" cross-faded on the same baseline, so the text overlapped. | The short label is gone before the long one fades in. |
+| 6 | 7 | 2034–2042 | Low | "How do I bake bread?" was drawn across the cube's AI badge. | The request's text clears before the cube's face, and a cyan dot carries it the rest of the way in. |
+| 7 | 8 | 2393–2402 | Medium | The cube glided home over the fading scorecard, cutting through its labels. | The scorecard fades out completely first (local 278–284), then the cube glides home in the last 14 frames. The stamp still holds for about 1 s. `cubePose` gains an optional `homeFrames`. |
+| 8 | 8 | 2290 | Low | "BACK TO TRAINING" ran into the scorecard's left border. | Moved 90 px left. |
+| 9 | 1 | 90–150 | Low | Falling icons were drawn on top of the blank network. | Once the network appears, falling icons fade over its footprint. Only icons being absorbed into a node show on top of it, brightening as they head in. |
+
+### Scores
+
+| # | Scene | Review 2 | Review 3 | Remaining note |
+|---|---|---|---|---|
+| 1 | Raw Data | 8 | **9.5** | None. |
+| 2 | Tokenize & Map | 8 | **9.5** | Words disappear for about 10 frames mid-morph, but the dots carry continuity. |
+| 3 | Adjusting Weights | 9 | **9.5** | The right-hand column is dense, but readable. |
+| 4 | Base Model → Fine-Tune | 8.5 | **9.5** | Card text faintly shows through the translucent cube as it enters, which reads as absorption. |
+| 5 | Learn from Feedback | 8.5 | **9.5** | The reward beat lands after the voiceover ends, which the fixed voiceover makes unavoidable. |
+| 6 | Reinforcement Learning | 9 | **9.5** | The fast-cycle attempt chips briefly touch the checker's border. They're incidental, and the verdicts are always correct. |
+| 7 | Safety Testing | 8.5 | **9.5** | The last REFUSED label is still fading (local 163–171) as the everyday request crosses the shield. They don't overlap. |
+| 8 | Evaluation | 8 | **9.5** | The glide home is quicker (14 frames, not 20). |
+| 9 | Locked In | 9.5 | **9.5** | None. |
+| 10 | Released to the World | 8.5 | **9.5** | For about 0.4 s after the racks appear (local 50–62), the right half is empty until the globe draws. This is the centring track making room for it. |
+
+**Lesson average: 9.5/10** (was 8.6).

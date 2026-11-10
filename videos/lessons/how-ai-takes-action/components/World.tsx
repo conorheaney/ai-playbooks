@@ -1,7 +1,9 @@
 import React from 'react';
+import {interpolate} from 'remotion';
 import {FONT} from '../../../shared/fonts';
+import {clampOpts} from '../../../shared/lib/motion';
 import {COLORS, rgba} from '../../../shared/theme';
-import {BOOKING_REF, PORTAL_ROW} from '../layout';
+import {ORDER_REF, PORTAL_NAME, PORTAL_ROW} from '../layout';
 import {MarkAt} from './Parts';
 
 export type DockIcon = 'file' | 'search' | 'portal';
@@ -73,17 +75,20 @@ export const Dock: React.FC<{x: number; y: number; name: string; icon: DockIcon;
     </div>
   ) : null;
 
-// The travel portal's booking card: NOT BOOKED until the harness lets a confirmed booking through.
-export const PortalCard: React.FC<{x: number; y: number; w?: number; opacity?: number; scale?: number; booked?: number; pulse?: number}> = ({
+// The purchasing portal's order card: NOT ORDERED until the harness lets a confirmed order through.
+export const PortalCard: React.FC<{x: number; y: number; w?: number; opacity?: number; scale?: number; ordered?: number; pulse?: number}> = ({
   x,
   y,
-  w = 400,
+  w = 460,
   opacity = 1,
   scale = 1,
-  booked = 0,
+  ordered = 0,
   pulse = 0,
-}) =>
-  opacity > 0.001 ? (
+}) => {
+  // One status at a time: NOT ORDERED clears before ORDERED appears, so the two never overlap.
+  const notOrderedOn = interpolate(ordered, [0, 0.45], [1, 0], clampOpts);
+  const orderedOn = interpolate(ordered, [0.55, 1], [0, 1], clampOpts);
+  return opacity > 0.001 ? (
     <div
       style={{
         position: 'absolute',
@@ -94,9 +99,9 @@ export const PortalCard: React.FC<{x: number; y: number; w?: number; opacity?: n
         transform: `translate(-50%, -50%) scale(${scale})`,
         padding: '20px 26px 24px',
         borderRadius: 20,
-        border: `2px solid ${booked > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.55)}`,
+        border: `2px solid ${ordered > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.55)}`,
         background: rgba(COLORS.charcoal, 0.95),
-        boxShadow: booked > 0 ? `0 0 ${40 * booked}px ${rgba(COLORS.cyan, 0.4 * booked)}` : undefined,
+        boxShadow: ordered > 0 ? `0 0 ${40 * ordered}px ${rgba(COLORS.cyan, 0.4 * ordered)}` : undefined,
         opacity,
         fontFamily: FONT,
         color: COLORS.white,
@@ -104,11 +109,11 @@ export const PortalCard: React.FC<{x: number; y: number; w?: number; opacity?: n
     >
       <div style={{display: 'flex', alignItems: 'center', gap: 14}}>
         <Icon kind="portal" color={rgba(COLORS.white, 0.85)} />
-        <div style={{fontSize: 24, fontWeight: 700, letterSpacing: '0.14em', color: rgba(COLORS.white, 0.85)}}>TRAVEL PORTAL</div>
+        <div style={{fontSize: 24, fontWeight: 700, letterSpacing: '0.12em', color: rgba(COLORS.white, 0.85), whiteSpace: 'nowrap'}}>{PORTAL_NAME}</div>
       </div>
       <div style={{fontSize: 26, fontWeight: 500, marginTop: 14, whiteSpace: 'nowrap'}}>{PORTAL_ROW}</div>
       <div style={{position: 'relative', height: 50, marginTop: 14}}>
-        {/* NOT BOOKED */}
+        {/* NOT ORDERED */}
         <div
           style={{
             position: 'absolute',
@@ -126,16 +131,16 @@ export const PortalCard: React.FC<{x: number; y: number; w?: number; opacity?: n
             fontWeight: 700,
             letterSpacing: '0.1em',
             color: rgba(COLORS.white, 0.75 + 0.25 * pulse),
-            opacity: 1 - booked,
+            opacity: notOrderedOn,
             whiteSpace: 'nowrap',
           }}
         >
           <div style={{width: 22, height: 22, borderRadius: 4, border: `2px solid ${rgba(COLORS.white, 0.75)}`}} />
-          NOT BOOKED
+          NOT ORDERED
         </div>
-        {/* BOOKED */}
-        {booked > 0.001 ? (
-          <div style={{position: 'absolute', left: 0, top: 0, display: 'flex', alignItems: 'center', gap: 16, opacity: booked, whiteSpace: 'nowrap'}}>
+        {/* ORDERED */}
+        {orderedOn > 0.001 ? (
+          <div style={{position: 'absolute', left: 0, top: 0, display: 'flex', alignItems: 'center', gap: 16, opacity: orderedOn, whiteSpace: 'nowrap'}}>
             <div
               style={{
                 display: 'flex',
@@ -153,13 +158,14 @@ export const PortalCard: React.FC<{x: number; y: number; w?: number; opacity?: n
               }}
             >
               <div style={{position: 'relative', width: 30, height: 30}}>
-                <MarkAt x={15} y={15} ok scale={booked} size={30} />
+                <MarkAt x={15} y={15} ok scale={orderedOn} size={30} />
               </div>
-              BOOKED
+              ORDERED
             </div>
-            <div style={{fontSize: 24, fontWeight: 500, color: rgba(COLORS.white, 0.85)}}>{BOOKING_REF}</div>
+            <div style={{fontSize: 24, fontWeight: 500, color: rgba(COLORS.white, 0.85), fontVariantNumeric: 'tabular-nums'}}>{ORDER_REF}</div>
           </div>
         ) : null}
       </div>
     </div>
   ) : null;
+};

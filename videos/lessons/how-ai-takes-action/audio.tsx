@@ -86,7 +86,7 @@ export const SFX: Cue[] = [
   hit('sfx/shield-hit.wav', 'boundaries', BOUNDS.gate[1], 0.3, 25),
   hit('sfx/pop.wav', 'boundaries', BOUNDS.confirm[0], 0.3, 8),
   hit('sfx/rating-ding.wav', 'boundaries', BOUNDS.approve, 0.3),
-  hit('sfx/rating-ding.wav', 'boundaries', BOUNDS.booked, 0.4),
+  hit('sfx/rating-ding.wav', 'boundaries', BOUNDS.ordered, 0.4),
   // 8 · Delegation
   hit('sfx/slice.wav', 'delegation', DELEGATE.split[0], 0.3, 15),
   ...[0, 1, 2].map((i) => hit('sfx/pop.wav', 'delegation', DELEGATE.subagents + i * 4, 0.3, 8)),

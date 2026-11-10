@@ -169,7 +169,8 @@ export const TemporaryScene: React.FC = () => {
           ) : null}
           {/* Between the cube and the new tank, clear of the saved-instructions label as it drops down the right side. */}
           <AppMarker x={870} y={300} opacity={app} frame={frame} />
-          <Caption x={TANK_HOME.x} y={TANK_HOME.y + TANK_HOME.h / 2 + 46} text="ONLY WHAT THE APP ADDS" color={COLORS.white} size={26} opacity={presence(frame, T.saved[1], T.finale + 10, 12, 12)} />
+          {/* On "only what the app puts in" (~6.8 s), held until the scene fades, so it can be read. */}
+          <Caption x={TANK_HOME.x} y={TANK_HOME.y + TANK_HOME.h / 2 + 46} text="ONLY WHAT THE APP ADDS" color={COLORS.white} size={26} opacity={presence(frame, T.saved[0] - 8, T.finale + T.fadeOut, 8, T.fadeOut)} />
 
           {/* Session window. */}
           {fold < 1 ? (

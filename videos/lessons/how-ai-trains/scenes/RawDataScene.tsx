@@ -35,6 +35,11 @@ const KEEP_CLEAR = [
   {x0: PANEL.x - PANEL.w / 2, x1: PANEL.x + PANEL.w / 2, y0: PANEL.top, y1: PANEL.bottom},
 ];
 const FEATHER = 60;
+// The blank model's footprint (Scene 3's network at 72%): once it appears, falling icons fade as they pass over
+// it, so only icons being absorbed into a node are ever drawn on top of the network.
+const NET_CLEAR = {x0: VIDEO.width / 2 - 330, x1: VIDEO.width / 2 + 330, y0: 250, y1: 690};
+const netClearance = (x: number, y: number) =>
+  clamp(Math.hypot(Math.max(NET_CLEAR.x0 - x, 0, x - NET_CLEAR.x1), Math.max(NET_CLEAR.y0 - y, 0, y - NET_CLEAR.y1)) / FEATHER, 0, 1);
 const clearance = (x: number, y: number) =>
   Math.min(
     1,
@@ -149,7 +154,9 @@ export const RawDataScene: React.FC = () => {
             const rot = icon.rot0 + frame * icon.spin;
             const scale = (icon.size / 64) * (1 - 0.7 * u);
             // Falling icons stay clear of text; absorbed icons fade into the node.
-            const opacity = icon.opacity * (u > 0 ? 1 - u * u : clearance(x, y));
+            const overNet = 1 - netIn * (1 - netClearance(x, y));
+            // Continuous at the switch: an absorbed icon starts from its falling opacity and brightens as it heads in.
+            const opacity = icon.opacity * (u > 0 ? (1 - u * u) * Math.max(clearance(x, y) * overNet, u) : clearance(x, y) * overNet);
             if (opacity <= 0.01) {
               return null;
             }

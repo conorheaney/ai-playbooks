@@ -22,10 +22,10 @@ const TRAY = {x: 1190, y: 520, w: 960, h: 640};
 // In VO order. Each card glides a short way in from its side while fading in (always inside the app's tray),
 // then becomes its slice of the context.
 const CARDS: {kind: SegKind; text: string; color: string; from: {x: number; y: number}; to: {x: number; y: number}}[] = [
-  {kind: 'instructions', text: 'You are a helpful travel assistant.', color: COLORS.purple, from: {x: 908, y: 320}, to: {x: 978, y: 320}},
-  {kind: 'history', text: 'Planning a 5-day trip in March…', color: COLORS.white, from: {x: 908, y: 500}, to: {x: 978, y: 500}},
-  {kind: 'documents', text: 'trip-plan.md', color: COLORS.cyan, from: {x: 1472, y: 500}, to: {x: 1402, y: 500}},
-  {kind: 'tools', text: 'search_web(query)', color: COLORS.purple, from: {x: 1472, y: 320}, to: {x: 1402, y: 320}},
+  {kind: 'instructions', text: 'You are a quality assistant.', color: COLORS.purple, from: {x: 908, y: 320}, to: {x: 978, y: 320}},
+  {kind: 'history', text: 'Preparing for the March audit…', color: COLORS.white, from: {x: 908, y: 500}, to: {x: 978, y: 500}},
+  {kind: 'documents', text: 'qms-manual.pdf', color: COLORS.cyan, from: {x: 1472, y: 500}, to: {x: 1402, y: 500}},
+  {kind: 'tools', text: 'search_docs(query)', color: COLORS.purple, from: {x: 1472, y: 320}, to: {x: 1402, y: 320}},
 ];
 
 const segFor = (kind: SegKind) => INPUT.find((s) => s.kind === kind)!;
@@ -154,15 +154,23 @@ export const AssembleScene: React.FC = () => {
           const r = segmentRect(TANK_HOME, seg.from, seg.to);
           const card = {x: cx - CARD.w / 2, y: cy - CARD.h / 2, w: CARD.w, h: CARD.h};
           const merge = moveOf(c.kind);
+          // Two phases: each card first shrinks in place to its slice's size, then the slim slice travels into
+          // the window, so the moving boxes stay small and clear of each other.
+          const shrink = interpolate(merge, [0, 0.35], [0, 1], clampOpts);
+          const travel = interpolate(merge, [0.25, 1], [0, 1], clampOpts);
+          const w = lerp(card.w, r.w, shrink);
+          const h = lerp(card.h, r.h, shrink);
+          const mx = lerp(card.x + card.w / 2, r.x + r.w / 2, travel);
+          const my = lerp(card.y + card.h / 2, r.y + r.h / 2, travel);
           return (
             <div
               key={c.kind}
               style={{
                 position: 'absolute',
-                left: lerp(card.x, r.x, merge),
-                top: lerp(card.y, r.y, merge),
-                width: lerp(card.w, r.w, merge),
-                height: lerp(card.h, r.h, merge),
+                left: mx - w / 2,
+                top: my - h / 2,
+                width: w,
+                height: h,
                 boxSizing: 'border-box',
                 borderRadius: lerp(20, 4, merge),
                 border: `2px solid ${rgba(c.color, 1 - merge * 0.6)}`,
@@ -175,7 +183,7 @@ export const AssembleScene: React.FC = () => {
                 zIndex: merge > 0 ? 10 + ORDER(c.kind) : 1, // a card that has started moving rides above the ones still waiting
               }}
             >
-              <div style={{position: 'absolute', inset: 0, background: SEGMENT_STYLE[c.kind].fill, opacity: merge}} />
+              <div style={{position: 'absolute', inset: 0, background: SEGMENT_STYLE[c.kind].fill, opacity: shrink}} />
               <div style={{position: 'relative', opacity: textIn}}>
                 <div style={{fontSize: 18, fontWeight: 700, letterSpacing: '0.18em', color: c.color === COLORS.white ? rgba(COLORS.white, 0.8) : c.color, marginBottom: 10}}>
                   {SEGMENT_STYLE[c.kind].label}

@@ -413,3 +413,37 @@ Each review is its own section, newest last. Every review is scored against `vid
 | 6 | Stop the top chunks short of the window border | 6 | Low |
 
 **Projected score with items 1–6 done:** about 9/10. The lesson is shippable as is, since no remaining issue misleads the viewer.
+
+## Review 3: Re-review against the 9.5 target (2026-11-10)
+
+**Reviewed against:** the updated `videos/practices.md` (9.5 target, fixed voiceover, text judged by role).
+**Source:** the committed render at frames 0–2660, sampled every 10 frames. Every transition was scrubbed every 2–3 frames, and suspect frames were checked at full resolution. Fixes were then re-rendered and re-checked.
+**Limits:**
+- Sync was checked against the word timings in `timing.ts` and `BLUEPRINT.md`. The audio itself was not listened to.
+- No scene lengths or voiceover beats changed.
+
+### Findings and fixes
+
+| # | Scene | *Abs* frames | Severity | Finding | Fix |
+|---|---|---|---|---|---|
+| 1 | 8 | 2284–2300 | Medium | The context window's outline drew straight through the memory store and its "Prefers hotels near Parliament House" drawer. | The store slides right first (local 100–116), and the window starts drawing at 113, once the store is clear. |
+| 2 | 8 | 2318–2340 | Medium (accuracy) | When the memory was retrieved, its drawer went empty. This taught that retrieval removes a memory from the store. | The stored memory stays in its drawer, dimmed like the others. A copy appears once it's clear of the drawer and travels into the window. |
+| 3 | 4 | 1150–1157 | Medium | On "in order", cards reshuffled through each other, with text over text (for example, SYSTEM INSTRUCTIONS over EMAIL). | The voiceover leaves only about 16 frames for this beat, so each card's text dips out mid-move and returns as it lands. Only opaque cards pass each other. |
+| 4 | 6 | 1704–1712 | Low | Ranked rows passed through each other while sorting, with scores overlapping. | Climbing rows swing right and are drawn on top. Sinking rows swing left and dim. |
+| 4a | 6 | 1730–1760 | Change requested | On "only", the not-used rows slid left beside a TOP 2 tag. | The rows below the top two slide down to open a gap, the dashed cut line draws in it, and the TOP 2 tag is removed. Not-used rows are greyed out (borders, chips, score bars and values), and NOT USED is centred under the list. |
+| 5 | 3, 8 | 925, 2460 | Low | The caveat captions were plain sentence-case text, unlike the caveat pills in Lesson 2. | `Note` now renders the shared caveat-pill style. The Scene 8 pill moves to x 640 to clear the window. |
+
+### Scores
+
+| # | Scene | Review 2 | Review 3 | Remaining note |
+|---|---|---|---|---|
+| 1 | Beyond the Weights | 9 | **9.5** | Cards briefly cross the window's outline as they drop in, which reads as entering. |
+| 2 | The Prompt | 9 | **9.5** | None. |
+| 3 | Vague vs Specific | 8.5 | **9.5** | The caveat pill sits about 20 px below the table's glow. |
+| 4 | Context Engineering | 8.5 | **9.5** | Opaque cards still cross for about 6 frames on "in order". |
+| 5 | Retrieval: Prepare | 8.5 | **9.5** | None. The index slot labels are incidental. |
+| 6 | Retrieval: Ask | 8.5 | **9.5** | The question bar crosses the window's top edge for about 6 frames as it drops in (*abs* 1630). |
+| 7 | Check the Source | 9 | **9.5** | None. |
+| 8 | Memory | 9 | **9.5** | None. |
+
+**Lesson average: 9.5/10** (was 8.8).

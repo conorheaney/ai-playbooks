@@ -13,9 +13,9 @@ import {COLORS, VIDEO} from '../../../shared/theme';
 import {FEEDBACK as F, SCENES} from '../timing';
 
 const POSE = {x: 960, y: 470, size: 80};
-const QUESTION = 'Explain gravity to a 10-year-old.';
-const ANSWER_A = 'Gravity is the curvature of spacetime described by general relativity.';
-const ANSWER_B = 'Gravity is an invisible pull that makes things fall to the ground!';
+const QUESTION = 'Explain calibration to a new hire.';
+const ANSWER_A = 'Calibration compares readings against a traceable reference standard and corrects deviation.';
+const ANSWER_B = 'Calibration checks the device against a known reference, so its readings stay accurate.';
 const CARD_A = {x: 410, y: 470};
 const CARD_B = {x: 1510, y: 470};
 const RATER = {x: 960, y: 800};
@@ -64,6 +64,7 @@ export const FeedbackScene: React.FC = () => {
   // The model takes on their preferences: it glows as each one lands, then once more as it settles.
   const dotGlow = Math.max(0, ...DOTS.map((d) => flashAt(frame, d.start + DOT_TRAVEL, 10)));
   const learnGlow = Math.max(flashAt(frame, F.rewardIn, 16), dotGlow * 0.6, flashAt(frame, F.signalEnd, 26));
+  // The short label is gone before the longer one fades in, so the two never overlap.
   const learnedLabel = interpolate(frame, [F.signal, F.signal + 10, F.contentOut, F.contentOut + 12], [0, 1, 1, 0], clampOpts);
 
   return (
@@ -113,7 +114,7 @@ export const FeedbackScene: React.FC = () => {
             const p = bez(from, {x: (from.x + to.x) / 2 + 40, y: (from.y + to.y) / 2}, to, Easing.inOut(Easing.quad)(t));
             return <circle key={i} cx={p.x} cy={p.y} r={7} fill={COLORS.purple} filter="url(#fb-glow)" />;
           })}
-          <Caption x={RATER.x + 190} y={665} text="PREFERENCES" anchor="start" color={COLORS.purple} size={24} opacity={crowd * (1 - learnedLabel)} />
+          <Caption x={RATER.x + 190} y={665} text="PREFERENCES" anchor="start" color={COLORS.purple} size={24} opacity={crowd * interpolate(frame, [F.signal - 8, F.signal], [1, 0], clampOpts)} />
           <Caption x={RATER.x + 190} y={665} text="LEARNS THEIR PREFERENCES" anchor="start" color={COLORS.purple} size={24} opacity={learnedLabel} />
         </g>
       </svg>

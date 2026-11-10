@@ -95,23 +95,37 @@ export const ToolsScene: React.FC = () => {
   const lights = [0, 1, 2].map((i) => pop(T.checks + i * T.checkStep));
   const portalT = ramp(T.move[0], T.move[1] + 6);
 
-  // The full ticket slides to the gate and becomes a glyph there; the glyph then runs out to the hotel search.
-  const ticketX = lerp(TICKET_AT.x, IN_GATE.x - GATE.w / 2 - 40, toGate);
-  const ticketOpacity = interpolate(toGate, [0.6, 1], [1, 0], clampOpts);
-  const glyphIn = interpolate(toGate, [0.6, 1], [0, 1], clampOpts);
-  const glyph = run > 0 ? {x: lerp(IN_GATE.x, DOCKS.search.x - DOCK_W / 2 - 40, run), y: lerp(IN_GATE.y, DOCKS.search.y, run)} : IN_GATE;
+  // The full ticket becomes a glyph where it stands, clear of the gate, so no ticket text ever crosses the gate's
+  // outline; the glyph then slides into the gate and later runs out to the supplier search.
+  const ticketX = TICKET_AT.x;
+  const ticketOpacity = interpolate(toGate, [0, 0.35], [1, 0], clampOpts);
+  const glyphIn = interpolate(toGate, [0.15, 0.4], [0, 1], clampOpts);
+  const slide = interpolate(toGate, [0.35, 1], [0, 1], clampOpts);
+  const glyph = run > 0 ? {x: lerp(IN_GATE.x, DOCKS.search.x - DOCK_W / 2 - 40, run), y: lerp(IN_GATE.y, DOCKS.search.y, run)} : {x: lerp(TICKET_AT.x, IN_GATE.x, slide), y: lerp(TICKET_AT.y, IN_GATE.y, slide)};
+  // The model's own reach: down from the cube, then across to the wall, where it stops.
+  const REACH_DOWN = REACH_Y - (MODEL_CUBE.y + 80);
+  const REACH_ACROSS = WALL.x - 28 - MODEL_CUBE.x;
+  const reachLen = reach * (REACH_DOWN + REACH_ACROSS);
+  const reachPts = [
+    [MODEL_CUBE.x, MODEL_CUBE.y + 80],
+    [MODEL_CUBE.x, MODEL_CUBE.y + 80 + Math.min(reachLen, REACH_DOWN)],
+    ...(reachLen > REACH_DOWN ? [[MODEL_CUBE.x + (reachLen - REACH_DOWN), REACH_Y]] : []),
+  ]
+    .map((p) => p.join(','))
+    .join(' ');
 
   return (
     <AbsoluteFill>
-      <WallWorld frame={frame} opacity={1} wallDraw={wallDraw} gear={gear} docks={[docksIn, docksIn, interpolate(portalT, [0.6, 1], [0, 1], clampOpts)]} scan={scan} glow={dockGlow} />
-      <PortalCard x={lerp(WORDS_PORTAL.x, DOCKS.portal.x, portalT)} y={lerp(WORDS_PORTAL.y, DOCKS.portal.y, portalT)} w={WORDS_PORTAL.w} scale={lerp(1, 0.6, portalT)} opacity={interpolate(portalT, [0.4, 0.8], [1, 0], clampOpts)} />
+      {/* The portal card shrinks towards its dock and is gone before the dock fades in, so the two never overlap. */}
+      <WallWorld frame={frame} opacity={1} wallDraw={wallDraw} gear={gear} docks={[docksIn, docksIn, interpolate(portalT, [0.65, 1], [0, 1], clampOpts)]} scan={scan} glow={dockGlow} />
+      <PortalCard x={lerp(WORDS_PORTAL.x, DOCKS.portal.x, portalT)} y={lerp(WORDS_PORTAL.y, DOCKS.portal.y, portalT)} w={WORDS_PORTAL.w} scale={lerp(1, 0.6, portalT)} opacity={interpolate(portalT, [0.25, 0.6], [1, 0], clampOpts)} />
 
       <Layer>
         <LockedCube id="ta-t-cube" absFrame={abs} {...cube} glow={generating * (0.35 + 0.3 * Math.sin(frame / 4))} />
         <FlowLine from={{x: GATE.x + GATE.w / 2 + 10, y: DOCKS.search.y}} to={{x: DOCKS.search.x - DOCK_W / 2 - 10, y: DOCKS.search.y}} frame={frame} opacity={interpolate(frame, [T.run[0] - 4, T.run[0] + 4], [0, 1], clampOpts) * end} />
         <TicketGlyph x={glyph.x} y={glyph.y} opacity={glyphIn * interpolate(run, [0.8, 1], [1, 0], clampOpts)} />
         {/* The model can't reach across the wall itself. */}
-        {reach > 0 ? <line x1={MODEL_CUBE.x + 90} x2={lerp(MODEL_CUBE.x + 90, WALL.x - 28, reach)} y1={REACH_Y} y2={REACH_Y} stroke={rgba(COLORS.white, 0.75)} strokeWidth={4} strokeDasharray="10 10" strokeLinecap="round" opacity={end} /> : null}
+        {reach > 0 ? <polyline points={reachPts} fill="none" stroke={rgba(COLORS.white, 0.75)} strokeWidth={4} strokeDasharray="10 10" strokeLinecap="round" strokeLinejoin="round" opacity={end} /> : null}
       </Layer>
 
       <ToolList opacity={list} highlight={highlight} />
@@ -129,7 +143,8 @@ export const ToolsScene: React.FC = () => {
       />
       <CheckLights lights={lights} opacity={end} />
       <MarkAt x={WALL.x} y={REACH_Y} ok={false} scale={pop(T.reach[0] + 12) * end} />
-      <Note x={WALL.x} y={CAPTION_Y} text="THE MODEL ASKS. THE APP RUNS." opacity={smooth(T.reach[1] - 8, 12) * end} />
+      {/* On "runs the tool"; it holds through the cut and Scene 3 fades it, for a 2.7 s reading window. */}
+      <Note x={WALL.x} y={CAPTION_Y} text="THE MODEL ASKS. THE APP RUNS." opacity={smooth(T.run[0], 12)} />
 
       <Pinned>
         <Badge kind="app" opacity={smooth(T.app, 12)} frame={frame} />

@@ -18,7 +18,7 @@ import {WORDS as W} from '../timing';
 const Y = 560;
 const CUBE_W = 240;
 const RESPONSE_W = 520;
-const PORTAL_W = 380;
+const PORTAL_W = 460;
 const [CUBE_X, RESPONSE_X, PORTAL_X] = centredRow(
   [
     {w: CUBE_W, p: 1},
@@ -115,6 +115,8 @@ export const WordsScene: React.FC = () => {
             transform: 'translate(-50%, -50%)',
             padding: '24px 30px',
             borderRadius: 22,
+            // The drifting words vanish at the card's edge: they never reach the portal.
+            overflow: 'hidden',
             border: `2px solid ${rgba(COLORS.cyan, 1 - dissolve * 0.85)}`,
             background: rgba(COLORS.charcoal, 0.92),
             opacity: responseIn * clear,
@@ -143,7 +145,8 @@ export const WordsScene: React.FC = () => {
       ) : null}
 
       <PortalCard x={PORTAL_X} y={Y} w={PORTAL_W} opacity={portalIn} pulse={pulse} scale={lerp(0.92, 1, portalIn)} />
-      <Note x={CX} y={CAPTION_Y} text="DESCRIBING ISN'T DOING" opacity={smooth(W.dissolve[1] - 6, 12) * clear} />
+      {/* The takeaway outlasts the response card, so it gets a full reading window (W.dissolve[1] to W.caption). */}
+      <Note x={CX} y={CAPTION_Y} text="DESCRIBING ISN'T DOING" opacity={smooth(W.dissolve[1] - 6, 12) * fadeOut(W.caption, W.caption + 14)} />
 
       <Pinned>
         <SceneTitle text="WORDS AREN'T ACTIONS" mode="hero" holdFrames={W.titleToCorner} />

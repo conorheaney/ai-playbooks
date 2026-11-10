@@ -13,7 +13,7 @@ import {DocIcon, Note, RefChipHtml} from '../components/Parts';
 import {CUBE_HOME, CUBE_W, PROMPT_CARD_W, ROW_GAP} from '../layout';
 import {SCENES, SPECIFIC as S} from '../timing';
 
-const DOC_NAMES = ['hotel-options.md', 'travel-policy-2025.pdf'];
+const DOC_NAMES = ['supplier-quotes.md', 'supplier-policy-2025.pdf'];
 // One stack of the same documents, between the lanes; both lanes' lines fork from its right side.
 const STACK = {y: 540, w: 340};
 // The row, left to right: the documents, the prompts, the results. Each area joins the row as it first appears, and
@@ -24,18 +24,18 @@ const CALLOUT = {w: 300, gap: 36}; // the CHECK callout beside the specific resu
 const [SCENE2_CUBE_X] = centredRow([{w: CUBE_W, p: 1}, {w: PROMPT_CARD_W, p: 1}], ROW_GAP);
 const LANES = [
   {key: 'vague', label: 'VAGUE', y: 365, prompt: 'Summarise these.'},
-  {key: 'specific', label: 'SPECIFIC', y: 765, prompt: "Compare each hotel with the policy's nightly limit. Table. Cite the section."},
+  {key: 'specific', label: 'SPECIFIC', y: 765, prompt: "Compare each supplier with the policy's lead-time limit. Table. Cite the section."},
 ];
 const PROMPT = {w: 480};
 const RESULT = {w: 640, h: 320, pad: 28};
-// The specific result's table: a header row, then one row per hotel.
+// The specific result's table: a header row, then one row per supplier.
 const TABLE = {head: 28, row: 72};
 
-const QUESTIONS = ['Which ones fit the limit?', 'Says who?', 'Which hotel?'];
+const QUESTIONS = ['Which ones fit the limit?', 'Says who?', 'Which supplier?'];
 const ROWS = [
-  {hotel: 'Parkside Hotel', price: '$235', fits: true},
-  {hotel: 'Lakeview Suites', price: '$245', fits: true},
-  {hotel: 'Capital Tower', price: '$289', fits: false},
+  {supplier: 'Northfield Sensors', price: '25 days', fits: true},
+  {supplier: 'Brookway Parts', price: '29 days', fits: true},
+  {supplier: 'Apex Precision', price: '40 days', fits: false},
 ];
 const CHECK_ROW = 1;
 // The flagged row's centre, from the result's centre.
@@ -193,7 +193,7 @@ export const SpecificScene: React.FC = () => {
             }}
           />
           <div style={{position: 'relative', display: 'grid', gridTemplateColumns: '1.7fr 1fr 0.6fr 0.9fr', gridTemplateRows: `${TABLE.head}px repeat(${ROWS.length}, ${TABLE.row}px)`, columnGap: 10, alignItems: 'center'}}>
-            {['HOTEL', '$/NIGHT', 'FITS', 'SOURCE'].map((h) => (
+            {['SUPPLIER', 'LEAD TIME', 'FITS', 'SOURCE'].map((h) => (
               <div key={h} style={{fontSize: 16, fontWeight: 700, letterSpacing: '0.16em', color: COLORS.cyan, alignSelf: 'start'}}>
                 {h}
               </div>
@@ -202,8 +202,8 @@ export const SpecificScene: React.FC = () => {
               const s = smooth(S.results[0] + 14 + i * 10, 10);
               const flagged = i === CHECK_ROW && frame >= S.check;
               return (
-                <React.Fragment key={r.hotel}>
-                  <div style={{fontSize: 22, fontWeight: 500, opacity: s, whiteSpace: 'nowrap'}}>{r.hotel}</div>
+                <React.Fragment key={r.supplier}>
+                  <div style={{fontSize: 22, fontWeight: 500, opacity: s, whiteSpace: 'nowrap'}}>{r.supplier}</div>
                   <div style={{fontSize: 22, fontWeight: 700, opacity: s, color: flagged ? COLORS.error : COLORS.white, fontVariantNumeric: 'tabular-nums'}}>{r.price}</div>
                   <div style={{opacity: s, height: 30}}>
                     <svg width={30} height={30} viewBox="-26 -26 52 52">
@@ -218,7 +218,7 @@ export const SpecificScene: React.FC = () => {
             })}
           </div>
         </ResultPanel>
-        {/* Clear structure, but the numbers still need checking: the price comes from a separate source. */}
+        {/* Clear structure, but the numbers still need checking: the lead time comes from a separate source. */}
         {check > 0.001 ? (
           <div
             style={{
@@ -242,7 +242,7 @@ export const SpecificScene: React.FC = () => {
             <div style={{position: 'absolute', left: -12, top: '50%', width: 18, height: 18, transform: 'translateY(-50%) rotate(45deg)', background: COLORS.charcoal, borderLeft: `3px solid ${COLORS.error}`, borderBottom: `3px solid ${COLORS.error}`}} />
             <div style={{fontSize: 18, fontWeight: 800, letterSpacing: '0.12em', color: COLORS.error, marginBottom: 6}}>CHECK</div>
             <div style={{fontSize: 18, fontWeight: 500, lineHeight: 1.35}}>
-              Price from <span style={{fontWeight: 700}}>hotel-options.md</span>, not the policy. Is it current?
+              Lead time from <span style={{fontWeight: 700, whiteSpace: 'nowrap'}}>supplier-quotes.md</span>, not the policy. Is it current?
             </div>
           </div>
         ) : null}

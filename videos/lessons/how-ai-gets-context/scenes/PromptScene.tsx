@@ -13,7 +13,7 @@ import {FlowLine} from '../components/Parts';
 import {CUBE_HOME, CUBE_W, PROMPT_CARD_W, ROW_GAP} from '../layout';
 import {PROMPT_BEATS as P, SCENES} from '../timing';
 
-const REQUEST = 'Recommend a hotel.';
+const REQUEST = 'Recommend a supplier.';
 // The bar starts at vertical centre and becomes the card in place; the card then grows one row per
 // section, equally up and down, so it stays centred on y = 540.
 // The row: the cube, then the prompt. The cube starts centred (where Scene 1 leaves it) and makes room as
@@ -29,9 +29,9 @@ const GHOST = {w: 360, h: 48, above: 42};
 
 // The pieces of a useful prompt, in VO order.
 const MODULES = [
-  {label: 'OBJECTIVE', text: 'Recommend a hotel for the Canberra trip.', color: COLORS.cyan},
-  {label: 'BACKGROUND & SOURCES', text: 'Canberra, 5 days in March. Source: travel-policy-2025.pdf', color: COLORS.white},
-  {label: 'CONSTRAINTS', text: "Within the policy's nightly limit.", color: COLORS.purple},
+  {label: 'OBJECTIVE', text: 'Recommend a supplier for the flow sensor.', color: COLORS.cyan},
+  {label: 'BACKGROUND & SOURCES', text: '500 units by June. Source: supplier-policy-2025.pdf', color: COLORS.white},
+  {label: 'CONSTRAINTS', text: "Within the policy's lead-time limit.", color: COLORS.purple},
   {label: 'OUTPUT', text: 'Top 3, as a table.', color: COLORS.cyan},
   {label: 'CHECKS', text: 'Cite the policy section for each.', color: COLORS.purple},
 ];

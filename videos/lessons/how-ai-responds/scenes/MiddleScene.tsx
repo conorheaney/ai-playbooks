@@ -19,9 +19,9 @@ const FILL = 0.92;
 const KEY_ROW = 7; // mid-tank
 const CAPTION = {x: 560, y: 985};
 // Short lines, so each can be read in the time it's on screen.
-const FACT = 'Valid 6 months after arrival.'; // the row itself is labelled PASSPORT RULE
-const QUESTION = 'Any document rules?';
-const ANSWER = 'Just bring your booking.';
+const FACT = "Keep for the device's lifetime."; // the row itself is labelled RECORDS RULE
+const QUESTION = 'How long do we keep records?';
+const ANSWER = 'Just keep them for a year.';
 
 // Attention is strongest near the start and end of a long context, weakest in the middle.
 // Illustrative only: the real pattern varies by model, task and position.
@@ -58,7 +58,7 @@ export const MiddleScene: React.FC = () => {
       tint: key && highlight > 0.01 ? rgba(COLORS.purple, 0.55 * highlight) : undefined,
       outline: key && missed > 0 ? COLORS.error : undefined,
       outlineOpacity: 0.4 + 0.6 * missed,
-      text: key ? (frame >= M.missed ? 'MISSED' : 'PASSPORT RULE') : undefined,
+      text: key ? (frame >= M.missed ? 'MISSED' : 'RECORDS RULE') : undefined,
       textOpacity: highlight,
     };
   });

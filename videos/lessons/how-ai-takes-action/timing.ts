@@ -11,7 +11,7 @@ const DURATIONS = {
   loop: 324, // VO 26 words
   workflow: 312, // VO 25 words
   harness: 348, // VO 28 words
-  boundaries: 336, // VO 24 words, plus the booking payoff
+  boundaries: 336, // VO 24 words, plus the order payoff
   delegation: 312, // VO 25 words
   failure: 495, // VO 24 words, the silent finale and a 3 s fade to black
 } as const;
@@ -26,9 +26,10 @@ export const WORDS = {
   cubeIn: 20,
   bar: [24, 50],
   write: [52, 140], // "writes text" ... "describe"
-  portal: 137, // "hotel"
-  dissolve: [159, 190], // "can't book one"
+  portal: 137, // "order" (in "placing an order")
+  dissolve: [159, 190], // "can't place one"
   clear: [200, 222], // "An agentic system"
+  caption: 236, // DESCRIBING ISN'T DOING holds from 184 to 250 (2.2 s)
   loop: [222, 255],
   act: 255, // "act"
   steps: [266, 277, 288], // "step by step"
@@ -56,9 +57,9 @@ export const TOOLS = {
 
 // Scene 3: the result goes into the context and the model is called again, from a rebuilt context.
 export const CONTEXT = {
-  receipt: [0, 24], // "The result"
+  receipt: [0, 24], // "The result": a glyph back through the gate (0-18), then the full receipt prints (14-26)
   relayout: [20, 50],
-  strip: [30, 60],
+  strip: [34, 60], // starts once Scene 2's wall and gate have faded (20-34)
   call2: [63, 90], // "into the context"
   again: [96, 129], // "the model is called again"
   away: [129, 142],
@@ -111,7 +112,7 @@ export const HARNESS = {
   modules: [145, 178, 200, 266], // "builds each request", "keeps state", "runs tools", "enforces limits"
   key: 244, // "its own access"
   tape: [299, 321], // "records what happened"
-  footnote: 318,
+  footnote: 280, // the caveat pill, after the last module; it holds into Scene 7 (2.9 s)
   out: 330,
 } as const;
 
@@ -127,9 +128,9 @@ export const BOUNDS = {
   gate: [254, 270], // "The harness enforces them"
   confirm: [275, 290],
   approve: 290,
-  pass: [294, 308],
-  booked: 306,
-  out: 320,
+  pass: [292, 302],
+  ordered: 300, // ORDERED ✓ holds for about a second before the scene fades
+  out: 324,
 } as const;
 
 // Scene 8: delegation to subagents.
@@ -148,7 +149,8 @@ export const DELEGATE = {
 
 // Scene 9: when tools fail, then the finale.
 export const FAILURE = {
-  rows: [60, 82, 104, 126, 148], // "wrong tool", "wrong input", "changed state", "duplicate actions", "misread results"
+  calls: 16, // "Tool calls": five plain tool calls appear, 3 frames apart
+  rows:[60, 82, 104, 126, 148], // "wrong tool", "wrong input", "changed state", "duplicate actions", "misread results"
   focus: [178, 200], // "A good agent"
   report: [211, 240], // "reports what happened"
   hide: 252, // "instead of hiding it"

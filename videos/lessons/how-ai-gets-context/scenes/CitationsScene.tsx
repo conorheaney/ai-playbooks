@@ -21,11 +21,11 @@ const SOURCE = {x: 1660, w: 500, h: 140, y: [400, 560, 720]};
 // Each claim cites a real section; the third section doesn't support its claim. On "fail to support" the words
 // that don't match (the claim's subject and the section's subject) are highlighted in red.
 const CLAIMS = [
-  {text: 'Hotel limit: $250 a night.', source: POLICY.s42, ok: true, mismatch: ''},
-  {text: 'Book through the travel portal.', source: POLICY.s31, ok: true, mismatch: ''},
-  {text: 'Breakfast is included.', source: POLICY.s43, ok: false, mismatch: 'Breakfast'},
+  {text: 'Lead-time limit: 30 days.', source: POLICY.s42, ok: true, mismatch: ''},
+  {text: 'Use the purchasing portal.', source: POLICY.s31, ok: true, mismatch: ''},
+  {text: 'Expedited shipping is free.', source: POLICY.s43, ok: false, mismatch: 'Expedited shipping'},
 ];
-const SOURCE_MISMATCH = 'Taxis';
+const SOURCE_MISMATCH = 'Inspect';
 
 // Text with its leading word highlighted (for the mismatch), or plain while there's nothing to point at.
 const Marked: React.FC<{text: string; word: string; highlight: number}> = ({text, word, highlight}) =>

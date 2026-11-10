@@ -23,8 +23,8 @@ const USER = {x: 1640, y: 500};
 const ANSWER_AT = {x: 1570, y: 700, w: 480}; // under the user who asked
 const REFUSAL = 'I can’t help with that.';
 const REFUSAL_HOLD = 32; // the first refusal is spoken by the model for about 1 s
-const USER_TEXT = 'How do I bake bread?';
-const REPLY = 'Here’s a simple recipe: flour, water, yeast, salt…';
+const USER_TEXT = 'How do I recalibrate?';
+const REPLY = 'Here are the steps from the user manual…';
 const BOUNCE = 16;
 
 export const SafetyScene: React.FC = () => {
@@ -124,6 +124,18 @@ export const SafetyScene: React.FC = () => {
             <Caption x={TEAM_X} y={720} text="RED TEAM" color={COLORS.error} size={24} />
           </g>
 
+          {/* The request's text clears before the cube's face; a cyan dot carries it the rest of the way in. */}
+          {userT > 0.48 && userT < 1 ? (
+            <circle
+              cx={userPos.x}
+              cy={userPos.y}
+              r={12}
+              fill={COLORS.cyan}
+              opacity={interpolate(userT, [0.48, 0.56, 0.9, 1], [0, 1, 1, 0], clampOpts)}
+              filter="url(#sf-cube-glow)"
+            />
+          ) : null}
+
           {/* Everyday user. */}
           <g opacity={smooth(S.user - 10)}>
             <Person {...USER} size={76} color={COLORS.cyan} />
@@ -141,8 +153,8 @@ export const SafetyScene: React.FC = () => {
           width={CHIP_W}
           text={USER_TEXT}
           fontSize={22}
-          opacity={frame < S.user ? 0 : smooth(S.user, 6) * (1 - interpolate(userT, [0.8, 1], [0, 1], clampOpts))}
-          scale={1 - 0.6 * interpolate(userT, [0.6, 1], [0, 1], clampOpts)}
+          opacity={frame < S.user ? 0 : smooth(S.user, 6) * interpolate(userT, [0.42, 0.56], [1, 0], clampOpts)}
+          scale={1 - 0.4 * interpolate(userT, [0.3, 0.56], [0, 1], clampOpts)}
         />
         {/* The model's own refusal on the first hit, above the shield where REFUSED shows for the others. */}
         <Bubble

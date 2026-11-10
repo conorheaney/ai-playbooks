@@ -12,13 +12,13 @@ import {EDGES, NODE_RADIUS, NODES, strokeForWeight} from '../lib/network';
 import {COLORS, rgba, VIDEO} from '../../../shared/theme';
 import {EXAMPLE_HOLD, EXAMPLE_TRAVEL, exampleArrive, FINETUNE as F, SCENES} from '../timing';
 
-const QUESTION = 'What’s the capital of France?';
-const RAMBLE = 'What’s the capital of Germany? What’s the capital of Spain? What’s the capital of Italy? What’s the…';
-const ANSWER = 'The capital of France is Paris.';
+const QUESTION = 'What does ISO 13485 cover?';
+const RAMBLE = 'What does ISO 9001 cover? What does ISO 14971 cover? What does IEC 62304 cover? What does the…';
+const ANSWER = 'Quality management for medical devices.';
 // The cube moves only twice: it parks right of centre for the whole scene (prompts arrive from its
 // left, outputs appear below it, people write examples to its left), then returns home at the end.
 const PARK = {x: 1215, y: 440};
-const LEFT = {x: 780, y: 440};
+const LEFT = {x: 740, y: 440}; // the prompt's right edge sits clear of the cube's left face
 const BELOW = {x: PARK.x, y: 790};
 const PEOPLE_X = 640;
 const PEOPLE_Y = [360, 520, 680];
@@ -26,13 +26,13 @@ const CAPTION_Y = 790; // both part B captions share one baseline
 const CARD = {w: 340, h: 92};
 const CARD_HOLD = {x: 850, y: 250}; // the first example pauses here, full size, to be read
 const EXAMPLES: [string, string][] = [
-  ['Q: Capital of France?', 'A: Paris.'],
+  ['Q: What is ISO 13485?', 'A: Device quality systems.'],
   ['Q: Fix this bug…', 'A: Change line 4 to…'],
   ['Q: Summarise this…', 'A: In short, …'],
-  ['Q: Translate “hello”', 'A: “Bonjour”'],
+  ['Q: Translate “calibrate”', 'A: “Étalonner”'],
   ['Q: Write a haiku', 'A: Autumn moonlight…'],
   ['Q: What is 12 × 4?', 'A: 48.'],
-  ['Q: Plan a weekend trip', 'A: Day 1: …'],
+  ['Q: Draft a service email', 'A: Dear customer, …'],
 ];
 const EXAMPLE_TOTAL = 10_000; // "thousands of example conversations"
 
@@ -96,6 +96,46 @@ export const FineTuneScene: React.FC = () => {
         ) : null}
         {burst > 0 && burst < 1 ? <circle cx={CUBE_HOME.x} cy={CUBE_HOME.y} r={220 * burst} fill={COLORS.white} opacity={0.8 * (1 - burst)} /> : null}
 
+        {/* Example conversations stream into the model (drawn first, so the cube sits on top). */}
+        {EXAMPLES.map(([q, a], i) => {
+          const start = F.examples[i];
+          if (frame < start || frame > exampleArrive(i)) {
+            return null;
+          }
+          const from = {x: PEOPLE_X + 80 + CARD.w / 2, y: PEOPLE_Y[i % PEOPLE_Y.length]};
+          let p: {x: number; y: number};
+          let shrink: number;
+          let opacity: number;
+          if (i === 0) {
+            // The first card pauses at full size so it can be read, then flies in.
+            const reach = interpolate(frame, [start, start + EXAMPLE_HOLD.reach], [0, 1], {...clampOpts, easing: Easing.out(Easing.cubic)});
+            const goStart = start + EXAMPLE_HOLD.reach + EXAMPLE_HOLD.hold;
+            const go = interpolate(frame, [goStart, goStart + EXAMPLE_HOLD.travel], [0, 1], {...clampOpts, easing: Easing.in(Easing.cubic)});
+            p = mix2(mix2(from, CARD_HOLD, reach), cubeAt, go);
+            shrink = go;
+            opacity = Math.min(1, reach * 3) * interpolate(go, [0.6, 0.85], [1, 0], clampOpts);
+          } else {
+            // The rest stream past as a montage.
+            const t = (frame - start) / EXAMPLE_TRAVEL;
+            const eased = Easing.inOut(Easing.cubic)(t);
+            p = mix2(from, cubeAt, eased);
+            shrink = eased;
+            opacity = Math.min(1, t * 6) * interpolate(t, [0.6, 0.85], [1, 0], clampOpts);
+          }
+          // Cards stay readable (never below ~60% size). They are drawn beneath the cube, so they pass into it
+          // rather than over its face, and are gone before they would shrink into an illegible speck.
+          return (
+            <g key={q} transform={`translate(${p.x} ${p.y}) scale(${1 - 0.45 * shrink})`} opacity={opacity}>
+              <rect x={-CARD.w / 2} y={-CARD.h / 2} width={CARD.w} height={CARD.h} rx={14} fill={COLORS.charcoal} stroke={COLORS.purple} strokeWidth={2.5} />
+              <text x={-CARD.w / 2 + 18} y={-16} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={24} dominantBaseline="central">
+                {q}
+              </text>
+              <text x={-CARD.w / 2 + 18} y={18} fill={COLORS.cyan} fontFamily={FONT} fontWeight={500} fontSize={24} dominantBaseline="central">
+                {a}
+              </text>
+            </g>
+          );
+        })}
         <ModelCube
           id="ft-cube"
           absFrame={abs}
@@ -127,44 +167,6 @@ export const FineTuneScene: React.FC = () => {
             {Math.round(examplesSeen).toLocaleString('en-US')}
           </text>
         </g>
-        {EXAMPLES.map(([q, a], i) => {
-          const start = F.examples[i];
-          if (frame < start || frame > exampleArrive(i)) {
-            return null;
-          }
-          const from = {x: PEOPLE_X + 80 + CARD.w / 2, y: PEOPLE_Y[i % PEOPLE_Y.length]};
-          let p: {x: number; y: number};
-          let shrink: number;
-          let opacity: number;
-          if (i === 0) {
-            // The first card pauses at full size so it can be read, then flies in.
-            const reach = interpolate(frame, [start, start + EXAMPLE_HOLD.reach], [0, 1], {...clampOpts, easing: Easing.out(Easing.cubic)});
-            const goStart = start + EXAMPLE_HOLD.reach + EXAMPLE_HOLD.hold;
-            const go = interpolate(frame, [goStart, goStart + EXAMPLE_HOLD.travel], [0, 1], {...clampOpts, easing: Easing.in(Easing.cubic)});
-            p = mix2(mix2(from, CARD_HOLD, reach), cubeAt, go);
-            shrink = go;
-            opacity = Math.min(1, reach * 3) * interpolate(go, [0.6, 0.85], [1, 0], clampOpts);
-          } else {
-            // The rest stream past as a montage.
-            const t = (frame - start) / EXAMPLE_TRAVEL;
-            const eased = Easing.inOut(Easing.cubic)(t);
-            p = mix2(from, cubeAt, eased);
-            shrink = eased;
-            opacity = Math.min(1, t * 6) * interpolate(t, [0.6, 0.85], [1, 0], clampOpts);
-          }
-          // Cards stay readable (never below ~60% size) and are gone before they would shrink into an illegible speck.
-          return (
-            <g key={q} transform={`translate(${p.x} ${p.y}) scale(${1 - 0.45 * shrink})`} opacity={opacity}>
-              <rect x={-CARD.w / 2} y={-CARD.h / 2} width={CARD.w} height={CARD.h} rx={14} fill={COLORS.charcoal} stroke={COLORS.purple} strokeWidth={2.5} />
-              <text x={-CARD.w / 2 + 18} y={-16} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={24} dominantBaseline="central">
-                {q}
-              </text>
-              <text x={-CARD.w / 2 + 18} y={18} fill={COLORS.cyan} fontFamily={FONT} fontWeight={500} fontSize={24} dominantBaseline="central">
-                {a}
-              </text>
-            </g>
-          );
-        })}
       </svg>
 
       {/* Part A */}
@@ -175,7 +177,7 @@ export const FineTuneScene: React.FC = () => {
           label="PROMPT"
           labelSize={22}
           text={QUESTION}
-          opacity={smooth(F.question1) * (1 - q1Fly)}
+          opacity={smooth(F.question1) * interpolate(q1Fly, [0, 0.4], [1, 0], clampOpts)}
           scale={1 - 0.8 * q1Fly}
         />
         <Bubble
@@ -200,7 +202,7 @@ export const FineTuneScene: React.FC = () => {
           label="PROMPT"
           labelSize={22}
           text={QUESTION}
-          opacity={smooth(F.question2) * (1 - q2Fly)}
+          opacity={smooth(F.question2) * interpolate(q2Fly, [0, 0.4], [1, 0], clampOpts)}
           scale={1 - 0.8 * q2Fly}
         />
         <Bubble

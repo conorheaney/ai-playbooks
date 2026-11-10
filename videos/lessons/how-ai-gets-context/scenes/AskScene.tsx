@@ -25,6 +25,9 @@ const FOUND = CANDIDATES.map((c, rank) => ({...c, rank, slot: INDEX_SLOTS.findIn
   (a, b) => (a.slot % INDEX.cols) - (b.slot % INDEX.cols) || a.slot - b.slot,
 );
 const rowY = (i: number) => RANK_TOP + i * RANK.step;
+// On "only", the rows below the top two slide down to open a gap, and the cut line draws in it.
+const CUT_GAP = 32;
+const GREY = '#8C8C8C'; // not-used rows are greyed out
 
 export const AskScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -54,6 +57,8 @@ export const AskScene: React.FC = () => {
   const scan = interpolate(frame, [A.scan[0], A.scan[1]], [0, 1], clampOpts);
   const sort = interpolate(frame, [A.sort[0], A.sort[1]], [0, 1], ease);
   const notUsed = interpolate(frame, [A.notUsed, A.notUsed + 14], [0, 1], ease);
+  const split = interpolate(frame, [A.cut, A.cut + 12], [0, 1], ease);
+  const cutY = rowY(TOP_N) - RANK.step / 2 + CUT_GAP / 2;
 
   const lift = (i: number) => interpolate(frame, [A.lift[0] + i * 2, A.lift[0] + i * 2 + 14], [0, 1], ease);
   const into = (rank: number) => interpolate(frame, [A.intoTank[0] + rank * 10, A.intoTank[0] + rank * 10 + 22], [0, 1], ease);
@@ -106,7 +111,10 @@ export const AskScene: React.FC = () => {
 
         <g opacity={out}>
           {/* Candidates lift out of the index, rank themselves, and the best two enter the window. */}
-          {FOUND.map((c, i) => {
+          {/* Rows that climb the ranking are drawn last, so they pass over the rows they overtake. */}
+          {FOUND.map((c, i) => ({c, i}))
+            .sort((a, b) => Number(a.c.rank < a.i) - Number(b.c.rank < b.i))
+            .map(({c, i}) => {
             const l = lift(i);
             if (l <= 0) {
               return null;
@@ -117,8 +125,11 @@ export const AskScene: React.FC = () => {
               return null;
             }
             const from = slotRect(geom, c.slot);
-            const rankY = lerp(rowY(i), rowY(c.rank), sort);
-            const rowX = rankX - (top ? 0 : 40 * notUsed);
+            const rankY = lerp(rowY(i), rowY(c.rank), sort) + (top ? 0 : CUT_GAP * split);
+            // While sorting, climbing rows swing right and sinking rows swing left (and dim), so rows passing
+            // each other sit side by side rather than stacked text on text.
+            const swing = Math.sin(Math.PI * sort) * Math.sign(i - c.rank);
+            const rowX = rankX + 80 * swing;
             let x = lerp(from.cx, rowX, l);
             let y = lerp(from.cy, rankY, l);
             let w = lerp(from.w, RANK.w, l);
@@ -126,7 +137,7 @@ export const AskScene: React.FC = () => {
             let fill = rgba(COLORS.charcoal, 0.95);
             if (t > 0) {
               // Out to the right along its own row first (the top two sit above the cut, so this never crosses the
-              // rest of the list or the TOP 2 label), then down inside the window into its slice.
+              // rest of the list or the cut line), then down inside the window into its slice.
               const r = segmentRect(TANK, ASK_SEGMENTS.retrieved[c.rank][0], ASK_SEGMENTS.retrieved[c.rank][1]);
               const across = interpolate(t, [0, 0.5], [0, 1], ease);
               const down = interpolate(t, [0.45, 1], [0, 1], ease);
@@ -137,7 +148,8 @@ export const AskScene: React.FC = () => {
               fill = SEGMENT_STYLE.retrieved.fill;
             }
             const content = l * (1 - interpolate(t, [0, 0.4], [0, 1], clampOpts));
-            const dim = top ? 1 : lerp(1, 0.35, notUsed);
+            const grey = top ? 0 : notUsed;
+            const dim = (top ? 1 : lerp(1, 0.7, notUsed)) * (1 - 0.5 * Math.max(0, -swing));
             // On the cut, the top two are ringed and held in place before they fly.
             const ring = top ? presence(frame, A.cut, A.intoTank[0] + 4, 6, 6) : 0;
             return (
@@ -145,12 +157,14 @@ export const AskScene: React.FC = () => {
                 {ring > 0.001 ? (
                   <rect x={x - w / 2 - 6} y={y - h / 2 - 6} width={w + 12} height={h + 12} rx={16} fill="none" stroke={COLORS.cyan} strokeWidth={3} opacity={ring} style={{filter: `drop-shadow(0 0 8px ${rgba(COLORS.cyan, 0.6)})`}} />
                 ) : null}
-                <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={lerp(8, 12, l)} fill={fill} stroke={top && frame >= A.cut ? COLORS.cyan : rgba(COLORS.cyan, 0.6)} strokeWidth={2} />
+                <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={lerp(8, 12, l)} fill={fill} stroke={top && frame >= A.cut ? COLORS.cyan : grey > 0 ? rgba(GREY, 0.6 - 0.2 * grey) : rgba(COLORS.cyan, 0.6)} strokeWidth={2} />
                 <g opacity={content}>
-                  <RefChip x={x - w / 2 + 50} y={y} text={c.ref} />
+                  {/* The cyan chip cross-fades to a grey one as the row is greyed out. */}
+                  <RefChip x={x - w / 2 + 50} y={y} text={c.ref} opacity={1 - grey} />
+                  <RefChip x={x - w / 2 + 50} y={y} text={c.ref} color={GREY} opacity={grey} />
                   <rect x={x - 34} y={y - 6} width={SCORE_W} height={12} rx={6} fill={rgba(COLORS.white, 0.12)} />
-                  <rect x={x - 34} y={y - 6} width={SCORE_W * c.score} height={12} rx={6} fill={top ? COLORS.cyan : rgba(COLORS.cyan, 0.55)} />
-                  <text x={x + w / 2 - 14} y={y + 1} fill={COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={18} textAnchor="end" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
+                  <rect x={x - 34} y={y - 6} width={SCORE_W * c.score} height={12} rx={6} fill={top ? COLORS.cyan : grey > 0.5 ? GREY : rgba(COLORS.cyan, 0.55)} />
+                  <text x={x + w / 2 - 14} y={y + 1} fill={grey > 0.5 ? GREY : COLORS.white} fontFamily={FONT} fontWeight={700} fontSize={18} textAnchor="end" dominantBaseline="central" style={{fontVariantNumeric: 'tabular-nums'}}>
                     {c.score.toFixed(2)}
                   </text>
                 </g>
@@ -159,12 +173,11 @@ export const AskScene: React.FC = () => {
           })}
           <Caption x={rankX} y={RANK_TOP - 52} text="RANKED" color={rgba(COLORS.white, 0.7)} size={20} opacity={smooth(A.lift[0], 12)} />
           {frame >= A.cut ? (
-            <g opacity={smooth(A.cut, 10)}>
-              <line x1={rankX - RANK.w / 2 - 14} x2={rankX + RANK.w / 2 + 14} y1={rowY(TOP_N) - RANK.step / 2} y2={rowY(TOP_N) - RANK.step / 2} stroke={COLORS.cyan} strokeWidth={3} strokeDasharray="10 8" />
-              <Caption x={rankX + RANK.w / 2 + 26} y={rowY(TOP_N) - RANK.step / 2} text={`TOP ${TOP_N}`} anchor="start" color={COLORS.cyan} size={18} />
+            <g opacity={smooth(A.cut + 6, 10)}>
+              <line x1={rankX - RANK.w / 2 - 14} x2={rankX + RANK.w / 2 + 14} y1={cutY} y2={cutY} stroke={COLORS.cyan} strokeWidth={3} strokeDasharray="10 8" />
             </g>
           ) : null}
-          <Caption x={rankX - 40} y={rowY(CANDIDATES.length) + 6} text="NOT USED" color={rgba(COLORS.white, 0.6)} size={18} opacity={notUsed} />
+          <Caption x={rankX} y={rowY(CANDIDATES.length) + 6 + CUT_GAP} text="NOT USED" color={GREY} size={18} opacity={notUsed} />
         </g>
       </svg>
 

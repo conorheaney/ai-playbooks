@@ -8,7 +8,7 @@ import {COLORS, rgba} from '../../../shared/theme';
 import {Ring, Runner, StateCard, Struck} from '../components/Loop';
 import {Arrow, Badge, Chip, GearMark, Layer, PersonIcon, Txt} from '../components/Parts';
 import {ReceiptGlyph, TicketGlyph} from '../components/Ticket';
-import {AVAILABILITY, GOAL, RING} from '../layout';
+import {GOAL, RING, STOCK} from '../layout';
 import {lerp, onCircle, useBeats} from '../lib';
 import {LOOP as L} from '../timing';
 import {CUBE_TOP} from './ContextScene';
@@ -75,7 +75,8 @@ export const LoopScene: React.FC = () => {
       </Layer>
 
       <AbsoluteFill style={{opacity: out}}>
-        <Txt x={RING.x} y={RING.y - RING.r + 48} text="GOAL & STATE" size={26} opacity={stations[0]} />
+        {/* Waits until the cube, gliding down to its station, has passed the label. */}
+        <Txt x={RING.x} y={RING.y - RING.r + 48} text="GOAL & STATE" size={26} opacity={stations[0] * ramp(L.move[1] - 8, L.move[1])} />
         <Txt x={RING.x + SIDE_LABEL_DX} y={SIDE_LABEL_Y} text="PICK A STEP" size={26} anchor="start" opacity={stations[1]} />
         <Txt x={RING.x} y={RING.y + RING.r + 58} text="RUN IT" size={26} opacity={stations[2]} />
         <Txt x={RING.x - SIDE_LABEL_DX} y={SIDE_LABEL_Y} text="SEE THE RESULT" size={26} anchor="end" opacity={stations[3]} />
@@ -92,16 +93,16 @@ export const LoopScene: React.FC = () => {
               on: lap1,
               text: (
                 <span>
-                  Parkside, <Struck text="Capital Tower" strike={strike} />
+                  Northfield, <Struck text="Apex" strike={strike} />
                 </span>
               ),
             },
-            {on: lap2, text: 'Limit: $250 a night'},
-            {on: row3, text: 'Parkside is free'},
+            {on: lap2, text: 'Lead-time limit: 30 days'},
+            {on: row3, text: 'Northfield: 500 in stock'},
           ]}
         />
 
-        <Chip x={RING.x + SIDE_LABEL_DX} y={SIDE_LABEL_Y + 230} text={AVAILABILITY.name} anchor="start" color={COLORS.cyan} textColor={COLORS.cyan} opacity={stepName} glow={generating * 0.5} />
+        <Chip x={RING.x + SIDE_LABEL_DX} y={SIDE_LABEL_Y + 230} text={STOCK.name} anchor="start" color={COLORS.cyan} textColor={COLORS.cyan} opacity={stepName} glow={generating * 0.5} />
 
         <Chip x={RING.x + 110} y={EXIT_Y} anchor="start" text="DONE" size={26} dashed={doneLit < 0.5} color={doneLit > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.5)} textColor={doneLit > 0.5 ? COLORS.cyan : rgba(COLORS.white, 0.85)} opacity={smooth(L.done[0] + 8, 10)} glow={doneLit * 0.6} />
         <Chip

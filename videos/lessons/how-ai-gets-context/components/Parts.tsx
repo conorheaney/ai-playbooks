@@ -171,14 +171,14 @@ export const Stamp: React.FC<{x: number; y: number; text: string; progress: numb
     </div>
   ) : null;
 
-// Sentence-case caption under the main content, as used in how-ai-responds.
+// Sentence-case caveat, styled as the series' caveat pill (as in how-ai-responds Scenes 5 and 7).
 export const Note: React.FC<{x: number; y: number; text: string; opacity: number; color?: string; size?: number}> = ({
   x,
   y,
   text,
   opacity,
-  color = rgba(COLORS.white, 0.85),
-  size = 28,
+  color = COLORS.white,
+  size = 26,
 }) =>
   opacity > 0.001 ? (
     <div
@@ -188,6 +188,10 @@ export const Note: React.FC<{x: number; y: number; text: string; opacity: number
         top: y,
         transform: `translate(-50%, -50%) translateY(${(1 - opacity) * 12}px)`,
         opacity,
+        padding: '12px 30px',
+        borderRadius: 32,
+        border: `2px solid ${rgba(COLORS.white, 0.35)}`,
+        background: rgba(COLORS.white, 0.07),
         fontFamily: FONT,
         fontWeight: 500,
         fontSize: size,
